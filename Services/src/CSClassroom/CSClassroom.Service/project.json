@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0-*",
+
+  "buildOptions": {
+    "debugType": "portable",
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "Autofac.Extensions.DependencyInjection": "4.0.0-rc3-309",
+    "CSClassroom.Model": "1.0.0-*",
+    "CSClassroom.Service.Interfaces": "1.0.0-*",
+    "Microsoft.NETCore.App": {
+      "version": "1.0.0",
+      "type": "platform"
+    },
+    "Microsoft.EntityFrameworkCore.Tools": "1.0.0-preview2-final",
+    "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0",
+    "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0",
+    "Npgsql.EntityFrameworkCore.PostgreSQL": "1.0.1"
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [ "portable-net451+win8" ]
+    }
+  },
+
+  "tools": {
+    "Microsoft.EntityFrameworkCore.Tools": {
+      "version": "1.0.0-preview2-final",
+      "imports": [
+        "portable-net45+win8+dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  }
+}

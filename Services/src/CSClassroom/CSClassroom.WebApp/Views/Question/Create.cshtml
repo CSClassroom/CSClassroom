@@ -1,0 +1,54 @@
+@model CSC.CSClassroom.Model.Exercises.Question
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h2>Create @Model.QuestionTypeDisplay</h2>
+
+<form asp-action="Create">
+    <div class="form-horizontal">
+        <hr />
+        <input type="hidden" name="QuestionType" value="@Model.GetType().Name" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="QuestionCategoryId" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="QuestionCategoryId" class="form-control-static"></p>
+                <select asp-for="QuestionCategoryId" class="form-control" asp-items="ViewBag.QuestionCategoryId"></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Name" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Name" class="form-control-static"></p>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Description" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Description" class="form-control-static"></p>
+                <textarea asp-for="Description" class="form-control" rows="10"></textarea>
+                <span asp-validation-for="Description" class="text-danger" />
+            </div>
+        </div>
+
+        @Html.Partial($"Create/_{Model.GetType().Name}", Model)
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

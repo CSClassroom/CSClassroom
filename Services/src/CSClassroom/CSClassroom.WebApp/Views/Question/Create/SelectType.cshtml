@@ -1,0 +1,15 @@
+﻿@model IList<CSC.CSClassroom.WebApp.ViewModels.Question.QuestionType>
+
+<h4><b>Select the type of question to create:</b></h4>
+<form asp-action="Create" method="get" class="form-horizontal">
+    <div style="margin-left: 25px">
+@foreach (var item in Model)
+{
+        <input type="radio" name="questionType" value="@item.Type.Name" />
+        <label class="info">@item.DisplayName</label>
+        <p class="narrow-paragraph">@item.Description</p>
+}
+    </div>
+    <input type="submit" value="Create" class="btn btn-default" />
+</form>
+

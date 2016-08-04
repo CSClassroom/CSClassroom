@@ -1,0 +1,56 @@
+{
+  "classCompilationResult" : {
+    "success" : true,
+    "errors" : null
+  },
+  "testsCompilationResult" : {
+    "success" : true,
+    "errors" : null
+  },
+  "testResults" : [ {
+    "name" : "Test1",
+    "completed" : true,
+    "exception" : null,
+    "returnValue" : "[(0, 1), (2, 3)]",
+    "output" : null
+  }, {
+    "name" : "Test2",
+    "completed" : true,
+    "exception" : null,
+    "returnValue" : null,
+    "output" : "[(0, 1), (2, 3)]\r\n"
+  }, {
+    "name" : "Test3",
+    "completed" : true,
+    "exception" : null,
+    "returnValue" : "[(4, 5), (6, 7)]",
+    "output" : null
+  } ],
+  "classDefinition" : {
+    "name" : "Line",
+    "fields" : [ {
+      "name" : "start",
+      "type" : "Point",
+      "isStatic" : false,
+      "isPublic" : false
+    }, {
+      "name" : "end",
+      "type" : "Point",
+      "isStatic" : false,
+      "isPublic" : false
+    } ],
+    "methods" : [ {
+      "name" : "Line",
+      "parameterTypes" : [ "Point", "Point" ],
+      "returnType" : null,
+      "isStatic" : false,
+      "isPublic" : true
+    }, {
+      "name" : "toString",
+      "parameterTypes" : [ ],
+      "returnType" : "String",
+      "isStatic" : false,
+      "isPublic" : true
+    } ]
+  }
+}

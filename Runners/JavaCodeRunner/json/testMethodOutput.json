@@ -1,0 +1,14 @@
+{
+  "classCompilationResult" : {
+    "success" : false,
+    "errors" : [ {
+      "lineNumber" : 1,
+      "columnNumber" : 58,
+      "message" : "incompatible types: unexpected return value",
+      "fullError" : "Error on line 1: incompatible types: unexpected return value\n\tpublic static void blah(int a, int b) { return a + b; }\n\t                                                 ^"
+    } ]
+  },
+  "testsCompilationResult" : null,
+  "testResults" : null,
+  "methodDefinition" : null
+}

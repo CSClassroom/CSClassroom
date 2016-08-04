@@ -1,0 +1,20 @@
+version: '2'
+
+services:
+  webapp:
+    image: csclassroom/csclassroom-webapp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    links:
+      - postgres:postgres
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/CodeRunner:/tmp/CodeRunner
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    restart: always

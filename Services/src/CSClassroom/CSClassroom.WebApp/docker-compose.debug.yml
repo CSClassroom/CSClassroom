@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+  webapp:
+    image: csclassroom/csclassroom-webapp:debug
+    build:
+      context: .
+      dockerfile: Dockerfile.debug
+    links:
+      - postgres:postgres
+    ports:
+      - "80:80"
+    environment:
+      - REMOTE_DEBUGGING
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/CodeRunner:/tmp/CodeRunner
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    restart: always

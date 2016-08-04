@@ -1,0 +1,10 @@
+{
+	"classesToImport": [],
+	"methodCode": "public static void blah(int a, int b) { return a + b; }",
+	"tests": [
+		{
+			"testName": "Test1",
+			"paramValues": "3, 4"
+		}
+	]
+}

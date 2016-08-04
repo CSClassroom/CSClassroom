@@ -1,0 +1,5 @@
+FROM maven
+
+COPY target/JavaCodeRunner-0.0.1-SNAPSHOT-jar-with-dependencies.jar /usr/local/share/java/JavaCodeRunner.jar
+
+ENTRYPOINT java -cp /usr/local/share/java/JavaCodeRunner.jar csc.coderunner.JavaCodeRunner ${JOB_TYPE} ${REQUEST_FILE_PATH} ${RESPONSE_FILE_PATH}

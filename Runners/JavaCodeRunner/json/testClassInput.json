@@ -1,0 +1,23 @@
+{
+	"className": "Line",
+	"classesToImport": [],
+	"fileContents": "public class Line\n{\n\tprivate Point start;\n\tprivate Point end;\n\n\tpublic Line(Point start, Point end)\n\t{\n\t\tthis.start = start;\n\t\tthis.end = end;\n\t}\n\n\tpublic String toString()\n\t{\n\t\treturn \"[\" + start + \", \" + end + \"]\";\n\t}\n}\n\nclass Point\n{\n\tprivate int x;\n\tprivate int y;\n\t\n\tpublic Point(int x, int y)\n\t{\n\t\tthis.x = x;\n\t\tthis.y = y;\n\t}\n\n\tpublic String toString()\n\t{\n\t\treturn \"(\" + x + \", \" + y + \")\";\n\t}\n}",
+	"lineNumberOffset": -2,
+	"tests": [
+		{
+			"testName": "Test1",
+			"returnType": "Line",
+			"methodBody": "return new Line(new Point(0,1), new Point(2,3));"
+		},
+		{
+			"testName": "Test2",
+			"returnType": "void",
+			"methodBody": "System.out.println(new Line(new Point(0,1), new Point(2,3)));"
+		},
+		{
+			"testName": "Test3",
+			"returnType": "Line",
+			"methodBody": "return new Line(new Point(4,5), new Point(6,7));"
+		}
+	]
+}
