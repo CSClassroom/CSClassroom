@@ -1,0 +1,59 @@
+version: '1.0.{build}'
+configuration:
+  - Release
+platform: Any CPU
+environment:
+  # Don't report back to the mothership
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  MAVEN_VERSION: 3.3.9
+init:
+  - cmd: SET PATH=%M2_HOME%\bin;%JAVA_HOME%\bin;%PATH%;
+  - cmd: SET M2_HOME=C:\maven\apache-maven-%MAVEN_VERSION%
+  - cmd: SET MAVEN_OPTS=-XX:MaxPermSize=1g -Xmx2g
+  - cmd: SET JAVA_OPTS=-XX:MaxPermSize=1g -Xmx2g
+before_build:
+  - ps: |
+      Add-Type -AssemblyName System.IO.Compression.FileSystem
+      if (!(Test-Path -Path "C:\maven" )) {
+        Write-Host "Downloading Maven $env:MAVEN_VERSION"
+        (new-object System.Net.WebClient).DownloadFile("https://repo1.maven.org/maven2/org/apache/maven/apache-maven/$env:MAVEN_VERSION/apache-maven-$env:MAVEN_VERSION-bin.zip", 'C:\maven-bin.zip')
+        [System.IO.Compression.ZipFile]::ExtractToDirectory("C:\maven-bin.zip", "C:\maven")
+      }
+  - dir c:\maven
+  - dir c:\maven\apache-maven-3.3.9
+  - cd Services
+  - appveyor-retry dotnet restore -v Minimal
+  - cd ..
+build_script:
+  - cd Runners\JavaCodeRunner
+  - mvn compile
+  - cd ..\..
+  - cd Runners\JavaProjectRunner
+  - mvn compile
+  - cd ..\..
+  - cd Services\src
+  - dotnet build "BuildService\BuildService.Endpoint" -c %CONFIGURATION%
+  - dotnet build "CSClassroom\CSClassroom.Webapp" -c %CONFIGURATION%
+  - cd ..\..
+after_build:
+  - cd Services\src
+  - dotnet publish "BuildService\BuildService.Endpoint" -c %CONFIGURATION%
+  - dotnet publish "CSClassroom\CSClassroom.Webapp" -c %CONFIGURATION%
+  - cd ..\..
+test_script:
+  - cd Runners\JavaCodeRunner
+  - mvn test
+  - cd ..\..
+  - cd Runners\JavaProjectRunner
+  - mvn test
+  - cd ..\..
+  - cd Services\test
+  - dotnet test "BuildService\BuildService.Service.UnitTests" -c %CONFIGURATION%
+  - dotnet test "CSClassroom\CSClassroom.Service.UnitTests" -c %CONFIGURATION%
+  - cd ..\..
+cache:
+  - Services\src\CSClassroom\CSClassroom.WebApp\node_modules # project npm modules
+  - '%APPDATA%\npm-cache'               # npm cache
+  - '%USERPROFILE%\.nuget\packages'  # project.json cache
+  - C:\maven -> appveyor.yml
+  - C:\Users\appveyor\.m2 -> pom.xml
