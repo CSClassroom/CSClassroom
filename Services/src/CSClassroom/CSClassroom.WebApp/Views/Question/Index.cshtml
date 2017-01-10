@@ -1,41 +1,69 @@
-@model IEnumerable<CSC.CSClassroom.Model.Exercises.Question>
+@using CSC.CSClassroom.Model.Users
+@using CSC.CSClassroom.WebApp.Utilities
+@model IEnumerable<Question>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Questions";
 }
 
-<h2>Index</h2>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+<h2>Questions</h2>
+<div id="accordion" class="panel-group" style="max-width: @(ClassroomRole >= ClassroomRole.Admin ? "700px" : "400px")">
+    @foreach (var category in Model
+        .GroupBy(question => question.QuestionCategory)
+        .OrderBy(group => group.Key.Name, new NaturalComparer()))
+    {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#collapse@(category.Key.Id)">@category.Key.Name</a>
+                </h4>
+            </div>
+            <div id="collapse@(category.Key.Id)" class="panel-collapse collapse">
+                <div class="panel-body" style="line-height: 175%">
+                    @if (ClassroomRole >= ClassroomRole.Admin)
+                    {
+                        <table class="table">
+                            <tbody>
+                            @foreach (var question in category)
+                            {
+                                <tr>
+                                    <td style="text-align: left">
+                                        @question.Name @(question.IsPrivate ? " (private)" : "")
+                                    </td>
+                                    <td style="text-align: right">
+                                        @if (!question.IsQuestionTemplate)
+                                        {
+                                            @Html.ActionLink("Randomize", "GenerateFromExisting", new {id = question.Id})
+                                            @:|
+                                        }
+                                        @Html.ActionLink("Duplicate", "DuplicateExisting", new {id = question.Id}) |
+                                        @Html.ActionLink("Solve", "Solve", new {id = question.Id}, new { target = "_blank" }) |
+                                        @Html.ActionLink("Edit", "Edit", new {id = question.Id}) |
+                                        @Html.ActionLink("Delete", "Delete", new {id = question.Id})
+                                    </td>
+                                </tr>
+                            }
+                            <tr></tr>
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        @foreach (var question in category)
+                         {
+                             @Html.ActionLink(question.Name, "Solve", new { id = question.Id }, new { target = "_blank" })
+                             <br/>
+                         }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+@if (ClassroomRole >= ClassroomRole.Admin)
+{
+    <p>
+        <a asp-action="Create">Create New Question</a> |
+        <a asp-action="Index" asp-controller="QuestionCategory">Manage Question Categories</a>
+    </p>
 }
-    </tbody>
-</table>

@@ -1,16 +1,14 @@
-﻿using CSC.CSClassroom.Model.Exercises;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using CSC.CSClassroom.Model.Questions;
 
 namespace CSC.CSClassroom.Model.Classrooms
 {
 	/// <summary>
-	/// A classroom.
+	/// A single classroom (potentially with multiple sections of students).
 	/// </summary>
-    public class Classroom
+	public class Classroom
 	{
 		/// <summary>
 		/// The unique ID for the classroom.
@@ -19,18 +17,7 @@ namespace CSC.CSClassroom.Model.Classrooms
 		public int Id { get; set; }
 
 		/// <summary>
-		/// The ID of the group that contains this classroom.
-		/// </summary>
-		[Required]
-		[Display
-		(
-			Name = "Group",
-			Description = "Select the category for the question."
-		)]
-		public int GroupId { get; set; }
-
-		/// <summary>
-		/// The name of the group.
+		/// The name of the classroom.
 		/// </summary>
 		[Required]
 		[MaxLength(50)]
@@ -38,29 +25,61 @@ namespace CSC.CSClassroom.Model.Classrooms
 		[Display
 		(
 			Name = "Name",
-			Description = "Enter the name of the classroom that will appear in URLs. This must be unique within the group."
+			Description = "Enter the name of the class that will appear in URLs. This must be unique."
 		)]
 		public string Name { get; set; }
 
 		/// <summary>
-		/// The display name of the group.
+		/// The display name of the classroom.
 		/// </summary>
 		[Required]
 		[Display
 		(
 			Name = "Display Name",
-			Description = "Enter the name of the classroom to be displayed on the website."
+			Description = "Enter the name of the class to be displayed on the website."
 		)]
 		public string DisplayName { get; set; }
 
 		/// <summary>
-		/// The group that contains this classroom.
+		/// The GitHub organization associated with the classroom.
 		/// </summary>
-		public virtual Group Group { get; set; }
+		[Required]
+		[Display
+		(
+			Name = "GitHub Organization",
+			Description = "Enter the name of the GitHub organization associated with this classroom."
+		)]
+		public string GitHubOrganization { get; set; }
 
 		/// <summary>
-		/// The categories of exercises available in this classroom.
+		/// The default time for due dates.
 		/// </summary>
-		public ICollection<QuestionCategory> Categories { get; set; }
+		[Display
+		(
+			Name = "Default Time Due",
+			Description = "Select the default time of day that assignments and projects will be due."
+		)]
+		public TimeSpan DefaultTimeDue { get; set; }
+
+		/// <summary>
+		/// The sections in this classroom.
+		/// </summary>
+		public virtual ICollection<Section> Sections { get; set; }
+
+		/// <summary>
+		/// The categories of questions available in this classroom.
+		/// </summary>
+		public virtual ICollection<QuestionCategory> Categories { get; set; }
+
+		/// <summary>
+		/// The gradebooks for this classroom.
+		/// </summary>
+		[Display
+		(
+			Name = "Classroom Gradebooks",
+			Description = "Enter the name of one or more external gradebooks. "
+				+ "This will facilitate transferring assignment grades to the gradebook."
+		)]
+		public virtual IList<ClassroomGradebook> ClassroomGradebooks { get; set; }
 	}
 }

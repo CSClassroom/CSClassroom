@@ -1,0 +1,15 @@
+﻿@model MarkdownEditorSettings
+
+<div id="@Model.EditorName">
+    <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">Markdown Cheatsheet</a>
+    <p></p>
+    <div id="wmd-button-bar-@Model.EditorName" class="wmd-button-bar"></div>
+    <div id="wmd-editor-@(Model.EditorName)" class="wmd-editor tex2jax_ignore">@Model.InitialContents</div>
+    <textarea name="@Model.TextAreaName" id="wmd-input-@Model.EditorName" class="wmd-input">@Model.InitialContents</textarea>
+    <h4>Preview:</h4>
+    <div id="wmd-preview-@Model.EditorName" class="wmd-preview"></div>
+</div>
+
+<script type="text/javascript">
+    createMarkdownEditor("@Model.EditorName");
+</script>

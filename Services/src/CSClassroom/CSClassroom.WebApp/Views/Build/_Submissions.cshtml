@@ -1,0 +1,52 @@
+﻿@model CheckpointSubmissionsViewModel
+
+<hr />
+<h3>Submissions</h3>
+<table class="table" style="width: auto">
+    <tr>
+        <th>
+            Checkpoint
+        </th>
+        <th>
+            Submission
+        </th>
+        <th>
+        </th>
+        <th>
+        </th>
+    </tr>
+    @foreach (var checkpointStatus in Model.Checkpoints)
+    {
+        <tr>
+            <td>
+                @checkpointStatus.CheckpointDisplayName
+            </td>
+            <td>
+                @if (checkpointStatus.SubmissionCommitDate != null)
+                {
+                    <span>@checkpointStatus.SubmissionCommitDate</span>
+                }
+                else
+                {
+                    <span style="@(checkpointStatus.PastDue ? "color: red; font-weight: bold" : "")">None (due @checkpointStatus.CheckpointDueDate)</span>
+                }
+            </td>
+            <td>
+                @if (checkpointStatus.SubmissionCommitDate != null)
+                {
+                    @Html.ActionLink("Change submission...", "Submit", "Submission", new {checkpointName = checkpointStatus.CheckpointName, userId = Model.User.Id}, htmlAttributes: null)
+                }
+                else
+                {
+                    @Html.ActionLink("Submit...", "Submit", "Submission", new {checkpointName = checkpointStatus.CheckpointName, userId = Model.User.Id}, htmlAttributes: null)
+                }
+            </td>
+            <td>
+                @if (checkpointStatus.FeedbackAvailable)
+                {
+                    @Html.ActionLink("Feedback", "ViewFeedback", "Submission", new { checkpointName = checkpointStatus.CheckpointName, submissionId = checkpointStatus.SubmissionId })
+                }
+            </td>
+        </tr>
+    }
+</table>

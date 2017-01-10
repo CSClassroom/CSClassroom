@@ -1,0 +1,74 @@
+﻿{
+  "jsBundles": [
+    {
+      "outputFile": "wwwroot/js/external.js",
+      "inputFiles": [
+        "node_modules/jquery/dist/jquery.js",
+        "node_modules/jquery-validation/dist/jquery.validate.js",
+        "node_modules/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
+        "node_modules/bootstrap/dist/js/bootstrap.js",
+        "node_modules/jquery-ui-dist/jquery-ui.js",
+        "node_modules/jquery-form/jquery.form.js",
+        "node_modules/datatables.net/js/jquery.dataTables.js",
+        "node_modules/d3/d3.js",
+        "node_modules/nvd3/build/nv.d3.js",
+        "node_modules/ace-builds/src/ace.js",
+        "node_modules/ace-builds/src/mode-java.js",
+        "node_modules/ace-builds/src/mode-markdown.js",
+        "node_modules/ace-builds/src/theme-eclipse.js",
+        "node_modules/ace-builds/src/theme-xcode.js",
+        "Content/js/jquery.appendGrid-1.6.2.js"
+      ]
+    },
+    {
+      "outputFile": "wwwroot/js/internal.js",
+      "inputFiles": [
+        "Content/js/nestedTables.js",
+        "Content/js/site.js"
+      ]
+    },
+    {
+      "outputFile": "wwwroot/js/markdownBundle.js",
+      "inputFiles": [
+        "Content/js/markdownLoader.js"
+      ],
+      "packWithBrowserify": true
+    }
+  ],
+
+  "cssBundles": [
+    {
+      "outputFile": "wwwroot/css/external.css",
+      "inputFiles": [
+        "Content/css/jquery.appendGrid-1.6.2.css",
+        "Content/css/markdownAceEditor.css",
+        "Content/css/highlight.js.css",
+        "node_modules/jquery-ui-themes/themes/smoothness/jquery-ui.css",
+        "node_modules/bootstrap/dist/css/bootstrap.css",
+        "node_modules/datatables.net-jqui/css/dataTables.jqueryui.css",
+        "node_modules/nvd3/build/nv.d3.css"
+      ]
+    },
+    {
+      "outputFile": "wwwroot/css/internal.css",
+      "inputFiles": [
+        "Content/css/site.css"
+      ]
+    }
+  ],
+
+  "imageBundles": [
+    {
+      "inputFiles": "node_modules/jquery-ui-themes/themes/smoothness/images/*",
+      "targetFolder": "wwwroot/css/images"
+    },
+    {
+      "inputFiles": "Content/images/*",
+      "targetFolder": "wwwroot/images"
+    },
+    {
+      "inputFiles": "Content/favicon.ico",
+      "targetFolder": "wwwroot"
+    }
+  ]
+}

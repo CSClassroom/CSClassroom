@@ -1,0 +1,96 @@
+﻿@using CSC.CSClassroom.WebApp.Utilities
+@model DynamicTableConfig
+
+<script type="text/javascript">
+    $(function() {
+
+        @if (Model.DropDownLists != null)
+        {
+            foreach (var dropDownList in Model.DropDownLists.Where(d => d.GroupFilter != null))
+            {
+                @:var @(dropDownList.PropertyName)groupOptions =
+                @:{
+                    @foreach (var groupItem in dropDownList.Choices.Select(dropDownList.GroupFilter).Distinct())
+                    {
+                        @:@(groupItem.Value): [
+                            @Html.Raw(string.Join(", ",
+                                dropDownList.Choices
+                                    .Where(c => dropDownList.GroupFilter(c).Equals(groupItem))
+                                    .Select(dropDownList.ItemAccessor)
+                                    .OrderBy(c => c.Name, new NaturalComparer())
+                                    .Select(i => $"{{name:\"{i.Name}\", value:\"{i.Value}\"}}")));
+                        @:],
+                    }
+                @:}
+
+                @:function handle@(dropDownList.GroupColumnName)Changed(evt, rowIndex)
+                @:{
+                    @:var elem1 = evt.target;
+                    @:var elem2 = $("#@Model.TableElementId").appendGrid('getCellCtrl', '@(dropDownList.PropertyName)', rowIndex);
+                    @:elem2.options.length = 1;
+                    @:if (elem1.selectedIndex > 0)
+                    @:{
+                        @:var options = @(dropDownList.PropertyName)groupOptions[elem1.value];
+                        @:for (var index = 1; index <= options.length; index++)
+                        @:{
+                            @:elem2.options[index] = new Option(options[index - 1].name, options[index - 1].value);
+                        @:}
+                        @:elem2.disabled = false;
+                    @:}
+                    @:else
+                    @:{
+                        @:elem2.disabled = true;
+                    @:}
+                @:}
+            }
+        }
+
+        // Initialize appendGrid
+        $("#@Model.TableElementId")
+            .appendGrid({
+                initRows: @Model.StartMinRows,
+                hideRowNumColumn: true,
+                i18n: {
+                    rowEmpty: ''
+                },
+                columns: @Html.Raw(Model.Columns.ToString()),
+                nameFormatter: function(idPrefix, name, uniqueIndex) {
+                    return "@(Model.CollectionName)[" + uniqueIndex + "]." + name;
+                },
+                @if (Model.InitData != null)
+                {
+                    @:initData: @Html.Raw(Model.InitData.ToString()),
+                }
+                @if (Model.SubPanelConfig != null)
+                {
+                    @:useSubPanel: true,
+                    @:subPanelBuilder: @Model.SubPanelConfig.BuilderFunctionName,
+                }
+
+                @if(Model.SubPanelConfig != null || (Model.DropDownLists?.Any(d => d.GroupFilter != null) ?? false))
+                {
+                    @:rowDataLoaded: function(caller, record, rowIndex, uniqueIndex)
+                    @:{
+                        @if (Model.SubPanelConfig != null)
+                        {
+                            @($"{Model.SubPanelConfig.LoadedFunctionName}(caller, record, rowIndex, uniqueIndex);")
+                        }
+                        @if (Model.DropDownLists != null)
+                        {
+                            foreach(var dropDownList in Model.DropDownLists.Where(d => d.GroupFilter != null))
+                            {
+                                @:if (record.@(dropDownList.GroupColumnName) > 0) {
+                                    @:var groupCol = $("#@Model.TableElementId").appendGrid('getCellCtrl', '@dropDownList.GroupColumnName', rowIndex);
+                                    @:$(groupCol).trigger('change');
+                                    @:var itemCol = $("#@Model.TableElementId").appendGrid('getCellCtrl', '@dropDownList.PropertyName', rowIndex);
+                                    @:if (record.@(dropDownList.PropertyName) > 0) {
+                                        @:$(itemCol).val(record.@(dropDownList.PropertyName));
+                                    @:}
+                                @:}
+                            }
+                        }
+                    @:}
+                }
+            });
+    });
+</script>

@@ -1,0 +1,28 @@
+﻿@model TestResultViewModel
+@{
+    ViewBag.Title = "Test result";
+}
+
+<h2>@Model.ClassName: @Model.TestName</h2>
+<h3>Result: @Html.Raw(Model.TestStatusHtml)</h3>
+<br />
+@if (!Model.Succeeded)
+{
+    if (!string.IsNullOrWhiteSpace(Model.FailureMessage))
+    {
+        <h3>Error message</h3>
+        <pre>@Model.FailureMessage</pre>
+    }
+
+    if (!string.IsNullOrWhiteSpace(Model.FailureTrace))
+    {
+        <h3>Stack trace</h3>
+        <pre>@Model.FailureTrace</pre>
+    }
+
+    if (!string.IsNullOrWhiteSpace(Model.FailureOutput))
+    {
+        <h3>Test output</h3>
+        <pre>@Model.FailureOutput</pre>
+    }
+}

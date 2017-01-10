@@ -1,0 +1,115 @@
+@model Project
+
+@{
+    ViewData["Title"] = ViewBag.ActionName;
+}
+
+<h2>@ViewBag.ActionName Project</h2>
+
+<form asp-action="@ViewBag.ActionName">
+    <div class="form-horizontal">
+        <hr />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @if (Model != null && Model.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+        <div class="form-group">
+            <label asp-for="Name" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Name" class="form-control-static"></p>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="ExplicitSubmissionRequired" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="ExplicitSubmissionRequired" class="form-control-static"></p>
+                <input asp-for="ExplicitSubmissionRequired" class="checkbox" type="checkbox" value="true" />
+                <input type="hidden" name="ExplicitSubmissionRequired" value="false" />
+                <span asp-validation-for="ExplicitSubmissionRequired" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="TestClasses" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="TestClasses" class="form-control-static"></p>
+                <table id="testClasses" class="equal-width"></table>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="PrivateFilePaths" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="PrivateFilePaths" class="form-control-static"></p>
+                <table id="privateFilePaths" class="equal-width"></table>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="ImmutableFilePaths" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="ImmutableFilePaths" class="form-control-static"></p>
+                <table id="immutableFilePaths" class="equal-width"></table>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="@ViewBag.ActionName" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "testClasses",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Project.TestClasses)),
+        properties = new[]
+        {
+            nameof(TestClass.ClassName),
+            nameof(TestClass.DisplayName)
+        },
+        orderByProp = nameof(TestClass.Order),
+        startMinRows = 0,
+        textAreas = false
+    })
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "privateFilePaths",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Project.PrivateFilePaths)),
+        properties = new[]
+        {
+            nameof(PrivateFilePath.Path)
+        },
+        orderByProp = nameof(PrivateFilePath.Path),
+        startMinRows = 0,
+        textAreas = false
+    })
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "immutableFilePaths",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Project.ImmutableFilePaths)),
+        properties = new[]
+        {
+            nameof(ImmutableFilePath.Path)
+        },
+        orderByProp = nameof(ImmutableFilePath.Path),
+        startMinRows = 0,
+        textAreas = false
+    })
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

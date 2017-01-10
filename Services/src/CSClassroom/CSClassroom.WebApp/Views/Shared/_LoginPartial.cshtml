@@ -1,0 +1,26 @@
+﻿@using CSC.CSClassroom.Service.Identity
+@inject IUserProvider UserProvider;
+@inject IIdentityProvider IdentityProvider;
+
+@{ var User = await UserProvider.GetCurrentUserAsync(); }
+@if (User != null)
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li><a asp-controller="User" asp-action="View" asp-route-userId="@User.Id">@User.FirstName @User.LastName</a>
+        <li><a asp-area="" asp-controller="Account" asp-action="SignOut">Sign Out</a></li>
+    </ul>
+}
+else if (IdentityProvider.CurrentIdentity != null)
+{
+
+    <ul class="nav navbar-nav navbar-right">
+        <li class="navbar-text">@IdentityProvider.CurrentIdentity.FirstName @IdentityProvider.CurrentIdentity.LastName</li>
+        <li><a asp-area="" asp-controller="Account" asp-action="SignOut">Sign Out</a></li>
+    </ul>
+}
+else
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li><a asp-area="" asp-controller="Account" asp-action="Signin">Sign in</a></li>
+    </ul>
+}

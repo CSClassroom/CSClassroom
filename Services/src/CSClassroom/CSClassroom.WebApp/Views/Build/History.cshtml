@@ -1,0 +1,54 @@
+﻿@model HistoryViewModel
+
+@{
+    ViewBag.Title = "Build history";
+}
+
+<h2>@Project.Name Build History</h2>
+<h4 style="color: blue">Student: @Model.User.FirstName @Model.User.LastName</h4>
+
+<br />
+<table class="table">
+    <tr>
+        <th>
+            Commit date
+        </th>
+        <th>
+            Commit message
+        </th>
+        <th>
+            Passing tests
+        </th>
+        <th>
+            Build result
+        </th>
+        <th>
+            GitHub commit
+        </th>
+    </tr>
+
+    @foreach (var item in Model.Builds)
+    {
+        <tr>
+            <td>
+                @item.Commit.PushDate.ToLocalTime().ToString("MM/dd/yyyy h:mm tt")
+            </td>
+            <td>
+                @item.Commit.Message
+            </td>
+            <td>
+                @(
+                    item.Status == BuildStatus.Completed
+                        ? $"{item.TestResults.Count(tr => tr.Succeeded)} / {item.TestResults.Count}"
+                        : "Build failed"
+                )
+            </td>
+            <td>
+                @Html.ActionLink("Build result", "BuildResult", new { buildId = @item.Id })
+            </td>
+            <td>
+                <a href="@item.Commit.GetCommitUrl(Url)">GitHub commit</a>
+            </td>
+        </tr>
+    }
+</table>

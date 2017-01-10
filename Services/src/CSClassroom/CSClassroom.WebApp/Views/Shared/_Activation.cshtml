@@ -1,0 +1,36 @@
+﻿@using CSC.CSClassroom.Service.Identity
+@inject IUserProvider UserProvider
+
+@{ var User = await UserProvider.GetCurrentUserAsync(); }
+
+@if (User != null && !User.IsActivated && (bool?)ViewBag.HideActivationNotice == null)
+{
+    <h2 class="text-danger">Your account is now registered, but not yet activated.</h2>
+    <ul>
+        @if (!User.EmailAddressConfirmed)
+        {
+            <li>
+                You have not yet confirmed your e-mail address. Please check your e-mail for a confirmation link.
+                <form name='resend' target="_blank" action='@Url.Action("ResendEmailConfirmation", "User")' method='post'>
+                </form>
+                <script type="text/javascript">
+                    function resend() {
+                        document.forms['resend'].submit();
+                    }
+                </script>
+                <a href="javascript:resend()">Click here</a> to resend the confirmation e-mail.
+            </li>
+        }
+        @if (User.ClassroomMemberships != null)
+        {
+            @foreach (var membership in User.ClassroomMemberships)
+             {
+                 @if (!membership.InGitHubOrganization)
+                  {
+                      <li>You have not yet joined the GitHub organization for @membership.Classroom.DisplayName.
+                          @Html.Link(Url.GitHub().Invitation(membership.Classroom.GitHubOrganization), "Click here") to see the invitation.</li>
+                 }
+             }
+        }
+    </ul>
+}

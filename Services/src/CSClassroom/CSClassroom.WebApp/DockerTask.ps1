@@ -1,489 +1,167 @@
 <#
 .SYNOPSIS
-Deploys an ASP .NET Core Web Application into a docker container running in a specified Docker machine.
-
-.DESCRIPTION
-The following script will execute a set of Docker commands against the designated dockermachine.
-
-.PARAMETER Build
-Builds the containers using docker-compose build.
-
+Builds and runs a Docker image.
 .PARAMETER Clean
-Clears out any running containers (docker-compose kill, docker-compose rm -f).
-
-.PARAMETER Exec
-Executes a command in the container using docker exec.
-
-.PARAMETER GetUrl
-Gets the url for the site to open.
-
-.PARAMETER WaitForUrl
-Waits for url to respond.
-
-.PARAMETER Refresh
-Kills the running command in the container, publishes the project and restarts executing the command.
-
+Removes the image csclassroom.webapp and kills all containers based on that image.
+.PARAMETER Build
+Builds a Docker image.
 .PARAMETER Run
-Removes any conflicting containers running on the same port, then instances the containers using docker-compose up.
-
+Builds the image and runs docker-compose.
+.PARAMETER StartDebugging
+Finds the running container and starts the debugger inside of it.
 .PARAMETER Environment
-Specifies the configuration under which the project will be built and run (Debug or Release).
-
-.PARAMETER Machine
-Specifies the docker machine name to connect to. This is optional and if left blank or not provided it will use the currently configured docker host, or if no host is set, will use the Docker for Windows beta.
-
-.PARAMETER ProjectFolder
-Specifies the project folder, defaults to the parent of the directory containing this script.
-
-.PARAMETER ProjectName
-Specifies the project name used by docker-compose, defaults to the name of $ProjectFolder.
-
-.PARAMETER NoCache
-Specifies the build argument --no-cache.
-
-.PARAMETER OpenSite
-Specifies whether to launch the site once the docker container is running, defaults to $True.
-
-.PARAMETER RemoteDebugging
-Specifies if remote debugging is needed, defaults to $False.
-
-.PARAMETER ClrDebugVersion
-Specifies the version of the debugger, defaults to 'VS2015U2'.
-
-.PARAMETER Command
-Specifies the command to run in the container.
-
-.INPUTS
-None. You cannot pipe inputs to DockerTask.
-
+The enviorment to build for (Debug or Release), defaults to Debug
 .EXAMPLE
-Compiles the project and builds the docker image using the currently configured docker host, or when no host is set, used for the Docker for Windows beta. To see the container running, use the -Run parameter
-C:\PS> .\DockerTask.ps1 -Build -Environment Release
-
-.EXAMPLE
-Will use 'docker-compose up' on the project, using the docker-machine instance named 'default', and opens a browser once the container responds. Assumes -Build was previously run. For the Docker for Windows Beta, remove the -Machine parameter or pass '' as the value.
-C:\PS> .\DockerTask.ps1 -Run -Environment Release -Machine 'default'
-
-.LINK
-http://aka.ms/DockerToolsForVS
+C:\PS> .\dockerTask.ps1 -Build
+Build a Docker image named csclassroom.webapp
 #>
 
 Param(
-    [Parameter(ParameterSetName = "Build", Position = 0, Mandatory = $True)]
-    [switch]$Build,
-    [Parameter(ParameterSetName = "Clean", Position = 0, Mandatory = $True)]
+    [Parameter(Mandatory=$True,ParameterSetName="Clean")]
     [switch]$Clean,
-    [Parameter(ParameterSetName = "Run", Position = 0, Mandatory = $True)]
+    [Parameter(Mandatory=$True,ParameterSetName="Build")]
+    [switch]$Build,
+    [Parameter(Mandatory=$True,ParameterSetName="Run")]
     [switch]$Run,
-    [Parameter(ParameterSetName = "Exec", Position = 0, Mandatory = $True)]
-    [switch]$Exec,
-    [Parameter(ParameterSetName = "GetUrl", Position = 0, Mandatory = $True)]
-    [switch]$GetUrl,
-    [Parameter(ParameterSetName = "WaitForUrl", Position = 0, Mandatory = $True)]
-    [switch]$WaitForUrl,
-    [Parameter(ParameterSetName = "Refresh", Position = 0, Mandatory = $True)]
-    [switch]$Refresh,
-    [Parameter(ParameterSetName = "ValidateVolumeMapping", Position = 0, Mandatory = $True)]
-    [switch]$ValidateVolumeMapping,
-    [parameter(ParameterSetName = "Clean", Position = 1, Mandatory = $True)]
-    [parameter(ParameterSetName = "Build", Position = 1, Mandatory = $True)]
-    [parameter(ParameterSetName = "Run", Position = 1, Mandatory = $True)]
-    [parameter(ParameterSetName = "Refresh", Position = 1, Mandatory = $True)]
+    [Parameter(Mandatory=$True,ParameterSetName="StartDebugging")]
+    [switch]$StartDebugging,
+    [parameter(ParameterSetName="Clean")]
+    [parameter(ParameterSetName="Build")]
+    [Parameter(ParameterSetName="Run")]
+    [parameter(ParameterSetName="StartDebugging")]
     [ValidateNotNullOrEmpty()]
-    [String]$Environment,
-    [parameter(ParameterSetName = "Clean", Position = 2, Mandatory = $False)]
-    [parameter(ParameterSetName = "Build", Position = 2, Mandatory = $False)]
-    [parameter(ParameterSetName = "Run", Position = 2, Mandatory = $False)]
-    [parameter(ParameterSetName = "Exec", Position = 1, Mandatory = $False)]
-    [Parameter(ParameterSetName = "GetUrl", Position = 1, Mandatory = $False)]
-    [Parameter(ParameterSetName = "WaitForUrl", Position = 1, Mandatory = $False)]
-    [parameter(ParameterSetName = "Refresh", Position = 2, Mandatory = $False)]
-    [parameter(ParameterSetName = "ValidateVolumeMapping", Position = 1, Mandatory = $False)]
-    [String]$Machine,
-    [parameter(ParameterSetName = "Clean", Position = 3, Mandatory = $False)]
-    [parameter(ParameterSetName = "Build", Position = 3, Mandatory = $False)]
-    [parameter(ParameterSetName = "Run", Position = 3, Mandatory = $False)]
-    [parameter(ParameterSetName = "Exec", Position = 2, Mandatory = $False)]
-    [parameter(ParameterSetName = "Refresh", Position = 3, Mandatory = $False)]
-    [ValidateNotNullOrEmpty()]
-    [String]$ProjectFolder = (Split-Path -Path $MyInvocation.MyCommand.Definition),
-    [parameter(ParameterSetName = "Clean", Position = 4, Mandatory = $False)]
-    [parameter(ParameterSetName = "Build", Position = 4, Mandatory = $False)]
-    [parameter(ParameterSetName = "Run", Position = 4, Mandatory = $False)]
-    [parameter(ParameterSetName = "Exec", Position = 3, Mandatory = $False)]
-    [parameter(ParameterSetName = "Refresh", Position = 4, Mandatory = $False)]
-    [ValidateNotNullOrEmpty()]
-    [String]$ProjectName = (Split-Path -Path (Resolve-Path $ProjectFolder) -Leaf).ToLowerInvariant(),
-    [parameter(ParameterSetName = "Build", Position = 5, Mandatory = $False)]
-    [switch]$NoCache,
-    [parameter(ParameterSetName = "Run", Position = 5, Mandatory = $False)]
-    [bool]$OpenSite = $True,
-    [parameter(ParameterSetName = "Run", Position = 6, Mandatory = $False)]
-    [bool]$RemoteDebugging = $False,
-    [parameter(ParameterSetName = "Build", Position = 6, Mandatory = $False)]
-    [String]$ClrDebugVersion = "VS2015U2",
-    [parameter(ParameterSetName = "Exec", Position = 4, Mandatory = $True)]
-    [parameter(ParameterSetName = "Refresh", Position = 5, Mandatory = $True)]
-    [ValidateNotNullOrEmpty()]
-    [String]$Command
+    [String]$Environment = "Debug"
 )
 
-$ErrorActionPreference = "Stop"
+$imageName="csclassroom.webapp"
+$projectName="csclassroomwebapp"
+$serviceName="csclassroom.webapp"
+$containerName="${projectName}_${serviceName}_1"
+$runtimeID = "debian.8-x64"
+$framework = "netcoreapp1.1"
 
-# Turns VERBOSE output ON
-$VerbosePreference = "Continue"
+# Kills all running containers of an image and then removes them.
+function CleanAll () {
+    if (Test-Path $composeFileName) {
+        docker-compose -f "$targetFolder\docker-compose.yml" -f "$targetFolder\$composeFileName" -p $projectName down --rmi all
 
-# Docker Working Directory for validating volume mapping. Should be in sync with Dockerfile and Docker.props.
-$DockerWorkingDirectory = "/app/"
-
-# Path for the launch URL to be opened
-$launchURLPath = ""
-
-# The project name can only contain alphanumeric charecters, replace everything else with empty string
-$ProjectName = $ProjectName -replace "[^a-zA-Z0-9]", ""
-
-# The name of the image created by the compose file
-$ImageName = "csclassroom/csclassroom-webapp"
-
-# Calculate the name of the container created by the compose file
-$ContainerName = "${ProjectName}_webapp_1"
-
-# .net core runtime ID for the container (used to publish the app correctly)
-$RuntimeID = "debian.8-x64"
-# .net core framework (used to publish the app correctly)
-$Framework = "netcoreapp1.0"
-
-# Kills all containers using an image, removes all containers using an image, and removes the image.
-function Clean () {
-    $composeFilePath = GetComposeFilePath($ProjectFolder)
-
-    # Call compose-down to clean up the containers
-    $shellCommand = "docker-compose -f '$composeFilePath' -p $ProjectName down"
-    Write-Verbose "Executing: $shellCommand"
-    Invoke-Expression "cmd /c $shellCommand `"2>&1`""
-    if ($LastExitCode -ne 0) {
-        Write-Error "Failed to clean up the containers"
+        $danglingImages = $(docker images -q --filter 'dangling=true')
+        if (-not [String]::IsNullOrWhiteSpace($danglingImages)) {
+            docker rmi -f $danglingImages
+        }
     }
-
-    # If $ImageName exists remove it
-    $ImageNameRegEx = "\b$ImageName\b"
-    docker images | select-string -pattern $ImageNameRegEx | foreach {
-        $imageName = $_.Line.split(" ", [System.StringSplitOptions]::RemoveEmptyEntries)[0];
-        $tag = $_.Line.split(" ", [System.StringSplitOptions]::RemoveEmptyEntries)[1];
-        $shellCommand = "docker rmi -f ${imageName}:$tag"
-        Write-Verbose "Executing: $shellCommand";
-        Invoke-Expression "cmd /c $shellCommand `"2>&1`""
-    }
-
-    # Remove any dangling images (from previous builds)
-    $shellCommand = "docker images -q --filter 'dangling=true'"
-    Write-Verbose "Executing: $shellCommand"
-    $danglingImages = $(Invoke-Expression "cmd /c $shellCommand `"2>&1`"")
-    if (-not [String]::IsNullOrWhiteSpace($danglingImages)) {
-        $shellCommand = "docker rmi -f $danglingImages"
-        Write-Verbose "Executing: $shellCommand"
-        Invoke-Expression "cmd /c $shellCommand `"2>&1`""
-    }
-
-    # If the folder for publishing exists, delete it
-    if (Test-Path $pubPath) {
-        Remove-Item $pubPath -Force -Recurse
+    else {
+        Write-Error -Message "$Environment is not a valid parameter. File '$composeFileName' does not exist." -Category InvalidArgument
     }
 }
 
-# Runs docker build.
-function Build () {
-    # Publish the project
-    PublishProject
+# Builds the Docker image.
+function BuildImage () {
+    if (Test-Path $composeFileName) {
+        Write-Host "Building the project ($ENVIRONMENT)."
+   
+        if ($Environment -eq "Debug") {
+            npm run gulp-Debug
+            dotnet build -f $framework -r $runtimeID -c $Environment
+            if ($lastExitCode -eq 0) {
+                if (-Not(Test-Path "obj\Docker\empty")) {
+                    New-Item "obj\Docker\empty" -ItemType Directory
+                }
+            }
+            else {
+                $global:buildFailure = $true
+            }
+        }
+        else {
+            dotnet publish -f $framework -r $runtimeID -c $Environment -o $targetFolder
+            if ($lastExitCode -ne 0) {
+                $global:buildFailure = $true
+            }
+        }
 
-    $composeFilePath = GetComposeFilePath($pubPath)
-
-    $buildArgs = ""
-    if ($NoCache)
-    {
-        $buildArgs = "--no-cache"
+        if (!$global:buildFailure) {
+            Write-Host "Building the image $imageName ($Environment)."
+            docker-compose -f "$targetFolder\docker-compose.yml" -f "$targetFolder\$composeFileName" -p $projectName build
+        }
+        else {
+            Write-Host "Project build failed. Skipping container build."
+        }
     }
-
-    # Call docker-compose on the published project to build the images
-    $shellCommand = "docker-compose -f '$composeFilePath' -p $ProjectName build $buildArgs"
-    Write-Verbose "Executing: $shellCommand"
-    Invoke-Expression "cmd /c $shellCommand `"2>&1`""
-    if ($LastExitCode -ne 0) {
-        Write-Error "Failed to build the image"
+    else {
+        Write-Error -Message "$Environment is not a valid parameter. File '$composeFileName' does not exist." -Category InvalidArgument
     }
 }
 
-function GetContainerId () {
-    $containerId = (docker ps -f "name=$ContainerName" -q -n=1)
+# Runs docker-compose.
+function Compose () {
+    if (Test-Path $composeFileName) {
+        if (!$global:buildFailure) {
+            if ($Environment -eq "Debug") {
+                if (-Not(Test-Path "obj\Docker\empty")) {
+                    New-Item "obj\Docker\empty" -ItemType Directory
+                }
+            }
+
+            Write-Host "Running compose file $composeFileName"
+            docker-compose -f "$targetFolder\docker-compose.yml" -f "$targetFolder\$composeFileName" -p $projectName kill
+            docker-compose -f "$targetFolder\docker-compose.yml" -f "$targetFolder\$composeFileName" -p $projectName up -d
+        }
+    }
+    else {
+        Write-Error -Message "$Environment is not a valid parameter. File '$dockerFileName' does not exist." -Category InvalidArgument
+    }
+}
+
+function StartDebugging () {
+    Write-Host "Starting the remote debugger..."
+
+    $containerId = (docker ps -f "name=$containerName" -q -n=1)
     if ([System.String]::IsNullOrWhiteSpace($containerId)) {
-        Write-Error "Could not find a container named $ContainerName"
+        Write-Error "Could not find a container named $containerName"
     }
 
-    $containerId
+    docker exec -i $containerId pkill dotnet       
+    docker exec -i $containerId /clrdbg2/clrdbg --interpreter=mi
 }
 
-# Validates volume mapping
-function ValidateVolumeMapping () {
-    # Volume mapping enables shared folder mounting between host and docker container
-    # If there are no files in the working directory, most likely volume mapping is misconfigured.
-    $containerId = GetContainerId
-    Write-Host "Validating volume mapping in the container $containerId"
-    $shellCommand = "docker exec -i $containerId /bin/bash -c 'ls $DockerWorkingDirectory'"
-    if (!$(Invoke-Expression $shellCommand)) {
-        Write-Error "Unable to validate volume mapping. For troubleshooting, follow instructions from http://aka.ms/DockerToolsTroubleshooting"
-    }
+$global:buildFailure = $false
+
+if($Environment -ne "Debug" -and $Environment -ne "Release") {
+    Write-Error "Environment must be Debug or Release."
 }
 
-# Runs docker run
-function Run () {
-    $composeFilePath = GetComposeFilePath($pubPath)
+Push-Location $PSScriptRoot
+[Environment]::CurrentDirectory = $PWD
 
-    $conflictingContainerIds = $(docker ps | select-string -pattern ":80->" | foreach { Write-Output $_.Line.split()[0] })
-
-    if ($conflictingContainerIds) {
-        $conflictingContainerIds = $conflictingContainerIds -Join ' '
-        Write-Host "Stopping conflicting containers using port 80"
-        $stopCommand = "docker stop $conflictingContainerIds"
-        Write-Verbose "Executing: $stopCommand"
-        Invoke-Expression "cmd /c $stopCommand `"2>&1`""
-        if ($LastExitCode -ne 0) {
-            Write-Error "Failed to stop the container(s)"
-        }
-    }
-
-    $shellCommand = "docker-compose -f '$composeFilePath' -p $ProjectName up -d"
-    Write-Verbose "Executing: $shellCommand"
-    Invoke-Expression "cmd /c $shellCommand `"2>&1`""
-    if ($LastExitCode -ne 0) {
-        Write-Error "Failed to start the container(s)"
-    }
-
-    if ($OpenSite) {
-        OpenSite
-    }
+if ($Environment -eq "Debug") {
+    $env:TAG = ":Debug"
 }
 
-# Runs docker run
-function Exec () {
-    $containerId = GetContainerId
-    $shellCommand = "docker exec -i $containerId $Command"
-    Write-Verbose "Executing: $shellCommand"
-    Invoke-Expression $shellCommand
-    if ($LastExitCode -ne 0) {
-        Write-Error "Failed to exec command $Command in the container"
-    }
+$EnvironmentLower = $Environment.ToLowerInvariant()
+$composeFileName = "docker-compose.dev.$EnvironmentLower.yml"
+$targetFolder = "."
+if($Environment -ne "Debug") {
+    $targetFolder = "bin\$Environment\$framework\publish"
 }
 
-# Opens the remote site
-function OpenSite () {
-    # If we're going to debug, the server won't start immediately; don't need to wait for it.
-    if (-not $RemoteDebugging)
-    {
-        $uri = GetUrl
-
-        WaitForUrl $uri
-
-        # Open the site.
-        Start-Process $uri
-    }
-    else {
-        # Give the container 10 seconds to get ready
-        Start-Sleep 10
-    }
-} 
-
-# Gets the Url of the remote container
-function GetUrl () {
-    if ([System.String]::IsNullOrWhiteSpace($Machine)) {
-        $launchURL = [System.UriBuilder]"http://localhost"
-    }
-    else {
-        $launchURL = [System.UriBuilder]"http://$(docker-machine ip $Machine)"
-    }
-    $launchURL.Path = $launchURLPath
-    return $launchURL.Uri.AbsoluteUri
-}
-
-# Checks if the URL is responding
-function WaitForUrl ([string]$uri) {
-    Write-Host "Opening site $uri " -NoNewline
-    $status = 0
-    $count = 0
-
-    #Check if the site is available
-    while ($status -ne 200 -and $count -lt 120) {
-        try {
-            Write-Host "Trying to connect to $uri ($count/120)"
-            $response = Invoke-WebRequest -Uri $uri -Headers @{"Cache-Control"="no-cache";"Pragma"="no-cache"} -UseBasicParsing -Verbose:$false
-            $status = [int]$response.StatusCode
-        }
-        catch [System.Net.WebException] { }
-        if($status -ne 200) {
-            # Wait Time max. 2 minutes (120 sec.)
-            Start-Sleep 1
-            $count += 1
-        }
-    }
-    Write-Host
-    if($status -ne 200) {
-        # Check if bad volume mapping is the reason why we were not able to connect
-        ValidateVolumeMapping
-    }
-}
-
-function Refresh () {
-    # Find the container
-    $containerId = GetContainerId
-
-    # Kill any existing process
-    $shellCommand = "docker exec -i $containerId /bin/bash -c 'if PID=`$(pidof -x $Command); then kill `$PID; fi'"
-    Write-Verbose "Executing: $shellCommand"
-    Invoke-Expression $shellCommand
-
-    # Publish the project
-    PublishProject
-
-    # Restart the process
-    $shellCommand = "docker exec -i $containerId $Command"
-    Write-Verbose "Executing: $shellCommand"
-    Invoke-Expression $shellCommand
-    if ($LastExitCode -ne 0) {
-        Write-Error "Failed to exec command $Command in the container"
-    }
-}
-
-# Publishes the project
-function PublishProject () {
-    $oldPath = $Env:Path
-
-    try {
-        # Need to add $ProjectFolder\node_modules\.bin and the External Tools folder from the Web Tools to Path before calling publish
-        $newPath = (Join-Path $ProjectFolder ".\node_modules\.bin") + ";$oldPath"
-
-        # Find where VS is installed
-        $vsPath = $null
-        if (Test-Path HKLM:\Software\WOW6432Node\Microsoft\VisualStudio\14.0\) {
-            $vsPath = (Get-ItemProperty -Path HKLM:\Software\WOW6432Node\Microsoft\VisualStudio\14.0\ -Name ShellFolder).ShellFolder
-        } elseif (Test-Path HKLM:\Software\Microsoft\VisualStudio\14.0\) {
-            $vsPath = (Get-ItemProperty -Path HKLM:\Software\Microsoft\VisualStudio\14.0\ -Name ShellFolder).ShellFolder
-        }
-
-        # Find where the Web Tools are installed
-        if ($vsPath -ne $null) {
-            $webExternalPath = $null
-            # Check for the Web Tools in VS
-            if (Test-Path (Join-Path $vsPath "Web")) {
-                $webExternalPath = Join-Path $vsPath (Join-Path "Web" "External")
-            # or the Web Exress edition
-            } elseif (Test-Path (Join-Path $vsPath "WebExpress")) {
-                $webExternalPath = Join-Path $vsPath (Join-Path "WebExpress" "External")
-            }
-            # If the Web Tools were found, add the externals from the Web Tools to Path
-            if ($webExternalPath -ne $null) {
-                $newPath = "$newPath;$webExternalPath;$webExternalPath\git"
-            }
-        }
-
-        # Set Path to our new path
-        $Env:Path = $newPath
-
-        # Publish the project
-        dotnet publish -f $Framework -r $RuntimeID -c $Environment -o $pubPath $ProjectFolder
-        if ($? -eq $False) {
-            Write-Error "Failed to publish the project"
-        }
-    }
-    finally {
-        # Restore path to its old value
-        $Env:Path = $oldPath
-    }
-}
-
-function GetComposeFilePath([string]$folder) {
-    $composeFileName = "docker-compose.yml"
-    if ($Environment -ne "Release") {
-        $composeFileName = "docker-compose.$($Environment.ToLower()).yml"
-    }
-    $composeFilePath = Join-Path $folder $composeFileName
-
-    if (Test-Path $composeFilePath) {
-        return $composeFilePath
-    } else {
-        Write-Error -Message "$Environment is not a valid parameter. File '$composeFilePath' does not exist." -Category InvalidArgument
-    }
-}
-
-# Need the full path of the project for mapping
-$ProjectFolder = Resolve-Path $ProjectFolder
-
-if (![System.String]::IsNullOrWhiteSpace($Machine)) {
-    $users = Split-Path $env:USERPROFILE -Parent
-
-    # Set the environment variables for the docker machine to connect to
-    $shellCommand = "docker-machine env $Machine --shell powershell"
-    Write-Verbose "Executing: $shellCommand | Invoke-Expression"
-    Invoke-Expression $shellCommand | Invoke-Expression
-    if ($LastExitCode -ne 0) {
-        Write-Error "Failed to set docker environment variables"
-    }
-
-    # Get the driver name of the docker machine
-    $DriverName = (docker-machine inspect $Machine | Out-String | ConvertFrom-Json)."DriverName"
-
-    # If the driver is virtualbox, need to check that the project location can be volume mapped
-    if ($DriverName -eq "virtualbox") {
-        if (!$ProjectFolder.StartsWith($users, [StringComparison]::InvariantCultureIgnoreCase)) {
-            $message  = "VirtualBox by default shares C:\Users as c/Users. If the project is not under c:\Users, please manually add it to the shared folders on VirtualBox. "`
-                      + "Follow instructions from https://www.virtualbox.org/manual/ch04.html#sharedfolders"
-            Write-Warning -Message $message
-        }
-        elseif (!$ProjectFolder.StartsWith($users, [StringComparison]::InvariantCulture)) {
-            # If the project is under C:\Users, fix the casing if necessary. Path in Linux is case sensitive and the default shared folder c/Users
-            # on VirtualBox can only be accessed if the project folder starts with the correct casing C:\Users as in $env:USERPROFILE
-            $ProjectFolder = $users + $ProjectFolder.Substring($users.Length)
-        }
-    }
-}
-
-# Our working directory in bin
-$dockerBinFolder = Join-Path $ProjectFolder (Join-Path "bin" "Docker")
-# The folder to publish the app to
-$pubPath = Join-Path (Join-Path $dockerBinFolder $Environment) "app"
-
-Write-Verbose "Setting: `$env:CLRDBG_VERSION = `"$ClrDebugVersion`""
-$env:CLRDBG_VERSION = "$ClrDebugVersion"
-
-if ($RemoteDebugging) {
-    Write-Verbose "Setting: `$env:REMOTE_DEBUGGING = 1"
-    $env:REMOTE_DEBUGGING = 1
-}
-else {
-    Write-Verbose "Setting: `$env:REMOTE_DEBUGGING = 0"
-    $env:REMOTE_DEBUGGING = 0
-}
-
-# Call the correct functions for the parameters that were used
+# Call the correct function for the parameter that was used
 if ($Clean) {
-    Clean
+    CleanAll
 }
-if ($Build) {
-    Build
+elseif($Build) {
+    BuildImage
 }
-if ($Run) {
-    Run
+elseif($Run) {
+    BuildImage
+    Compose
 }
-if ($Exec) {
-    Exec
+elseif($StartDebugging) {
+    StartDebugging
 }
-if ($GetUrl) {
-    GetUrl
-}
-if ($WaitForUrl) {
-    WaitForUrl (GetUrl)
-}
-if ($Refresh) {
-    Refresh
-}
-if ($ValidateVolumeMapping) {
-    ValidateVolumeMapping
+
+Pop-Location
+[Environment]::CurrentDirectory = $PWD
+
+if ($global:buildFailure) {
+    exit 1
 }

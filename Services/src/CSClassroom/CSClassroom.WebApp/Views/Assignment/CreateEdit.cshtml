@@ -1,0 +1,125 @@
+@using CSC.CSClassroom.WebApp.Providers
+@model Assignment
+@inject ITimeZoneProvider TimeZoneProvider;
+
+@{
+    ViewData["Title"] = ViewBag.ActionName;
+}
+
+<h2>@ViewBag.ActionName Assignment</h2>
+
+<form asp-action="@ViewBag.ActionName">
+    <div class="form-horizontal">
+        <hr />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @if (Model != null && Model.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+        <div class="form-group">
+            <label asp-for="Name" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Name" class="form-control-static"></p>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="GroupName" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="GroupName" class="form-control-static"></p>
+                <input asp-for="GroupName" class="form-control" />
+                <span asp-validation-for="GroupName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Questions" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Questions" class="form-control-static"></p>
+                <table id="questions" class="equal-width"></table>
+                <span asp-validation-for="Questions" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="DueDates" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="DueDates" class="form-control-static"></p>
+                <table id="dueDates" class="equal-width"></table>
+                <span asp-validation-for="DueDates" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="@ViewBag.ActionName" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "questions",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Assignment.Questions)),
+        properties = new[]
+        {
+            nameof(AssignmentQuestion.QuestionId),
+            nameof(AssignmentQuestion.Points)
+        },
+        orderByProp = nameof(AssignmentQuestion.Order),
+        startMinRows = 0,
+        textAreas = false,
+        dropDownLists = new List<DropDownList>()
+        {
+            new DropDownList
+            (
+                nameof(AssignmentQuestion.QuestionId),
+                ((IList<Question>)ViewBag.AvailableQuestions).Cast<object>().ToList(),
+                (Func<object, DropDownListItem>)(question => new DropDownListItem(((Question)question).Name, ((Question)question).Id)),
+                "Category",
+                (Func<object, DropDownListItem>)(question => new DropDownListItem(((Question)question).QuestionCategory.Name, ((Question)question).QuestionCategoryId))
+            )
+        }
+    })
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "dueDates",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Assignment.DueDates)),
+        properties = new[]
+        {
+            nameof(AssignmentDueDate.SectionId),
+            nameof(AssignmentDueDate.DueDate),
+        },
+        orderByProp = nameof(AssignmentDueDate.SectionId),
+        startMinRows = 0,
+        textAreas = false,
+        defaultValues = new Dictionary<string, object>()
+        {
+            [nameof(AssignmentDueDate.DueDate)] = TimeZoneProvider
+                .ToUserLocalTime(DateTime.UtcNow)
+                .Date
+                .Add(Classroom.DefaultTimeDue)
+                .ToString("yyyy-MM-ddTHH\\:mm")
+        },
+        dropDownLists = new List<DropDownList>()
+        {
+            new DropDownList
+            (
+                nameof(AssignmentDueDate.SectionId),
+                Classroom.Sections.Cast<object>().ToList(),
+                (Func<object, DropDownListItem>)(section => new DropDownListItem(((Section)section).DisplayName, ((Section)section).Id))
+            )
+        }
+    })
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

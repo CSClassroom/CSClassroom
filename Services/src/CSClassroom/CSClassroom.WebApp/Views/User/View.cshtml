@@ -1,0 +1,88 @@
+﻿@using CSC.CSClassroom.Model.Users
+@using CSC.CSClassroom.Service.Identity
+@model CSC.CSClassroom.Model.Users.User
+@inject IUserProvider UserProvider
+
+@{
+    ViewData["Title"] = "User Information";
+}
+
+<h2>User Information</h2>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.UserName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.UserName)
+            <br><br>
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.LastName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.LastName)
+            <br><br>
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.FirstName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.FirstName)
+            <br><br>
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.EmailAddress)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.EmailAddress)
+            <br>
+            @if (Model.EmailAddressConfirmed)
+            {
+                <span style="color: green">Confirmed</span>
+            }
+            else
+            {
+                <span class="text-danger">Not Confirmed</span>
+            }
+            <br><br>
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.GitHubLogin)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.GitHubLogin)<br>
+            @if (Model.ClassroomMemberships?.All(c => c.InGitHubOrganization) ?? true)
+            {
+                <span style="color: green">Confirmed</span>
+            }
+            else
+            {
+                <span class="text-danger">Not Confirmed</span>
+            }
+            <br><br>
+        </dd>
+        <dt>
+            Account Status
+        </dt>
+        <dd>
+            @if (Model.IsActivated)
+            {
+                <span style="color: green">Activated</span>
+            }
+            else
+            {
+                <span class="text-danger">Not Activated</span>
+            }
+            <br />
+            <br />
+        </dd>
+        <dt>
+        </dt>
+        <dd>
+            <a asp-action="Edit" asp-route-id="@Model.Id">Edit User Information</a>
+        </dd>
+    </dl>
+</div>

@@ -1,0 +1,153 @@
+﻿@model TestTrendViewModel
+@inject IJsonSerializer Json
+@{
+    var chartId = $"chart{Model.ProjectName}";
+    var chartSelector = $"#{chartId}";
+}
+
+@if (!Model.Thumbnail)
+{
+    <h3>Test Trend</h3>
+}
+
+<div id="@chartId" class="container with-3d-shadow with-transitions">
+    @if (Model.Thumbnail)
+    {
+        <svg style="width: 350px; height: 175px"></svg>
+    }
+    else
+    {
+        <svg style="width: 550px; height: 350px"></svg>
+    }
+</div>
+<script type="text/javascript">
+
+    (function() {
+        var data = [
+            {
+                "key": "Passed",
+                "values": @Html.Raw(Json.Serialize(Model.GetDataSeriesArray(Url, passed: true))),
+                "color": "rgb(142, 178, 217)"
+            },
+            {
+                "key": "Failed",
+                "values": @Html.Raw(Json.Serialize(Model.GetDataSeriesArray(Url, passed: false))),
+                "color": "rgb(242, 84, 84)"
+            }
+        ]
+
+        var margin = @(Model.Thumbnail ? "{ top: 0, left: 0, bottom: 0, right: 0 }" : "{ left: 20, bottom: 50}");
+
+        nv.addGraph(function() {
+            var chart = nv.models.stackedAreaChart()
+                .margin(margin)
+                .x(function(value) { return value.index; })
+                .y(function(value) { return value.testCount })
+                .useInteractiveGuideline(true)
+                .rightAlignYAxis(true)
+                .duration(500)
+                .showControls(false)
+                .clipEdge(true)
+                .showXAxis(@(Model.Thumbnail ? "false" : "true"))
+                .showYAxis(@(Model.Thumbnail ? "false" : "true"))
+                .showLegend(@(Model.Thumbnail ? "false" : "true"));
+
+            chart.xAxis.tickValues(data[0].values.map(function(value, index) {
+                return index;
+            }));
+
+            //Format x-axis labels with custom function.
+            chart.xAxis.tickFormat(function(index) {
+                return data[0].values[index].shortCommitDate;
+            });
+
+            @if (!Model.Thumbnail)
+            {
+                @:chart.xAxis.rotateLabels(-60);
+            }
+
+            chart.interactiveLayer.tooltip.headerFormatter(function(d) {
+                return data[0].values[d].longCommitDate;
+            });
+
+            chart.xAxis.showMaxMin(false);
+
+            d3.select('@chartSelector svg')
+                .datum(data)
+                .call(chart);
+
+            var maxYValue = @Model.AllBuildTestCounts.Max(b => b.PassedCount + b.FailedCount);
+
+            var currentBuildIndex = @(Model.CurrentBuildIndex ?? -1);
+
+            if (currentBuildIndex != -1) {
+                // x values of vertical lines
+                var xgrid = [@Model.CurrentBuildIndex];
+
+                var custLine = d3.select('@chartSelector')
+                    .select('.nv-areaWrap')
+                    .append('g');
+
+                custLine.selectAll('line')
+                    .data(xgrid)
+                    .enter()
+                    .append('line')
+                    .attr({
+                        x1: function(d) { return chart.xAxis.scale()(d) },
+                        y1: function(d) { return chart.yAxis.scale()(0) },
+                        x2: function(d) { return chart.xAxis.scale()(d) },
+                        y2: function(d) { return chart.yAxis.scale()(maxYValue) }
+                    })
+                    .style("stroke", "#000000")
+                    .style("stroke-dasharray", "2,5");
+            }
+
+            /* create a function to disable events and modify the update function */
+            function disableAreaClick() {
+                chart.stacked.dispatch.on("areaClick", null);
+                chart.stacked.dispatch.on("areaClick.toggle", null);
+
+                chart.stacked.scatter.dispatch.on("elementClick", null);
+                chart.stacked.scatter.dispatch.on("elementClick.area", null);
+
+                chart.legend.dispatch.on("legendClick", null);
+                chart.legend.dispatch.on("legendDblclick", null);
+                chart.legend.dispatch.on("stateChange", null);
+
+                var linkToResults = @(Model.Thumbnail ? "false" : "true");
+                if (linkToResults) {
+                    chart.interactiveLayer.dispatch.on("elementClick",
+                        function(e) {
+                            var pointIndex = nv.interactiveBisect(data[0].values, e.pointXValue, chart.x());
+                            location.href = data[0].values[pointIndex].buildUrl;
+                        });
+                }
+
+                if (chart.update) {
+                    //if the chart currently has an update function
+                    //(created when the chart is called on a container selection)
+                    //then modify it to re-call this function after update
+
+                    var originalUpdate = chart.update;
+                    //assign the update function to a new name
+
+                    chart.update = function() {
+                        originalUpdate();
+                        disableAreaClick();
+                    }
+                }
+            }
+
+            //Call your function, disabling events on current chart and future updates:
+            disableAreaClick();
+            //this must be called *after* calling the chart on a selection
+            //so that it has an update function to modify
+
+            nv.utils.windowResize(chart.update);
+            //chart.legend.updateState(false);
+
+            return chart;
+        });
+    })();
+
+</script>

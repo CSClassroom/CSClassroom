@@ -15,7 +15,7 @@ public class FieldDefinition
 		this.name = field.getName();
 		this.type = field.getType().getName();
 		this.isStatic = Modifier.isStatic(field.getModifiers());
-		this.isPublic = Modifier.isPublic(field.getModifiers());
+		this.isPublic = !Modifier.isPrivate(field.getModifiers()) && !Modifier.isProtected(field.getModifiers());
 	}
 
 	/**

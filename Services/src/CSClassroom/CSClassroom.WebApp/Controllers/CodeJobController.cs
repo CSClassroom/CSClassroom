@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using CSC.BuildService.Model.CodeRunner;
+using CSC.BuildService.Service.CodeRunner;
 using Microsoft.AspNetCore.Mvc;
-using CSC.CodeRunner.Service;
-using CSC.CodeRunner.Model;
 
 namespace CSC.CSClassroom.WebApp.Controllers
 {
@@ -24,6 +21,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			_codeRunnerService = codeRunnerService;
 		}
 
+		/*
 		/// <summary>
 		/// A method to see if the service is running.
 		/// </summary>
@@ -32,6 +30,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		public void Ping()
 		{
 		}
+		*/
 
 		/// <summary>
 		/// Executes a class job.

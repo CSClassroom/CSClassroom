@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Add student";
+}
+@model UserToAdd
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="AddUser">
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label class="col-md-2 control-label">Username</label>
+            <div class="col-md-10">
+                <p class="form-control-static">Enter the username of the user to add to @Section.DisplayName. The user must already be registered.</p>
+                <input asp-for="UserName" class="form-control" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Add User" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+

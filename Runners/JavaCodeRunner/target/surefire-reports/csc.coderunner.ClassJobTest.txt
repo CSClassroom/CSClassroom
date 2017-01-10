@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: csc.coderunner.ClassJobTest
--------------------------------------------------------------------------------
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.836 sec - in csc.coderunner.ClassJobTest

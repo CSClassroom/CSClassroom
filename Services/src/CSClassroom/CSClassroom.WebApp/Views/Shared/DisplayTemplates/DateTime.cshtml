@@ -1,0 +1,5 @@
+﻿@using CSC.CSClassroom.WebApp.Providers
+@model DateTime
+@inject ITimeZoneProvider TimeZoneProvider
+
+<span>@Model.FormatShortDateTime(TimeZoneProvider)</span>

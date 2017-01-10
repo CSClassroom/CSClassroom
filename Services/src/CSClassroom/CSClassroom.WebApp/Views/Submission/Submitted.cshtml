@@ -1,0 +1,50 @@
+﻿@model SubmittedViewModel
+
+@{
+    ViewBag.Title = "Submission Successful";
+}
+@{
+    <h2>@Project.Name @Model.Checkpoint.DisplayName Submission Successful</h2>
+}
+<h4 style="color: blue">Student: @Model.User.FirstName @Model.User.LastName</h4>
+
+<br />
+<img src="~/images/success.png" />
+<br />
+<br />
+<span style="font-weight: bold">You have successfully submitted the following change:</span>
+<br />
+<br />
+<table class="table">
+    <tr>
+        <th>
+            Date committed
+        </th>
+        <th>
+            GitHub link
+        </th>
+        <th>
+            Test results
+        </th>
+        <th>
+            Commit message
+        </th>
+    </tr>
+
+    <tr>
+        <td>
+            @Model.Submission.DateCommitted
+        </td>
+        <td>
+            <a href="@Model.Submission.GitHubUrl" target="_blank">Show on GitHub</a>
+        </td>
+        <td>
+            @Html.ActionLink("Build result", "BuildResult", new { buildId = Model.Submission.BuildId }, new { target = "_blank" })<span> (@Model.Submission.PassingTests passing)</span>
+        </td>
+        <td>
+            @Model.Submission.CommitMessage
+        </td>
+    </tr>
+</table>
+<br />
+@Html.ActionLink("Go to latest build", "LatestBuildResult", "Build", new { userId = Model.User.Id })

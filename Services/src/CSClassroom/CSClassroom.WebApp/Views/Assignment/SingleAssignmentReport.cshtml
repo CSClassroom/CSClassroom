@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Section Assignment Report";
+}
+
+@model AssignmentViewModel
+
+<h2>Assignment Report</h2>
+<h4>Section: @Model.SectionName</h4>
+<h4>Assignment: @Model.AssignmentName</h4>
+<h4>Out of: @Model.Points points</h4>
+<div id="assignmentReport"></div>
+
+@Html.Partial(
+    "_NestedTable", 
+    new NestedTableConfig
+    (
+        "assignmentReport", 
+        typeof(StudentAssignmentResultViewModel), 
+        Model.StudentResults, 
+        "No assignment results."
+    ))

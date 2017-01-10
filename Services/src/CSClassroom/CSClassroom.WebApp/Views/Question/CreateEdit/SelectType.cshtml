@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "Select Question Type";
+}
+
+@model IEnumerable<CSC.CSClassroom.WebApp.ViewModels.Question.QuestionType>
+
+<h3><b>Select the type of question to create:</b></h3>
+
+<form asp-action="Create" method="get" class="form-horizontal">
+    <div style="margin-left: 25px">
+@foreach (var item in Model)
+{
+        <input type="radio" name="questionType" value="@item.Type.Name" />
+        <label class="info">@item.DisplayName</label>
+        <p class="narrow-paragraph">@item.Description</p>
+}
+    </div>
+    <input type="submit" value="Create" class="btn btn-default" />
+</form>
+

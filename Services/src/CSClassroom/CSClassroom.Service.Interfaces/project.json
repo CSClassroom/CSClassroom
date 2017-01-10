@@ -6,8 +6,10 @@
   },
 
   "dependencies": {
+    "BuildService.Model": "1.0.0-*",
+    "Common.Infrastructure.Interfaces": "1.0.0-*",
     "CSClassroom.Model": "1.0.0-*",
-    "NETStandard.Library": "1.6.0"
+    "NETStandard.Library": "1.6.1"
   },
 
   "frameworks": {

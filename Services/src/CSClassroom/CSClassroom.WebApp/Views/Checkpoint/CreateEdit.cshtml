@@ -1,0 +1,116 @@
+@model Checkpoint
+
+@{
+    ViewData["Title"] = ViewBag.ActionName;
+}
+
+<h2>@ViewBag.ActionName Checkpoint</h2>
+
+<form asp-action="@ViewBag.ActionName">
+    <div class="form-horizontal">
+        <hr />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @if (Model != null && Model.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+        <div class="form-group">
+            <label asp-for="Name" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Name" class="form-control-static"></p>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="DisplayName" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="DisplayName" class="form-control-static"></p>
+                <input asp-for="DisplayName" class="form-control" />
+                <span asp-validation-for="DisplayName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="TestClasses" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="TestClasses" class="form-control-static"></p>
+                <table id="testClasses" class="equal-width"></table>
+                <span asp-validation-for="TestClasses" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="SectionDates" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="SectionDates" class="form-control-static"></p>
+                <table id="sectionDates" class="equal-width"></table>
+                <span asp-validation-for="SectionDates" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="@ViewBag.ActionName" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "sectionDates",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Checkpoint.SectionDates)),
+        properties = new[]
+        {
+            nameof(CheckpointDates.SectionId),
+            Project.ExplicitSubmissionRequired 
+                ? null
+                : nameof(CheckpointDates.StartDate),
+            nameof(CheckpointDates.DueDate),
+        },
+        orderByProp = nameof(CheckpointDates.SectionId),
+        startMinRows = 0,
+        textAreas = false,
+        dropDownLists = new List<DropDownList>()
+        {
+            new DropDownList
+            (
+                nameof(CheckpointDates.SectionId),
+                Classroom.Sections.Cast<object>().ToList(),
+                (Func<object, DropDownListItem>)(section => new DropDownListItem(((Section)section).DisplayName, ((Section)section).Id))
+            )
+        }
+    })
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "testClasses",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Checkpoint.TestClasses)),
+        properties = new[]
+        {
+            nameof(CheckpointTestClass.TestClassId),
+            nameof(CheckpointTestClass.Required),
+        },
+        orderByProp = nameof(CheckpointTestClass.TestClassId),
+        startMinRows = 0,
+        textAreas = false,
+        dropDownLists = new List<DropDownList>()
+        {
+            new DropDownList
+            (
+                nameof(CheckpointTestClass.TestClassId),
+                Project.TestClasses.Cast<object>().ToList(),
+                (Func<object, DropDownListItem>)(testClass => new DropDownListItem(((TestClass)testClass).DisplayName, ((TestClass)testClass).Id))
+            )
+        }
+    })
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

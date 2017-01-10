@@ -1,0 +1,92 @@
+﻿@{
+    ViewData["Title"] = "Build Status";
+}
+
+@model BuildInProgressViewModel
+<h2>@Project.Name: Build in progress</h2>
+<h4 style="color: blue">Student: @Model.Commit.User.FirstName @Model.Commit.User.LastName</h4>
+
+<h3 id="progressdescription">Loading...</h3>
+<div id="progressbar">
+    <div class="progress-label"></div>
+</div>
+
+<script type="text/javascript">
+    var progressbar = $("#progressbar");
+    var progressdescription = $("#progressdescription");
+    var progresslabel = $(".progress-label");
+
+    progressbar.progressbar({
+        value: false,
+        change: function() {
+            progresslabel.text(progressbar.progressbar("value") + "%");
+        },
+        complete: function() {
+            progresslabel.text("100%");
+            progressdescription.text("Complete!");
+        }
+    });
+
+    $(".ui-widget-header").css("background", "rgb(142, 178, 217)");
+    
+    var maxAttempts = 30;
+    var progressAttempts = 0;
+    var waitBetweenPolls = 5000;
+    var estimatedDuration = @Model.EstimatedDuration.TotalSeconds;
+
+    function monitorProgress()
+    {
+        progressAttempts++;
+
+        if (progressAttempts >= maxAttempts) {
+            buildTimedOut();
+            return;
+        }
+
+        $.ajax({
+            url: "@Url.Action("MonitorProgress", new { userId = Model.Commit.User.Id})",
+            method: 'GET',
+            success: function (data) {
+                var result = trackJobProgress(data);
+                if (result) {
+                    setTimeout(function () {
+                        monitorProgress();
+                    }, waitBetweenPolls);
+                }
+                else {
+                    buildTimedOut();
+                }
+            },
+            error: function () {
+                buildTimedOut();
+            }
+        });
+    }
+
+    function trackJobProgress(response) {
+        if (response.completed) {
+            progressbar.progressbar("value", 100);
+            location.reload(true /*forceGet*/);
+            return true;
+        }
+        else if (response.enqueued && response.duration > 0) {
+            progressdescription.text("Building...");
+            progressbar.progressbar("value", Math.round(Math.min((response.duration * 100.0)/estimatedDuration, 99)));
+            return true;
+        }
+        else if (response.enqueued) {
+            progressdescription.text("Waiting for the build to start...");
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    function buildTimedOut() {
+        $("#progressbar").hide();
+        $("#progressbar").after("<h4>The build timed out. Please try again later.</h4>");
+    }
+
+    monitorProgress();
+</script>

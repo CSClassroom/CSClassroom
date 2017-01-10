@@ -1,0 +1,9 @@
+﻿@model IList<UnreadFeedbackViewModel>
+
+<hr />
+<h3 style="color: red; font-weight: bold">Unread Checkpoint Feedback!</h3>
+<span>You have feedback on one or more submitted checkpoints. Please read the feedback now.</span><br />
+@foreach (var feedback in Model)
+{
+    <br /><a href="@feedback.FeedbackUrl" target="_blank">@feedback.ProjectName @feedback.CheckpointDisplayName</a>@: (committed on @feedback.CommitDate)
+}

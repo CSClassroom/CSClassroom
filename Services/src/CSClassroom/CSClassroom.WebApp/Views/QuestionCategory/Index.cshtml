@@ -1,10 +1,10 @@
-@model IEnumerable<CSC.CSClassroom.Model.Exercises.QuestionCategory>
+@model IEnumerable<CSC.CSClassroom.Model.Questions.QuestionCategory>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Question Categories";
 }
 
-<h2>Index</h2>
+<h2>Question Categories</h2>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -15,6 +15,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsPrivate)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -23,6 +26,9 @@
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsPrivate, "YesNo")
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

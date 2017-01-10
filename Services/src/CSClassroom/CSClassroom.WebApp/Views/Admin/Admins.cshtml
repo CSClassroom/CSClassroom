@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = Classroom.DisplayName + " Admins";
+}
+
+@model UserListViewModel
+
+<h2>@ViewData["Title"]</h2>
+
+@Html.Partial("_UserList", Model)
+<br />
+@Html.ActionLink("Add an admin", "AddAdmin")
+

@@ -1,0 +1,13 @@
+﻿@model SelectAssignmentReport
+
+<form asp-action="Report">
+    <input type="hidden" asp-for="SectionName" />
+    <input type="hidden" asp-for="AssignmentGroupName" />
+    <input type="hidden" asp-for="GradebookName" />
+    <label class="control-label">Update Last Transfer Date to @Model.GradebookName</label>
+    <br/>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <input asp-for="LastTransferDate" class="form-control" />
+    <br/>
+    <input type="submit" value="Update" class="btn btn-default" />
+</form>

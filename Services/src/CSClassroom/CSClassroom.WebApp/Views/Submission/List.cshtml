@@ -1,0 +1,93 @@
+﻿@using CSC.CSClassroom.Model.Projects.ServiceResults
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@model IEnumerable<CSC.CSClassroom.Model.Projects.ServiceResults.SectionSubmissionResult>
+@inject ITimeZoneProvider TimeZoneProvider
+
+@{
+    ViewBag.Title = $"{Project.Name} {Checkpoint.DisplayName} Submissions";
+}
+
+<h2>@ViewBag.Title</h2>
+<br />
+<div style="text-align: center">
+    <h4>@Html.ActionLink("Download Submissions", "Download") | @Html.ActionLink("Grade Submissions", "Grade")</h4>
+    <br />
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CommitDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BuildId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PullRequestNumber)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+    @{
+        var lastNoSubmissionItem = Model.LastOrDefault(s => s.CommitDate == null);
+    }
+    @foreach (var item in Model)
+    {
+        <tr @Html.Raw(item == lastNoSubmissionItem ? "style=\"border-bottom: 2px solid black\"" : "")>
+            <td>
+                @item.LastName
+            </td>
+            <td>
+                @item.FirstName
+            </td>
+            <td>
+                @if (item.CommitDate != null)
+                {
+                    <span>@item.CommitDate.Value.FormatLongDateTime(TimeZoneProvider)</span>
+                }
+                else
+                {
+                    @:No Submission
+                }
+            </td>
+            <td>
+                @if (item.BuildId != null)
+                {
+                    @Html.ActionLink(
+                        "Submission Build",
+                        "BuildResult",
+                        "Build",
+                        new {buildId = item.BuildId.Value})
+                }
+                else
+                {
+                    @Html.ActionLink(
+                        "Latest Build",
+                        "LatestBuildResult",
+                        "Build",
+                        new { userId = item.UserId })
+                }
+            </td>
+            <td>
+                @if (item.PullRequestNumber != null)
+                {
+                    @Html.Link(
+                        Url.GitHub().PullRequest
+                        (
+                            Classroom.GitHubOrganization,
+                            item.Commit.GetRepoName(),
+                            item.PullRequestNumber.Value
+                        ), "Pull Request")
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

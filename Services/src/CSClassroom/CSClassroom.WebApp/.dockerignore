@@ -1,0 +1,5 @@
+appsettings.Environment.json
+docker-compose.yml
+Dockerfile
+bower_components
+node_modules

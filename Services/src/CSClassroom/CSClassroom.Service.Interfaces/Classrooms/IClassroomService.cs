@@ -1,6 +1,7 @@
-﻿using CSC.CSClassroom.Model.Classrooms;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using CSC.CSClassroom.Model.Classrooms;
+using CSC.CSClassroom.Model.Users;
 
 namespace CSC.CSClassroom.Service.Classrooms
 {
@@ -12,27 +13,37 @@ namespace CSC.CSClassroom.Service.Classrooms
 		/// <summary>
 		/// Returns the list of classrooms.
 		/// </summary>
-		Task<IList<Classroom>> GetClassroomsAsync(Group group);
+		Task<IList<Classroom>> GetClassroomsAsync();
 
 		/// <summary>
 		/// Returns the classroom with the given name.
 		/// </summary>
-		Task<Classroom> GetClassroomAsync(Group group, string classroomName);
+		Task<Classroom> GetClassroomAsync(string classroomName);
+
+		/// <summary>
+		/// Returns all administrators of the current classroom.
+		/// </summary>
+		Task<IList<ClassroomMembership>> GetClassroomAdminsAsync(string classroomName);
+
+		/// <summary>
+		/// Returns all classrooms the user has access to.
+		/// </summary>
+		Task<IList<ClassroomMembership>> GetClassroomsWithAccessAsync(int userId);
 
 		/// <summary>
 		/// Creates a classroom.
 		/// </summary>
-		Task CreateClassroomAsync(Group group, Classroom classroom);
+		Task CreateClassroomAsync(Classroom classroom);
 
 		/// <summary>
 		/// Updates a classroom.
 		/// </summary>
-		Task UpdateClassroomAsync(Group group, Classroom classroom);
+		Task UpdateClassroomAsync(Classroom classroom);
 
 		/// <summary>
 		/// Removes a classroom.
 		/// </summary>
 		/// <param name="classroomName">The name of the classroom to remove.</param>
-		Task DeleteClassroomAsync(Group group, string classroomName);
+		Task DeleteClassroomAsync(string classroomName);
 	}
 }

@@ -120,7 +120,7 @@ public class ClassJobTest
 			{ 
 				  "java.lang.ArrayIndexOutOfBoundsException: 4\n"
 				+ "\tat java.util.Arrays$ArrayList.get\n"
-				+ "\tat ExceptionOperation.getFourthElement (Line 4)" 
+				+ "\tat ExceptionOperation.getFourthElement (Line 3)" 
 			}, 
 			result.getTestResults());
 	}	

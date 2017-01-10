@@ -1,37 +1,64 @@
 {
     "version": "0.2.0",
-    "configurations": [
+    "configurations": [        
         {
-            "name":".NET Core Docker Launch (web)",
+            "name":"WebApp",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "composeForDebug",
+            "preLaunchTask": "Run WebApp (Debug)",
             "cwd": "/app",
-            "program": "/app/CSClassroom.WebApp.dll",
+            "program": "/usr/bin/dotnet",
+            "args": ["--additionalprobingpath", "/root/.nuget/packages", "/app/bin/Debug/netcoreapp1.1/CSClassroom.WebApp.dll"],
             "sourceFileMap": {
                 "/app": "${workspaceRoot}/src/CSClassroom/CSClassroom.WebApp"
             },
 
             "launchBrowser": {
                 "enabled": true,
-                "args": "${auto-detect-url}",
+                "args": "http://localhost:10000",
                 "windows": {
                     "command": "cmd.exe",
-                    "args": "/C start ${auto-detect-url}"
+                    "args": "/C start http://localhost:10000"
                 },
                 "osx": {
                     "command": "open"
+                },
+                "linux": {
+                    "command": "firefox"
                 }
             },
 
             "pipeTransport": {
                 "pipeProgram": "/bin/bash",
                 "pipeCwd": "${workspaceRoot}/src/CSClassroom/CSClassroom.WebApp",
-                "pipeArgs": [ "-c", "./dockerTask.sh startDebugging" ],
+                "pipeArgs": [ "./dockerTask.sh", "startDebugging", "Debug" ],
                 "windows": {
                     "pipeProgram": "${env.windir}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
                     "pipeCwd": "${workspaceRoot}/src/CSClassroom/CSClassroom.WebApp",
-                    "pipeArgs": [ ".\\dockerTaskVSCode.ps1", "-StartDebugging" ]
+                    "pipeArgs": [ ".\\dockerTask.ps1", "-StartDebugging", "-Environment", "Debug" ]
+                }
+            }
+        },  
+        {
+            "name":"BuildService",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Run BuildService (Debug)",
+            "cwd": "/app",
+            "program": "/usr/bin/dotnet",
+            "args": ["--additionalprobingpath", "/root/.nuget/packages", "/app/bin/Debug/netcoreapp1.1/BuildService.Endpoint.dll"],
+            "sourceFileMap": {
+                "/app": "${workspaceRoot}/src/BuildService/BuildService.Endpoint"
+            },
+
+            "pipeTransport": {
+                "pipeProgram": "/bin/bash",
+                "pipeCwd": "${workspaceRoot}/src/BuildService/BuildService.Endpoint",
+                "pipeArgs": [ "./dockerTask.sh", "startDebugging", "Debug" ],
+                "windows": {
+                    "pipeProgram": "${env.windir}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                    "pipeCwd": "${workspaceRoot}/src/BuildService/BuildService.Endpoint",
+                    "pipeArgs": [ ".\\dockerTask.ps1", "-StartDebugging", "-Environment", "Debug" ]
                 }
             }
         }

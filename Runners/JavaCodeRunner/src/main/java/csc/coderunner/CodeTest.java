@@ -4,13 +4,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 /**
  * A test to run for a java class.
  */
 public abstract class CodeTest
 {
+	private static final String c_additionalContentOmitted = "Additional content omitted.";
 	private String testName;
+	private final int maxSize = 100000;
 
 	/**
 	 * Constructor.
@@ -94,7 +98,20 @@ public abstract class CodeTest
 			
 			Object returnValue = method.invoke(null);
 			String returnString = getReturnValueAsString(returnValue);
+			if (returnString != null && returnString.length() > maxSize)
+			{
+				returnString = returnString.substring(0, maxSize) 
+						+ "\n"
+						+ c_additionalContentOmitted;
+			}
+			
 			String outputString = newOutStream.toString();
+			if (outputString != null && outputString.length() > maxSize)
+			{
+				outputString = outputString.substring(0, maxSize) 
+						+ "\n"
+						+ c_additionalContentOmitted;
+			}
 			
 			return new CodeTestResult(
 				testName,
@@ -130,6 +147,10 @@ public abstract class CodeTest
 	{
 		if (returnValue == null)
 			return null;
+		else if (returnValue instanceof Float)
+			return getNumericValueAsString((Float)returnValue);
+		else if (returnValue instanceof Double)
+			return getNumericValueAsString((Double)returnValue);
 		else if (returnValue instanceof boolean[])
 			return Arrays.toString((boolean[])returnValue);
 		else if (returnValue instanceof byte[])
@@ -150,6 +171,14 @@ public abstract class CodeTest
 			return Arrays.deepToString((Object[])returnValue);
 		else
 			return returnValue.toString();
+	}
+	
+	/**
+	 * Returns a numeric value, as a string.
+	 */
+	private String getNumericValueAsString(Number value)
+	{
+		return new DecimalFormat("0.0#####").format(value);
 	}
 	
 	/**

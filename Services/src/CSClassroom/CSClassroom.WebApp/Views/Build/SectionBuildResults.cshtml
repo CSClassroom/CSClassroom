@@ -1,0 +1,10 @@
+﻿@model SectionBuildResultsViewModel
+@inject IJsonSerializer Json;
+@{ 
+    ViewBag.Title = $"{Model.SectionName} {Project.Name} Build Results";
+}
+
+<h3>@Model.SectionName @Project.Name Build Results</h3>
+<div id="buildReport"></div>
+
+@Html.Partial("_NestedTable", new NestedTableConfig("buildReport", Model.BuildTableInfo, Model.BuildTableData, "No builds recorded."))

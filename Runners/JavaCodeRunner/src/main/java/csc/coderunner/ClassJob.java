@@ -28,11 +28,15 @@ public class ClassJob extends CodeJob<ClassJobResult>
 		@JsonProperty("tests") List<ClassTest> tests)
 	{
 		super(className, classesToImport);
+				
+		JavaFileBuilder builder = JavaFileBuilder.createBuilder(classesToImport);
 		
-		this.fileContents = JavaFileBuilder.createBuilder(classesToImport)
+		this.lineNumberOffset = lineNumberOffset - builder.getNumLinesAdded();
+		
+		this.fileContents = builder
 			.addLines(fileContents)
 			.getFileContents();
-		this.lineNumberOffset = lineNumberOffset;
+		
 		this.tests = tests;
 	}
 	

@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  projectrunner:
+    image: csclassroom/projectrunner-java
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app

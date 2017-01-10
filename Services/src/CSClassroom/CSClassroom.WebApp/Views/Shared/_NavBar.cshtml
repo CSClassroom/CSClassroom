@@ -1,0 +1,44 @@
+﻿@using CSC.CSClassroom.Model.Classrooms
+@using CSC.CSClassroom.Model.Users
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            @if (ViewBag.Classroom != null)
+            {
+                <a asp-controller="Classroom" asp-action="Home" class="navbar-brand">@ViewBag.Classroom.DisplayName</a>}
+            else
+            {
+                <a asp-controller="Home" asp-action="Index" class="navbar-brand">CS Classroom</a>
+            }
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                @if (ViewBag.Classroom != null)
+                {
+                    @if (ViewBag.ClassroomRole >= ClassroomRole.Admin)
+                    {
+                        <li><a asp-controller="Classroom" asp-action="Index">Classes</a></li>
+                        <li><a asp-controller="Section" asp-action="Index">Sections</a></li>
+                    }
+                    <li><a asp-controller="Question" asp-action="Index">Questions</a></li>
+                    <li><a asp-controller="Assignment" asp-action="Index">Assignments</a></li>
+                    @if (ViewBag.ClassroomRole >= ClassroomRole.Admin)
+                    {
+                        <li><a asp-controller="Project" asp-action="Index">Projects</a></li>
+                    }
+                    else
+                    {
+                        <li><a asp-controller="Project" asp-action="Status">Projects</a></li>
+                    }
+                }
+            </ul>
+            @await Html.PartialAsync("_LoginPartial")
+        </div>
+    </div>
+</div>

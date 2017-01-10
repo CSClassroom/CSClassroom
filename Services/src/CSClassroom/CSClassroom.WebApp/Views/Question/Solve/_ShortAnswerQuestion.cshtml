@@ -1,0 +1,58 @@
+﻿@using CSC.CSClassroom.Model.Questions.ServiceResults
+@model CSC.CSClassroom.Model.Questions.ServiceResults.QuestionToSolve
+@{
+    var question = Model.Question as ShortAnswerQuestion;
+    var lastSubmission = Model.LastSubmission as ShortAnswerQuestionSubmission;
+}
+
+
+<input type="hidden" name="QuestionSubmissionType" value="ShortAnswerQuestionSubmission" />
+<table class="table" style="width: auto">
+    <tbody>
+        @foreach (var blank in question.Blanks)
+        {
+            var blankIndex = @question.Blanks.IndexOf(blank);
+            var blankValue = lastSubmission?.Blanks?.SingleOrDefault(b => b.Name == blank.Name)?.Answer ?? "";
+
+            <tr>
+                <td>
+                    <pre>@blank.Name</pre>
+                    <input type="hidden" name="Blanks[@blankIndex].Name" value="@blank.Name" />
+                </td>
+                <td>
+                    @if (blank.Answer.Split('\n').Length > 1)
+                    {
+                        <textarea name="Blanks[@blankIndex].Answer" style="border: 1px solid #aaa" rows="10" cols="50">@(blankValue)</textarea>
+                    }
+                    else
+                    {
+                        <input type="text" name="Blanks[@blankIndex].Answer" style="border: 1px solid #aaa" value="@blankValue"/>
+                    }
+                    <span id="result@(blankIndex)" style="display: none"></span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<span id="result" style="display: none"></span>
+<script type="text/javascript">
+    function displayResult(response) {
+        for (var blankIndex = 0; blankIndex < response.result.correct.length; blankIndex++)
+        {
+            var correct = response.result.correct[blankIndex];
+            var result = $('#result' + blankIndex);
+            result.css('display', 'inherit');
+            result.css('font-weight', 'bold');
+            if (correct)
+            {
+                result.text('Correct!');
+                result.css('color', 'green');
+            }
+            else
+            {
+                result.text('Incorrect.');
+                result.css('color', 'red');
+            }
+        }
+    }
+</script>

@@ -1,0 +1,33 @@
+﻿@model CodeEditorSettings
+@inject IJsonHelper Json;
+
+@if (Model.TextArea)
+{
+    <textarea name="@Model.EditorName" style="display: none"></textarea>
+}
+
+<div id="wrapper-@Model.EditorName"></div>
+<script>
+    function createEditor(text)
+    {
+        $('#wrapper-@Model.EditorName').html('<pre id="@Model.EditorName">' + (text != null ? text : '') + '</pre>');
+        createCodeEditor('@Model.EditorName', @Html.Raw(Model.TextArea ? $"$(\"textarea[name = {@Model.EditorName}]\")" : "undefined"), @Model.MinLines, @Model.MaxLines);
+    }
+
+    var initialContents = @Json.Serialize(Model.InitialContents);
+    createEditor(initialContents);
+</script>
+
+@if (!string.IsNullOrEmpty(Model.RevertContents))
+{
+    <script>
+        function revertCodeEditor() {
+            var revertContents = @Json.Serialize(Model.RevertContents);
+            createEditor(revertContents);
+        }
+
+        $(function() {
+            $("#revert").css('display', '').click(revertCodeEditor);
+        })
+    </script>
+}

@@ -1,0 +1,90 @@
+﻿@model SubmissionCandidatesViewModel
+
+@{
+    ViewBag.Title = "Submit Checkpoint";
+}
+@{
+    var existingSubmission = Model.Candidates.Any(candidate => candidate.PreviousSubmission);
+    if (existingSubmission)
+    {
+        <h2>Change Existing @Project.Name @Model.Checkpoint.DisplayName Submission</h2>
+    }
+    else
+    {
+        <h2>Submit @Project.Name @Model.Checkpoint.DisplayName</h2>
+    }
+}
+
+<br />
+<span style="font-weight: bold">Select a commit, and then click @(existingSubmission ? "Change submission" : "Submit") below.</span>
+<br />
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="userId" value="@Model.User.Id" />
+    <br />
+    <table class="table">
+        <tr>
+            <th>
+            </th>
+            <th>
+                Date committed
+            </th>
+            <th>
+                GitHub link
+            </th>
+            <th>
+                Test results
+            </th>
+            <th>
+                Commit message
+            </th>
+        </tr>
+
+        @foreach (var item in Model.Candidates)
+        {
+            <tr>
+                <td>
+                    <input type="radio" name="commitId" value="@item.CommitId" data-previous-submission="@(item.PreviousSubmission ? "true" : "false")" data-date="@item.DateCommitted" @(item.DefaultChoice ? "checked" : "") />
+                </td>
+                <td>
+                    @item.DateCommitted.ToString()
+                    @if (item.PreviousSubmission)
+                    {
+                        <br><span style="font-weight: bold">(previous submission)</span>
+                    }
+                </td>
+                <td>
+                    <a href="@item.GitHubUrl" target="_blank">Show on GitHub</a>
+                </td>
+                <td>
+                    @Html.ActionLink("Build result", "BuildResult", "Build", new { buildId = @item.BuildId }, new { target = "_blank" })<span> (@item.PassingTests passing)</span>
+                </td>
+                <td>
+                    @item.CommitMessage
+                </td>
+            </tr>
+        }
+    </table>
+    <script type="text/javascript">
+        function confirmSubmit() {
+            var selected = $('input[name="commitId"]:checked');
+            var date = selected.attr("data-date");
+            var previousSubmission = selected.attr("data-previous-submission");
+            if (previousSubmission == "true" && false) {
+                alert("You have selected a commit that is already submitted!");
+                return false;
+            } else {
+                @if (existingSubmission)
+                {
+                    @:return confirm("Are you sure you want to change your existing @Model.Checkpoint.DisplayName submission to your change on " + date + "?");
+                }
+                else
+                {
+                    @:return confirm("Are you sure you want to submit your change on " + date + " for @Model.Checkpoint.DisplayName?");
+                }
+            }
+        }
+    </script>
+    <input type="submit" name="Submit" value="@(existingSubmission ? "Change Submission" : "Submit")" onclick="return confirmSubmit();" />
+}

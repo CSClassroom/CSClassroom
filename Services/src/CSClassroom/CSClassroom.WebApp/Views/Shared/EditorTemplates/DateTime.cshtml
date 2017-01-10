@@ -1,0 +1,6 @@
+﻿@using CSC.CSClassroom.WebApp.Providers
+@model DateTime
+@inject ITimeZoneProvider TimeZoneProvider
+
+@Html.Html5DateRenderingMode
+<input type="datetime-local" name="@ViewData.TemplateInfo.HtmlFieldPrefix" value="@TimeZoneProvider.ToUserLocalTime(Model)" />

@@ -1,0 +1,259 @@
+﻿@using System.Threading.Tasks
+@using CSC.CSClassroom.WebApp.ViewModels.Shared
+@model ClassQuestion
+
+@inject IJsonHelper Json;
+
+<div class="form-group">
+    <label asp-for="ImportedClasses" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="ImportedClasses" class="form-control-static"></p>
+        <span asp-validation-for="ImportedClasses" class="text-danger"></span>
+        <table id="importedClasses" class="equal-width"></table>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="FileTemplate" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="FileTemplate" class="form-control-static"></p>
+        <span asp-validation-for="FileTemplate" class="text-danger"></span>
+        @Html.Partial($"_CodeEditor", new CodeEditorSettings("FileTemplate", Model.FileTemplate, revertContents: null, textArea: true, minLines: 10, maxLines: 150))
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="ClassName" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="ClassName" class="form-control-static"></p>
+        <input asp-for="ClassName" class="form-control"/>
+        <span asp-validation-for="ClassName" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="ClassSubmissionType" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="ClassSubmissionType" class="form-control-static"></p>
+        <select asp-for="ClassSubmissionType" asp-items="Html.GetEnumSelectList<ClassSubmissionType>()"></select>
+        <span asp-validation-for="ClassSubmissionType" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="AllowPublicFields" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="AllowPublicFields" class="form-control-static"></p>
+        <input asp-for="AllowPublicFields" class="checkbox" type="checkbox" value="true"/>
+        <input type="hidden" name="AllowPublicFields" value="false"/>
+        <span asp-validation-for="AllowPublicFields" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="RequiredMethods" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="RequiredMethods" class="form-control-static"></p>
+        <span asp-validation-for="RequiredMethods" class="text-danger"></span>
+        <table id="requiredMethods" class="equal-width"></table>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="CodeConstraints" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="CodeConstraints" class="form-control-static"></p>
+        <table id="codeConstraints" class="equal-width"></table>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="InitialSubmission" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="InitialSubmission" class="form-control-static"></p>
+        <span asp-validation-for="InitialSubmission" class="text-danger"></span>
+        @Html.Partial($"_CodeEditor", new CodeEditorSettings
+        (
+            nameof(ClassQuestion.InitialSubmission), 
+            Model.InitialSubmission, 
+            revertContents: null,
+            textArea: true, 
+            minLines: 10, 
+            maxLines: 150
+        ))
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="Tests" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="Tests" class="form-control-static"></p>
+        <table id="classTests" class="equal-width"></table>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="AllowPartialCredit" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="AllowPartialCredit" class="form-control-static"></p>
+        <input asp-for="AllowPartialCredit" class="checkbox" type="checkbox" value="true" />
+        <input type="hidden" name="AllowPartialCredit" value="false" />
+        <span asp-validation-for="AllowPartialCredit" class="text-danger"></span>
+    </div>
+</div>
+
+<br>
+<script type="text/javascript">
+    var classTestsSubPanel = {
+        subPanelBuilder: function(cell, uniqueIndex) {
+            var fieldName = "Tests[" + uniqueIndex + "].MethodBody";
+            var fieldId = 'classTests_MethodBody_' + uniqueIndex;
+            var editorContainerId = fieldId + "_EditorContainer";
+            var editorId = fieldId + "_Editor";
+            var buttonId = fieldId + "_Button";
+
+            // Add the caption.
+            $('<span></span>').text('Test Method Body: ').appendTo(cell);
+
+            // Add the show/hide button.
+            $('<button>Hide</button>')
+                .attr({
+                    id: buttonId,
+                    type: 'button'
+                })
+                .click(function() {
+                    var button = $("#" + buttonId);
+                    var editor = $("#" + editorId);
+                    if (button.text() === "Show") {
+                        button.text("Hide");
+                        $("#" + editorContainerId).removeClass("editor-hidden");
+                        ace.edit(editorId).resize();
+                    } else {
+                        button.text("Show");
+                        $("#" + editorContainerId).addClass("editor-hidden");
+                        ace.edit(editorId).resize();
+                    }
+                })
+                .appendTo(cell);
+
+            // Add the hidden text area.
+            var textArea = $('<textarea></textarea>')
+                .css("display", "none")
+                .attr({
+                    id: fieldId,
+                    name: fieldName
+                })
+                .appendTo(cell);
+
+            // Add a container for the code editor.
+            var editorContainer = $('<div></div>')
+                .attr({
+                    id: editorContainerId
+                })
+                .appendTo(cell);
+
+            // Add the code editor.
+            var editor = $('<pre></pre>')
+                .attr({
+                    id: editorId
+                })
+                .appendTo(editorContainer);
+
+            createCodeEditor(editorId, textArea, 3 /*minLines*/, 50 /*maxLines*/);
+        },
+
+        rowDataLoaded: function(caller, rowData, rowIndex, uniqueIndex) {
+            var fieldName = "Tests[" + uniqueIndex + "]." + name;
+            var editorId = 'classTests_MethodBody_' + uniqueIndex + '_Editor';
+            var buttonId = 'classTests_MethodBody_' + uniqueIndex + '_Button';
+            if (rowData.MethodBody) {
+                var editor = ace.edit(editorId);
+
+                editor.session.insert({
+                        row: 0,
+                        column: 0
+                    },
+                    rowData.MethodBody);
+
+                $("#" + buttonId).click();
+            }
+        }
+    };
+</script>
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "importedClasses",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(ClassQuestion.ImportedClasses)),
+        properties = new[]
+        {
+            nameof(ImportedClass.ClassName)
+        },
+        orderByProp = nameof(ImportedClass.ClassName),
+        startMinRows = 0,
+        textAreas = false
+    })
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "requiredMethods",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(ClassQuestion.RequiredMethods)),
+        properties = new[]
+        {
+            nameof(RequiredMethod.Name),
+            nameof(RequiredMethod.ParamTypes),
+            nameof(RequiredMethod.ReturnType),
+            nameof(RequiredMethod.IsPublic),
+            nameof(RequiredMethod.IsStatic)
+        },
+        orderByProp = nameof(RequiredMethod.Name),
+        startMinRows = 0,
+        textAreas = false
+    })
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "codeConstraints",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(ClassQuestion.CodeConstraints)),
+        properties = new[]
+        {
+            nameof(CodeConstraint.Regex),
+            nameof(CodeConstraint.Type),
+            nameof(CodeConstraint.Frequency),
+            nameof(CodeConstraint.ErrorMessage)
+        },
+        orderByProp = nameof(CodeConstraint.Order),
+        startMinRows = 0,
+        textAreas = false
+    })
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "classTests",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(ClassQuestion.Tests)),
+        properties = new[]
+        {
+            nameof(ClassQuestionTest.Description),
+            nameof(ClassQuestionTest.ReturnType),
+            nameof(ClassQuestionTest.ExpectedReturnValue),
+            nameof(ClassQuestionTest.ExpectedOutput)
+        },
+        hiddenValues = new Dictionary<string, string> { ["CodeQuestionTestType"] = typeof(ClassQuestionTest).Name },
+        orderByProp = nameof(ClassQuestionTest.Order),
+        startMinRows = 1,
+        textAreas = true,
+        subPanelConfig = new SubPanelConfig
+        (
+            nameof(ClassQuestionTest.MethodBody),
+            "classTestsSubPanel.subPanelBuilder",
+            "classTestsSubPanel.rowDataLoaded"
+        )
+    })

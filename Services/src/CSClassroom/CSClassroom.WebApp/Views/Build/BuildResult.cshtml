@@ -1,0 +1,65 @@
+﻿@model BuildViewModel
+
+@{ 
+    ViewBag.Title = "Build result";
+}
+<h2>@Project.Name: @(Model.IsLatestBuild ? "Latest Build" : $"Build on { Model.PushDate.ToLocalTime().ToString("MM/dd/yyyy") } at { Model.PushDate.ToLocalTime().ToString("h:mm tt") }")</h2>
+<h4 style="color: blue">Student: @Model.User.FirstName @Model.User.LastName</h4>
+@if (!Model.IsLatestBuild)
+{
+    <hr />
+    <h3 style="color: red; font-weight: bold">Warning: </h3>
+    <h4>This is not the most recent build for this project. To see the most recent build, click @Html.ActionLink("here", "LatestBuildResult", new { userId = Model.User.Id }).</h4>
+}
+
+@if (Model.UnreadFeedback.Any())
+{
+    @Html.Partial("_UnreadFeedback", Model.UnreadFeedback);
+}
+
+@Html.Partial("_Submissions", Model.Submissions)
+
+@if (Model.BuildStatus == BuildStatus.Completed)
+{
+    <hr />
+    @Html.Partial("_TestTrend", Model.TestTrend)
+}
+<hr />
+<h3>Commit information</h3>
+<table class="table" style="width: auto">
+    <tr>
+        <th>
+            Date
+        </th>
+        <th>
+            Message
+        </th>
+        <th>
+            Link
+        </th>
+    </tr>
+
+    <tr>
+        <td>
+            @Model.PushDate.ToLocalTime().ToString("MM/dd/yyyy h:mm tt")
+        </td>
+        <td>
+            @Model.CommitMessage
+        </td>
+        <td>
+            <a href="@Model.CommitUrl" target="_blank">Show on GitHub</a>
+        </td>
+    </tr>
+</table>
+
+@if (Model.BuildStatus == BuildStatus.Completed)
+{
+    @Html.Partial("_BuildSucceeded", Model)
+}
+else
+{
+    @Html.Partial("_BuildFailed", Model);
+}
+
+<br />
+<h4>@Html.ActionLink("Build History", "History", User != Model.User ? new { userId = Model.User.Id } : null)</h4>

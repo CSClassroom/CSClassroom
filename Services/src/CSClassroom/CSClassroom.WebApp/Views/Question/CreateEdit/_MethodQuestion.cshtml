@@ -1,0 +1,135 @@
+﻿@using System.Threading.Tasks
+@using CSC.CSClassroom.WebApp.ViewModels.Shared
+@model MethodQuestion
+
+<div class="form-group">
+    <label asp-for="ImportedClasses" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="ImportedClasses" class="form-control-static"></p>
+        <span asp-validation-for="ImportedClasses" class="text-danger"></span>
+        <table id="importedClasses" class="equal-width"></table>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="MethodName" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="MethodName" class="form-control-static"></p>
+        <input asp-for="MethodName" class="form-control"/>
+        <span asp-validation-for="MethodName" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="ParameterTypes" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="ParameterTypes" class="form-control-static"></p>
+        <input asp-for="ParameterTypes" class="form-control" />
+        <span asp-validation-for="ParameterTypes" class="text-danger"></span>
+    </div> 
+</div>
+<div class="form-group">
+    <label asp-for="ReturnType" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="ReturnType" class="form-control-static"></p>
+        <input asp-for="ReturnType" class="form-control"/>
+        <span asp-validation-for="ReturnType" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="CodeConstraints" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="CodeConstraints" class="form-control-static"></p>
+        <table id="codeConstraints" class="equal-width"></table>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="InitialSubmission" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="InitialSubmission" class="form-control-static"></p>
+        <span asp-validation-for="InitialSubmission" class="text-danger"></span>
+        @Html.Partial($"_CodeEditor", new CodeEditorSettings
+        (
+            nameof(MethodQuestion.InitialSubmission), 
+            Model.InitialSubmission, 
+            revertContents: null,
+            textArea: true, 
+            minLines: 10, 
+            maxLines: 150
+        ))
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="Tests" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="Tests" class="form-control-static"></p>
+        <table id="methodTests" class="equal-width"></table>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="AllowPartialCredit" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="AllowPartialCredit" class="form-control-static"></p>
+        <input asp-for="AllowPartialCredit" class="checkbox" type="checkbox" value="true" />
+        <input type="hidden" name="AllowPartialCredit" value="false" />
+        <span asp-validation-for="AllowPartialCredit" class="text-danger"></span>
+    </div>
+</div>
+
+<br>
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "importedClasses",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(MethodQuestion.ImportedClasses)),
+        properties = new[]
+        {
+            nameof(ImportedClass.ClassName)
+        },
+        orderByProp = nameof(ImportedClass.ClassName),
+        startMinRows = 0,
+        textAreas = false
+    })
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "codeConstraints",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(MethodQuestion.CodeConstraints)),
+        properties = new[]
+        {
+            nameof(CodeConstraint.Regex),
+            nameof(CodeConstraint.Type),
+            nameof(CodeConstraint.Frequency),
+            nameof(CodeConstraint.ErrorMessage)
+        },
+        orderByProp = nameof(CodeConstraint.Order),
+        startMinRows = 0,
+        textAreas = false
+    })
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "methodTests",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(MethodQuestion.Tests)),
+        properties = new[]
+        {
+            nameof(MethodQuestionTest.Name),
+            nameof(MethodQuestionTest.ParameterValues),
+            nameof(MethodQuestionTest.ExpectedReturnValue),
+            nameof(MethodQuestionTest.ExpectedOutput)
+        },
+        hiddenValues = new Dictionary<string, string> { ["CodeQuestionTestType"] = typeof(MethodQuestionTest).Name },
+        orderByProp = nameof(MethodQuestionTest.Order),
+        startMinRows = 1,
+        textAreas = true
+    })

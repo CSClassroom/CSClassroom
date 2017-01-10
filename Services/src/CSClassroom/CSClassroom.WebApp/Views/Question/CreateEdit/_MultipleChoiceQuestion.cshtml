@@ -1,0 +1,37 @@
+﻿@using System.Threading.Tasks
+@model MultipleChoiceQuestion
+
+<div class="form-group">
+    <label asp-for="AllowMultipleCorrectAnswers" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="AllowMultipleCorrectAnswers" class="form-control-static"></p>
+        <input asp-for="AllowMultipleCorrectAnswers" class="checkbox" type="checkbox" value="true" />
+        <input type="hidden" name="AllowMultipleCorrectAnswers" value="false" />
+        <span asp-validation-for="AllowMultipleCorrectAnswers" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="Choices" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="Choices" class="form-control-static"></p>
+        <span asp-validation-for="Choices" class="text-danger"></span>
+        <table id="choices" class="equal-width"></table>
+    </div>
+</div>
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "choices",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(MultipleChoiceQuestion.Choices)),
+        properties = new[]
+        {
+            nameof(MultipleChoiceQuestionChoice.Value),
+            nameof(MultipleChoiceQuestionChoice.Correct)
+        },
+        orderByProp = nameof(MultipleChoiceQuestionChoice.Order),
+        startMinRows = 1,
+        textAreas = true
+    })

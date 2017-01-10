@@ -1,16 +1,19 @@
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using CSC.CSClassroom.Service.Exercises;
-using CSC.CSClassroom.Model.Exercises;
+using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Classrooms;
+using CSC.CSClassroom.Service.Questions;
+using CSC.CSClassroom.WebApp.Filters;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CSC.CSClassroom.WebApp.Controllers
 {
 	/// <summary>
 	/// The question category controller.
 	/// </summary>
-	[Route(GroupRoutePrefix)]
-	public class QuestionCategoryController : BaseGroupController
+	[Route(ClassroomRoutePrefix)]
+	[ClassroomAuthorization(ClassroomRole.Admin)]
+	public class QuestionCategoryController : BaseClassroomController
 	{
 		/// <summary>
 		/// The category service.
@@ -21,9 +24,10 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// Constructor.
 		/// </summary>
 		public QuestionCategoryController(
-			IGroupService groupService, 
+			BaseControllerArgs args,
+			IClassroomService classroomService, 
 			IQuestionCategoryService questionCategoryService) 
-				: base(groupService)
+				: base(args, classroomService)
 		{
 			QuestionCategoryService = questionCategoryService;
 		}
@@ -34,29 +38,10 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[Route("QuestionCategories")]
 		public async Task<IActionResult> Index()
 		{
-			var categories = await QuestionCategoryService.GetQuestionCategoriesAsync(Group);
+			var categories = await QuestionCategoryService
+				.GetQuestionCategoriesAsync(ClassroomName);
 
 			return View(categories);
-		}
-
-		/// <summary>
-		/// Shows the details of a category.
-		/// </summary>
-		[Route("QuestionCategories/{id}/Details")]
-		public async Task<IActionResult> Details(int? id)
-		{
-			if (id == null)
-			{
-				return NotFound();
-			}
-
-			var questionCategory = await QuestionCategoryService.GetQuestionCategoryAsync(Group, id.Value);
-			if (questionCategory == null)
-			{
-				return NotFound();
-			}
-
-			return View(questionCategory);
 		}
 
 		/// <summary>
@@ -65,7 +50,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[Route("CreateQuestionCategory")]
 		public IActionResult Create()
 		{
-			return View();
+			return View("CreateEdit");
 		}
 
 		/// <summary>
@@ -78,13 +63,17 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		{
 			if (ModelState.IsValid)
 			{
-				await QuestionCategoryService.CreateQuestionCategoryAsync(Group, questionCategory);
+				await QuestionCategoryService.CreateQuestionCategoryAsync
+				(
+					ClassroomName, 
+					questionCategory
+				);
 
 				return RedirectToAction("Index");
 			}
 			else
 			{
-				return View(questionCategory);
+				return View("CreateEdit", questionCategory);
 			}
 		}
 
@@ -99,13 +88,18 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				return NotFound();
 			}
 
-			var questionCategory = await QuestionCategoryService.GetQuestionCategoryAsync(Group, id.Value);
+			var questionCategory = await QuestionCategoryService.GetQuestionCategoryAsync
+			(
+				ClassroomName, 
+				id.Value
+			);
+
 			if (questionCategory == null)
 			{
 				return NotFound();
 			}
 
-			return View(questionCategory);
+			return View("CreateEdit", questionCategory);
 		}
 
 		/// <summary>
@@ -123,13 +117,17 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			if (ModelState.IsValid)
 			{
-				await QuestionCategoryService.UpdateQuestionCategoryAsync(Group, questionCategory);
+				await QuestionCategoryService.UpdateQuestionCategoryAsync
+				(
+					ClassroomName, 
+					questionCategory
+				);
 
 				return RedirectToAction("Index");
 			}
 			else
 			{
-				return View(questionCategory);
+				return View("CreateEdit", questionCategory);
 			}
 		}
 
@@ -144,7 +142,12 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				return NotFound();
 			}
 
-			var questionCategory = await QuestionCategoryService.GetQuestionCategoryAsync(Group, id.Value);
+			var questionCategory = await QuestionCategoryService.GetQuestionCategoryAsync
+			(
+				ClassroomName, 
+				id.Value
+			);
+
 			if (questionCategory == null)
 			{
 				return NotFound();
@@ -166,7 +169,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				return NotFound();
 			}
 
-			await QuestionCategoryService.DeleteQuestionCategoryAsync(Group, id.Value);
+			await QuestionCategoryService.DeleteQuestionCategoryAsync(ClassroomName, id.Value);
 
 			return RedirectToAction("Index");
 		}

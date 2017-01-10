@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Select Section Project Report";
+}
+
+@model SelectProjectReport
+
+<form asp-action="SectionReport">
+    <div class="form-horizontal">
+        <hr />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="SectionName" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="SectionName" class="form-control-static"></p>
+                <select asp-for="SectionName" class="form-control" asp-items="ViewBag.SectionNames"></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="ProjectName" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="ProjectName" class="form-control-static"></p>
+                <select asp-for="ProjectName" class="form-control" asp-items="ViewBag.ProjectNames"></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Generate Report" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,40 @@
+﻿{
+  "version": "1.0.0-*",
+
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "CSClassroom.Model": "1.0.0-*",
+    "Microsoft.EntityFrameworkCore": "1.1.0",
+    "Microsoft.EntityFrameworkCore.Tools": "1.1.0-preview4-final",
+    "Microsoft.Extensions.Configuration": "1.1.0",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.1.0",
+    "Microsoft.Extensions.Configuration.Json": "1.1.0",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.1.0"
+    },
+    "Npgsql.EntityFrameworkCore.PostgreSQL": "1.1.0"
+  },
+
+  "frameworks": {
+    "netcoreapp1.1": {
+      "imports": [
+        "dotnet5.6",
+        "portable-net451+win8"
+      ]
+    }
+  },
+
+  "tools": {
+    "Microsoft.EntityFrameworkCore.Tools.DotNet": {
+      "version": "1.1.0-preview4-final",
+      "imports": [
+        "portable-net45+win8+dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  }
+}

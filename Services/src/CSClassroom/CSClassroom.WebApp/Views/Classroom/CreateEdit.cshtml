@@ -1,0 +1,87 @@
+@model Classroom
+
+@{
+    var actionName = $"{ViewContext.RouteData.Values["action"]}";
+    ViewData["Title"] = actionName;
+}
+
+<h2>@actionName Class</h2>
+
+<form asp-action="@actionName">
+    <div class="form-horizontal">
+        <hr />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @if (Model != null && Model.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+        <div class="form-group">
+            <label asp-for="Name" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Name" class="form-control-static"></p>
+                <input asp-for="Name" class="form-control" /> 
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="DisplayName" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="DisplayName" class="form-control-static"></p>
+                <input asp-for="DisplayName" class="form-control" />
+                <span asp-validation-for="DisplayName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="GitHubOrganization" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="GitHubOrganization" class="form-control-static"></p>
+                <input asp-for="GitHubOrganization" class="form-control" />
+                <span asp-validation-for="GitHubOrganization" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="DefaultTimeDue" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="DefaultTimeDue" class="form-control-static"></p>
+                <input asp-for="DefaultTimeDue" class="form-control" />
+                <span asp-validation-for="DefaultTimeDue" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="ClassroomGradebooks" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="ClassroomGradebooks" class="form-control-static"></p>
+                <table id="classroomGradebooks" class="equal-width"></table>
+                <span asp-validation-for="ClassroomGradebooks" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="@actionName" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "classroomGradebooks",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Classroom.ClassroomGradebooks)),
+        properties = new[]
+        {
+            nameof(ClassroomGradebook.Name)
+        },
+        orderByProp = nameof(ClassroomGradebook.Order),
+        startMinRows = 0,
+        textAreas = false
+    })

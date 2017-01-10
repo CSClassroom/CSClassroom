@@ -134,7 +134,42 @@ public class MethodJobTest
 	}	
 	
 	@Test
-	public void primitiveReturnType()
+	public void voidReturnType()
+	{
+		MethodJob job = new MethodJob(
+			Arrays.asList() /*classesToImport*/,
+			
+			"public static void printIntegers(int a, int b)"
+				+ "\n" + "{"
+				+ "\n" + "	System.out.print(a + \" \" + b);"
+				+ "\n" + "}",
+			
+			Arrays.asList
+			(
+				new MethodTest("Test1", "3, 4"),
+				new MethodTest("Test2", "-2, 6")
+			));
+		
+		MethodJobResult result = job.runJob();
+		
+		assertCompilationSucceeded(result.getClassCompilationResult());
+		
+		assertMethodEquals(
+			result.getMethodDefinition(),
+			"printIntegers",
+			true /*isStatic*/,
+			new String[] { "int", "int" },
+			"void");
+		
+		assertTestResults(
+			true /*output*/, 
+			true /*expectSuccess*/, 
+			new String[] { "3 4", "-2 6" }, 
+			result.getTestResults());
+	}
+	
+	@Test
+	public void intReturnType()
 	{
 		MethodJob job = new MethodJob(
 			Arrays.asList() /*classesToImport*/,
@@ -165,6 +200,40 @@ public class MethodJobTest
 			false /*output*/, 
 			true /*expectSuccess*/, 
 			new String[] { "7", "4" }, 
+			result.getTestResults());
+	}
+	
+	@Test
+	public void doubleReturnType()
+	{
+		MethodJob job = new MethodJob(
+			Arrays.asList() /*classesToImport*/,
+			
+			"public static double getValue()"
+				+ "\n" + "{"
+				+ "\n" + "	return 1.5000000001;"
+				+ "\n" + "}",
+			
+			Arrays.asList
+			(
+				new MethodTest("Test1", "")
+			));
+		
+		MethodJobResult result = job.runJob();
+		
+		assertCompilationSucceeded(result.getClassCompilationResult());
+		
+		assertMethodEquals(
+			result.getMethodDefinition(),
+			"getValue",
+			true /*isStatic*/,
+			new String[] { },
+			"double");
+		
+		assertTestResults(
+			false /*output*/, 
+			true /*expectSuccess*/, 
+			new String[] { "1.5" }, 
 			result.getTestResults());
 	}
 	

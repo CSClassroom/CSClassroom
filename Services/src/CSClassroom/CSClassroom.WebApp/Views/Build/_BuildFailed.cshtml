@@ -1,0 +1,22 @@
+﻿@model BuildViewModel
+
+<hr />
+@if (Model.BuildStatus == BuildStatus.Error)
+{
+    <h3 style="color: red; font-weight:bold">Build failed</h3>
+}
+else if (Model.BuildStatus == BuildStatus.Timeout)
+{
+    <h3 style="color: red; font-weight:bold">Tests timed out</h3>
+    <span>The tests took too long to run for your build (possibly due to an infinite loop).</span>
+    <ul>
+    <li>Look carefully at your last commit.</li>
+    <li>Look at the build output, to see the last test that was running when time ran out.</li>
+    </ul>
+}
+else
+{
+    throw new ArgumentOutOfRangeException(nameof(Model.BuildStatus));
+}
+<hr /><h3>Build output:</h3>
+<pre>@Model.BuildOutput</pre>

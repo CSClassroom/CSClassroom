@@ -1,0 +1,50 @@
+{
+  "version": "1.0.0",
+  "name": "asp.net",
+  "private": true,
+  "devDependencies": {
+    "del": "^2.2.1",
+    "gulp": "^3.9.1",
+    "gulp-bro": "^0.3.1",
+    "gulp-changed": "^1.3.2",
+    "gulp-concat": "^2.6.0",
+    "gulp-cssmin": "^0.1.7",
+    "gulp-htmlmin": "^2.0.0",
+    "gulp-newer": "^1.3.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^2.0.0",
+    "gulp-util": "^3.0.8",
+    "merge-stream": "^1.0.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "yargs": "^6.5.0"
+  },
+
+  "dependencies": {
+    "ace-builds": "1.2.5",
+    "bootstrap": "3.3.6",
+    "cheerio": "^0.20.0",
+    "cookie": "^0.3.1",
+    "datatables.net": "1.10.11",
+    "datatables.net-jqui": "1.10.11",
+    "d3": "3.5.17",
+    "fs": "^0.0.2",
+    "highlight.js": "^9.6.0",
+    "jquery": "2.2.0",
+    "jquery-ui-dist": "1.12.1",
+    "jquery-ui-themes": "1.12.0",
+    "jquery-validation": "1.14.0",
+    "jquery-validation-unobtrusive": "3.2.6",
+    "jquery-form": "3.50.0",
+    "marked": "^0.3.6",
+    "nvd3": "1.8.5",
+    "pagedown": "^1.1.0",
+    "sanitize-html": "^1.13.0"
+  },
+
+  "scripts": {
+    "gulp-clean": "gulp clean",
+    "gulp-Debug": "gulp",
+    "gulp-Release": "gulp --production"
+  }
+}

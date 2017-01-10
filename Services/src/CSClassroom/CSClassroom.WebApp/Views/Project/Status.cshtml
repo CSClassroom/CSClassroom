@@ -1,0 +1,83 @@
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@model ProjectStatusResultsViewModel
+@inject ITimeZoneProvider TimeZoneProvider
+@{
+    ViewData["Title"] = "Project Status";
+}
+
+<style>
+.table-curved {
+    border-collapse: separate;
+}
+.table-curved {
+    border: solid black 1px;
+    border-radius: 6px;
+}
+.table-curved th { border-bottom: 1px solid black }
+.table-curved td { border-left: 1px solid black; border-bottom: 1px solid black }
+
+</style>
+<h2>Projects</h2>
+<h4 style="color: blue">Student: @Model.FirstName @Model.LastName</h4>
+<br/>
+<div class="panel-group">
+    @foreach (var projectStatus in Model.ProjectStatus)
+    {
+        <div class="panel panel-primary" style="width: 410px">
+            <div class="panel-heading" style="font-size: 18px">
+                <a data-toggle="collapse" href="#collapse@(projectStatus.ProjectName)" style="color: white">@projectStatus.ProjectName</a>
+            </div>
+            <div id="collapse@(projectStatus.ProjectName)" class="@(projectStatus == Model.ProjectStatus.First() ? "panel-collapse collapse in" : "panel-collapse collapse")">
+                <div class="panel-body">
+                    @if (projectStatus.TestTrend.AllBuildTestCounts.Any())
+                    {
+                        @Html.Partial("../Build/_TestTrend", projectStatus.TestTrend)
+                        <br />
+                    }
+                    <table class="table table-curved">
+                        <tr>
+                            <th style="text-align: left; border-top: none">
+                                Last Commit Date
+                            </th>
+                            <td>
+                                @projectStatus.LastCommitDate.FormatLongDateTime(TimeZoneProvider)
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                Last Build Succeeded
+                            </th>
+                            <td style="color: @(projectStatus.LastBuildSucceeded ? "green" : "red"); font-weight: bold; border-left: 1px solid black">
+                                @(projectStatus.LastBuildSucceeded ? "Yes" : "No")
+                            </td>
+                        </tr>
+                        @{
+                            var lastBuild = projectStatus.TestTrend.AllBuildTestCounts.LastOrDefault();
+                        }
+                        @if (projectStatus.LastBuildSucceeded && lastBuild != null)
+                        {
+                            <tr>
+                                <th>
+                                    Test Results
+                                </th>
+                                <td>
+                                    @(lastBuild.PassedCount) / @(lastBuild.PassedCount + lastBuild.FailedCount)
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <th style="border-bottom: 0px">
+                                Build Result
+                            </th>
+                            <td style="border-bottom: 0px">
+                                @Html.ActionLink("Latest Build", "LatestBuildResult", "Build", new {projectName = projectStatus.ProjectName, userId = Model.UserId})
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

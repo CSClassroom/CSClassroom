@@ -1,0 +1,12 @@
+﻿@model UserListViewModel
+
+@{
+    ViewData["Title"] = Section.DisplayName + " Students";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<h3>Students</h3>
+@Html.Partial("_UserList", Model)
+<br />
+@Html.ActionLink("Add a student", "AddStudent")

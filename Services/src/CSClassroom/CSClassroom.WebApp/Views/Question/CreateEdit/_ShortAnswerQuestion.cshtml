@@ -1,0 +1,37 @@
+﻿@using System.Threading.Tasks
+@model ShortAnswerQuestion
+
+<div class="form-group">
+    <label asp-for="Blanks" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="Blanks" class="form-control-static"></p>
+        <span asp-validation-for="Blanks" class="text-danger"></span>
+        <table id="blanks" class="equal-width"></table>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="AllowPartialCredit" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="AllowPartialCredit" class="form-control-static"></p>
+        <input asp-for="AllowPartialCredit" class="checkbox" type="checkbox" value="true" />
+        <input type="hidden" name="AllowPartialCredit" value="false" />
+        <span asp-validation-for="AllowPartialCredit" class="text-danger"></span>
+    </div>
+</div>
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "blanks",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(ShortAnswerQuestion.Blanks)),
+        properties = new[]
+        {
+            nameof(ShortAnswerQuestionBlank.Name),
+            nameof(ShortAnswerQuestionBlank.Answer)
+        },
+        orderByProp = nameof(ShortAnswerQuestionBlank.Order),
+        startMinRows = 1,
+        textAreas = true
+    })

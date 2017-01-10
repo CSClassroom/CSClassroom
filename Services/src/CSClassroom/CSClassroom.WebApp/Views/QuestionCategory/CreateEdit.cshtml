@@ -1,0 +1,47 @@
+@model CSC.CSClassroom.Model.Questions.QuestionCategory
+
+@{
+    ViewData["Title"] = ViewBag.ActionName;
+}
+
+<h2>@ViewBag.ActionName Question Category</h2>
+
+<form asp-action="Create">
+    <div class="form-horizontal">
+        <hr />
+        @if (Model != null && Model.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="Name" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="IsPrivate" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="IsPrivate" class="form-control-static"></p>
+                <input asp-for="IsPrivate" class="checkbox" type="checkbox" value="true" />
+                <input type="hidden" name="IsPrivate" value="false" />
+                <span asp-validation-for="IsPrivate" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="@ViewBag.ActionName" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

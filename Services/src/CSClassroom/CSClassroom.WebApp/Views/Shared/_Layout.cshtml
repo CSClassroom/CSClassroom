@@ -1,67 +1,67 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration TelemetryConfiguration
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - CSClassroom.WebApp</title>
+    <title>@ViewData["Title"] - CS Classroom</title>
+    
+    @Html.ApplicationInsightsJavaScript(TelemetryConfiguration)
+    @if (User?.Identity?.Name != null)
+    {
+        <script>
+            appInsights.setAuthenticatedUserContext("@(User.Identity.Name
+               .Replace("\\", "\\\\"))"
+               .replace(/[,;=| ]+/g, "_"));
+        </script>
+    }
 
     <environment names="Development">
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
-        <link rel="stylesheet" href="~/css/site.css" />
+        <script src="~/js/external.js" asp-append-version="true"></script>
+        <script src="~/js/internal.js" asp-append-version="true"></script>
     </environment>
     <environment names="Staging,Production">
-        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/css/bootstrap.min.css"
-              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
-              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
-    </environment>
-</head>
-<body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">CSClassroom.WebApp</a>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2016 - CSClassroom.WebApp</p>
-        </footer>
-    </div>
-
-    <environment names="Development">
-        <script src="~/lib/jquery/dist/jquery.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-        <script src="~/js/site.js" asp-append-version="true"></script>
-    </environment>
-    <environment names="Staging,Production">
-        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
-                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
-                asp-fallback-test="window.jQuery">
-        </script>
-        <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/bootstrap.min.js"
-                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
-                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal">
-        </script>
-        <script src="~/js/site.min.js" asp-append-version="true"></script>
+        <script src="~/js/external.min.js" asp-append-version="true"></script>
+        <script src="~/js/internal.min.js" asp-append-version="true"></script>
     </environment>
 
     @RenderSection("scripts", required: false)
+
+    <environment names="Development">
+        <link rel="stylesheet" href="~/css/external.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/internal.css" asp-append-version="true" />
+    </environment>
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="~/css/external.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/internal.min.css" asp-append-version="true" />
+    </environment>
+
+</head>
+<body>
+    @Html.Partial("_NavBar")
+    <div class="container body-content">
+        @Html.Partial("_Activation")
+        @RenderBody()
+        <script type="text/javascript">
+            $(document).ready(rewriteGridCollectionNames);
+            function cookieExists(name) {
+                var nameToFind = name + "=";
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    if (cookies[i].trim().indexOf(nameToFind) === 0) return true;
+                }
+                return false;
+            }
+            if (!cookieExists("_timeZoneOffset")) {
+                var now = new Date();
+                var timeZoneOffset = -now.getTimezoneOffset();  // in minutes
+                now.setTime(now.getTime() + 10*24*60*60*1000); // keep it for 10 days
+                document.cookie = "_timeZoneOffset=" + timeZoneOffset.toString() + ";expires=" + now.toGMTString() + ";path=/;" + document.cookie;
+                }
+        </script>
+        <hr />
+    </div>
+
 </body>
 </html>

@@ -1,0 +1,72 @@
+﻿@using System.Threading.Tasks
+@using CSC.CSClassroom.Model.Questions.ServiceResults
+@using CSC.CSClassroom.WebApp.ViewModels.Shared
+@model CSC.CSClassroom.Model.Questions.ServiceResults.QuestionToSolve
+
+@{
+    ViewData["Title"] = "Solve";
+}
+
+<h2>@Model.Question.Name</h2>
+<h4>@Model.Question.QuestionCategory.Name</h4>
+
+@if (!Model.UnsolvedPrerequisites.Any())
+{
+    <br />
+    @Html.Partial("_MarkdownViewer", new MarkdownViewerSettings("questionDescription", @Model.Question.Description))
+    <br/>
+    <form action="@($"{Context.Request.Path}{Context.Request.QueryString}")" method="post" id="questionForm">
+        @Html.Partial($"Solve/_{Model.Question.GetType().Name}", Model)
+
+        <div class="form-group">
+            <input id="submit" type="submit" value="Submit" class="btn btn-default"/>
+            &nbsp;&nbsp;<input id="revert" type="button" value="Revert to default" class="btn btn-default" style="display: none"/>
+            <div id="progress" style="display: none">
+                <br/>
+                <img src="~/images/ajax-loader.gif">
+                <span>&nbsp; Waiting for results...</span>
+            </div>
+        </div>
+    </form>
+    <script type="text/javascript">
+        $("#questionForm").ajaxForm({
+            beforeSend: function(e) {
+                $("#submit").prop("disabled", true);
+                $("#progress").show();
+            },
+            success: function(obj) {
+                displayResult(obj);
+            },
+            error: function(obj) {
+                alert("An error occured.");
+            },
+            complete: function() {
+                $("#submit").prop("disabled", false);
+                $("#progress").hide();
+            }
+        })
+
+        keepAuthenticatedSessionAlive();
+    </script>
+}
+else
+{
+    <span>You must solve the following questions before working on this question:</span>
+    <ul>
+        @foreach (var unsolvedPrereq in Model.UnsolvedPrerequisites)
+        {
+            <li>
+                @Html.ActionLink(unsolvedPrereq.Name, "Solve", new { id = unsolvedPrereq.Id })
+            </li>
+        }
+    </ul>
+}
+
+@section Scripts {
+    <environment names="Development">
+        <script src="~/js/markdownBundle.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/js/markdownBundle.min.js" asp-append-version="true"></script>
+    </environment>
+}

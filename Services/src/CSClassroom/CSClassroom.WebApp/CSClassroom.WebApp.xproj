@@ -14,13 +14,15 @@
   </PropertyGroup>
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
-    <DockerToolsMinVersion>0.21</DockerToolsMinVersion>
+    <ApplicationInsightsResourceId>/subscriptions/16d00d96-519f-4f88-9873-a9018b96024d/resourcegroups/CSClassroom/providers/microsoft.insights/components/CS Classroom</ApplicationInsightsResourceId>
   </PropertyGroup>
   <ItemGroup>
     <DnxInvisibleContent Include="bower.json" />
     <DnxInvisibleContent Include=".bowerrc" />
   </ItemGroup>
-  <Import Project="Properties\Docker.props" />
-  <Import Project="Properties\Docker.targets" />
+  <ItemGroup>
+    <DnxInvisibleFolder Include="bower_components\" />
+    <DnxInvisibleFolder Include="wwwroot\" />
+  </ItemGroup>
   <Import Project="$(VSToolsPath)\DotNet.Web\Microsoft.DotNet.Web.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

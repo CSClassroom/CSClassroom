@@ -1,0 +1,126 @@
+﻿@model IList<GradeSubmissionViewModel>
+
+@{
+    ViewBag.Title = "Grade Submissions";
+}
+
+@inject IJsonSerializer Json
+
+<h2>Grade @Project.Name @Checkpoint.DisplayName Submissions</h2>
+
+<hr />
+@{
+    foreach (var viewModel in Model)
+    {
+        <h2>@viewModel.LastName, @viewModel.FirstName</h2>
+        <table class="display dataTable no-footer" align="left" cellpadding="5" cellspacing="0" style="width: auto; border: 2px solid black" >
+            <thead>
+            <tr>
+                <th style="text-align: center">Commit Date</th>
+                <th style="text-align: center">Submission Status</th>
+                <th style="text-align: center">Pull Request</th>
+                <th style="text-align: center">Required Tests</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr style="text-align: center">
+                <td style="text-align: center">@Html.Raw(viewModel.CommitDate)</td>
+                <td style="text-align: center">@Html.Raw(viewModel.SubmissionStatus)</td>
+                <td style="text-align: center">@Html.Raw(viewModel.PullRequest)</td>
+                <td style="text-align: center">@Html.Raw(viewModel.RequiredTests)</td>
+            </tr>
+            </tbody>
+        </table>
+        <br clear="left"/>
+        <h4><b>Feedback:</b></h4>
+        if (viewModel.FeedbackSent)
+        {
+            <div style="margin-left: 40px; white-space: pre-line">@(viewModel.Feedback ?? string.Empty)</div>
+        }
+        else
+        {
+            <textarea changed="false" submissionId=@viewModel.SubmissionId class="feedbackArea" onkeyup='feedbackChanged($(this))' onchange='feedbackChanged($(this))' onblur='saveFeedback($(this))' style="max-width: 1000px" rows="8" cols="100">@(viewModel.Feedback ?? string.Empty)</textarea>
+        }
+
+        <h4><b>Past Submissions:</b></h4><div id='@($"PastSubmissions-{viewModel.SubmissionId}")'></div>
+        <h4><b>Test Results:</b></h4><div id='@($"TestResults-{viewModel.SubmissionId}")'></div>
+        <hr />
+    }
+
+    <form asp-action="SendFeedback" id="SendFeedback" method="post">
+        <button onclick="return sendFeedback();">Send feedback to students</button>
+    </form>
+}
+<script type="text/javascript">
+    jQuery.support.cors = true;
+
+    var submissionIds = @Html.Raw(Json.Serialize(Model.Select(viewModel => $"{viewModel.SubmissionId}").ToArray()))
+
+    var testClassColumns = @Html.Raw(Json.Serialize(new TableInfo(typeof(TestClassTableEntry), showHeader: true)));
+    var allTestClassData = @Html.Raw(Json.Serialize(Model.Select(viewModel => viewModel.TestClassResults).ToList()));
+
+    var pastSubmissionColumns = @Html.Raw(Json.Serialize(new TableInfo(typeof(PastSubmissionTableEntry), showHeader: false)));
+    var allPastSubmissionData = @Html.Raw(Json.Serialize(Model.Select(viewModel => viewModel.PastSubmissions).ToList()));
+
+    $(document).ready(function () {
+        for (var resultIndex = 0; resultIndex < @Model.Count; resultIndex++) {
+            var testResultColumns = { columns: [], childTableInfo: testClassColumns };
+
+            createNestedTable($("#PastSubmissions-" + submissionIds[resultIndex]), pastSubmissionColumns, allPastSubmissionData[resultIndex], "No past submissions.");
+            createNestedTable($("#TestResults-" + submissionIds[resultIndex]), testResultColumns, [{ childTableData: allTestClassData[resultIndex] }], "No submission recorded.");
+        }
+    });
+
+    var feedbackChanged = function(feedbackArea) {
+        feedbackArea.attr("changed", "true");
+        feedbackArea.css("border", "solid 3px red");
+    }
+
+    var saveTask = $.Deferred().resolve().promise();
+    var saveFeedback = function(feedbackArea)
+    {
+        if (feedbackArea.attr("changed") === "false")
+            return;
+
+        var url = "@Url.Action("SaveFeedback")";
+
+        if (saveTask.state() == "resolved")
+            saveTask = $.Deferred().resolve().promise();
+
+        saveTask = saveTask.then(function()
+        {
+            if (feedbackArea.attr("changed") === "false")
+            {
+                return $.Deferred().resolve().promise();
+            }
+            else
+            {
+                feedbackArea.attr("changed", "false");
+                return $.post(url, { submissionId: feedbackArea.attr("submissionId"), feedbackText: feedbackArea.val() });
+            }
+        }).then(function()
+        {
+            if (feedbackArea.attr("changed") === "false")
+                feedbackArea.css("border", "solid 3px green");
+        }, function()
+        {
+            alert("Failed to save feedback. Your session may have expired. Please refresh the page.");
+            feedbackArea.attr("changed", "true");
+
+            return $.Deferred().resolve({}).promise();
+        });
+    }
+
+    var sendFeedback = function() {
+        if ($('.feedbackArea[changed*="true"]').length > 0) {
+            alert("You have changes to student feedback that have not yet been saved.");
+            return false;
+        } else {
+            return confirm("Are you sure you want to send all filled-out feedback for @Project.Name @Checkpoint.DisplayName?")
+        }
+    }
+
+    $(".feedbackArea").css("border", "solid 3px green");
+
+    keepAuthenticatedSessionAlive();
+</script>

@@ -1,0 +1,46 @@
+@using CSC.CSClassroom.Model.Projects.ServiceResults
+@model IList<CSC.CSClassroom.Model.Projects.ServiceResults.CreateStudentRepoResult>
+
+@{
+    ViewData["Title"] = "Student repository results";
+}
+
+<h2>Student repository results</h2>
+
+<table id="results" class="table">
+    <tr>
+        <th>Student name</th>
+        <th>Repository result</th>
+    </tr>
+    @foreach (var result in Model)
+    {
+        <tr>
+            <td>
+                @($"{result.Student.LastName}, {result.Student.FirstName}")
+            </td>
+            <td>
+                @{ string color; }
+                @switch (result.CreateAndPushResult)
+                {
+                    case CreateAndPushResult.Exists:
+                        color = "blue";
+                        break;
+                    
+                    case CreateAndPushResult.Created:
+                    case CreateAndPushResult.Overwritten:
+                        color = "green";
+                        break;
+
+                    case CreateAndPushResult.Failed:
+                    default:
+                        color = "red";
+                        break;
+                }
+                
+                <p style="color: @color">@result.CreateAndPushResult.ToString()</p>
+            </td>
+        </tr>
+    }
+
+</table>
+   

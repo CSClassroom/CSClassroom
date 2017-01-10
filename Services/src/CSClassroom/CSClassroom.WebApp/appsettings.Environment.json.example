@@ -1,0 +1,30 @@
+{
+  "Authentication": {
+    "AzureAd": {
+      "AADInstance": "https://login.microsoftonline.com/",
+      "CallbackPath": "/signin-oidc",
+      "ClientId": "REPLACE-WITH-AAD-CLIENT-ID"
+    }
+  },
+  "CSClassroom": {
+    "ActivationToken": "REPLACE-WITH-ACTIVATION-TOKEN",
+    "HostName": "http://localhost:10000",
+    "EmailAddress": "REPLACE-WITH-FROM-EMAIL-ADDRESS"
+  },
+  "GitHub": {
+    "OAuthToken": "REPLACE-WITH-GITHUB-OAUTH-TOKEN",
+    "WebhookSecret": "REPLACE-WITH-GITHUB-WEBHOOK-SECRET"
+  },
+  "SendGrid": {
+    "ApiKey": "REPLACE-WITH-SENDGRID-API-KEY"
+  },
+  "ConnectionStrings": {
+    "PostgresDefaultConnection": "User ID=postgres;Password=postgres;Host=dockerhost;Port=5432;Database=csclassroom;Pooling=true;"
+  },
+  "BuildService": {
+    "Host": "http://dockerhost:10001"
+  },
+  "ApplicationInsights": {
+    "InstrumentationKey": "REPLACE-WITH-APPLICATION-INSIGHTS-KEY"
+  }
+}

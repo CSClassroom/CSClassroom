@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Remove student";
+}
+
+@model User
+
+<h2>@ViewData["Title"]</h2>
+
+<h3>Are you sure you want to remove this user from @Section.DisplayName?</h3>
+<div>
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.UserName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.UserName)
+        </dd>
+    </dl>
+
+    <form asp-action="RemoveUser">
+        <div class="form-actions no-color">
+            <input name="userId" type="hidden" value="@Model.Id" />
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            <a asp-action="Index">Back to List</a>
+        </div>
+    </form>
+</div>
+

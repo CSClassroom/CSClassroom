@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  buildservice.endpoint:
+    labels:
+      - "com.microsoft.visualstudio.targetoperatingsystem=linux"
+    volumes:
+      - ~/clrdbg:/clrdbg:ro
+    entrypoint: /bin/bash ./entrypoint-dev.sh Release

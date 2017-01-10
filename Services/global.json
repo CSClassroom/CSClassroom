@@ -1,5 +1,5 @@
 ﻿{
-  "projects": [ "src/CodeRunner", "src/Common", "src/CSClassroom" ],
+  "projects": [ "src/BuildService", "src/Common", "src/CSClassroom", "test/BuildService", "test/Common", "test/CSClassroom" ],
   "sdk": {
     "version": "1.0.0-preview2-003121"
   }

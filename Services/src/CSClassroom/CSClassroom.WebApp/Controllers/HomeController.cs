@@ -1,36 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
+using CSC.CSClassroom.Model.Users;
+using CSC.CSClassroom.WebApp.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CSC.CSClassroom.WebApp.Controllers
 {
-	[Route("Test/[action]")]
-    public class HomeController : Controller
-    {
-        public IActionResult Index()
-        {
-            return View();
-        }
+	/// <summary>
+	/// The home controller.
+	/// </summary>
+	public class HomeController : BaseController
+	{
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public HomeController(BaseControllerArgs args) 
+			: base(args)
+		{
+		}
 
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
+		/// <summary>
+		/// The home page.
+		/// </summary>
+		[Route("")]
+		[Authorization(RequiredAccess.Anonymous)]
+		public IActionResult Index()
+		{
+			if (User == null)
+			{
+				return View();
+			}
 
-            return View();
-        }
+			if (User.SuperUser)
+			{
+				return RedirectToAction("Index", "Classroom");
+			}
 
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
+			var classroomMembership = User.ClassroomMemberships
+					?.FirstOrDefault(c => c.Role >= ClassroomRole.General);
 
-            return View();
-        }
+			if (classroomMembership != null)
+			{
+				return RedirectToAction
+				(
+					"Home",
+					"Classroom",
+					new { className = classroomMembership.Classroom.Name }
+				);
+			}
 
-        public IActionResult Error()
-        {
-            return View();
-        }
-    }
+			return View();
+		}
+
+		/// <summary>
+		/// An error page.
+		/// </summary>
+		[Route("Error")]
+		[Authorization(RequiredAccess.Anonymous)]
+		public IActionResult Error()
+		{
+			return View();
+		}
+	}
 }

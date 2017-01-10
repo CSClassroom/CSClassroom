@@ -1,0 +1,97 @@
+@using CSC.CSClassroom.Model.Questions;
+@model Section
+
+@{
+    ViewData["Title"] = ViewBag.ActionName;
+}
+
+<h2>@ViewBag.ActionName Section</h2>
+
+<form asp-action="@ViewBag.ActionName">
+    <div class="form-horizontal">
+        <hr />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @if (Model != null && Model.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+        <div class="form-group">
+            <label asp-for="Name" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Name" class="form-control-static"></p>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="DisplayName" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="DisplayName" class="form-control-static"></p>
+                <input asp-for="DisplayName" class="form-control" />
+                <span asp-validation-for="DisplayName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="AllowNewRegistrations" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="AllowNewRegistrations" class="form-control-static"></p>
+                <input asp-for="AllowNewRegistrations" class="checkbox" type="checkbox" value="true" />
+                <input type="hidden" name="AllowNewRegistrations" value="false" />
+                <span asp-validation-for="AllowNewRegistrations" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="SectionGradebooks" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="SectionGradebooks" class="form-control-static"></p>
+                <table id="sectionGradebooks" class="equal-width"></table>
+                <span asp-validation-for="SectionGradebooks" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="@ViewBag.ActionName" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "sectionGradebooks",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Section.SectionGradebooks)),
+        properties = new[]
+        {
+            nameof(SectionGradebook.ClassroomGradebookId),
+            nameof(SectionGradebook.LastTransferDate),
+        },
+        orderByProp = nameof(SectionGradebook.ClassroomGradebookId),
+        startMinRows = 0,
+        textAreas = false,
+        dropDownLists = new List<DropDownList>()
+        {
+            new DropDownList
+            (
+                nameof(SectionGradebook.ClassroomGradebookId),
+                Classroom.ClassroomGradebooks.Cast<object>().ToList(),
+                (Func<object, DropDownListItem>)
+                (
+                    classroomGradebook => new DropDownListItem
+                    (
+                        ((ClassroomGradebook)classroomGradebook).Name, 
+                        ((ClassroomGradebook)classroomGradebook).Id
+                    )
+                )
+            )
+        }
+    })

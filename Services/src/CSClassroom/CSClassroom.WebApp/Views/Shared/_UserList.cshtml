@@ -1,0 +1,57 @@
+﻿@model UserListViewModel
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Users[0].LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Users[0].FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Users[0].UserName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Users[0].EmailAddress)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Users[0].GitHubLogin)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Users)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EmailAddress)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.GitHubLogin)
+                </td>
+                <td>
+                    @{
+                        int actionIndex = 0;
+                        foreach (UserAction action in Model.Actions)
+                        {
+                            var separator = (actionIndex < Model.Actions.Count - 1 ? " | " : "");
+                            <a href="@action.GetActionUrl(item)">@action.Name</a>@Html.Raw(separator)
+                            actionIndex++;
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

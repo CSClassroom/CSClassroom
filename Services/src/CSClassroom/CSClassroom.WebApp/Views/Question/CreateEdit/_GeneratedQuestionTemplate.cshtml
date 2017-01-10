@@ -1,0 +1,46 @@
+﻿@using System.Threading.Tasks
+@using CSC.CSClassroom.WebApp.ViewModels.Shared
+@model GeneratedQuestionTemplate
+
+<input asp-for="DateModified" type="hidden" value="@DateTime.Now" />
+
+<div class="form-group">
+    <label asp-for="ImportedClasses" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="ImportedClasses" class="form-control-static"></p>
+        <span asp-validation-for="ImportedClasses" class="text-danger"></span>
+        <table id="importedClasses" class="equal-width"></table>
+    </div>
+</div>
+
+<div class="form-group">
+    <label asp-for="GeneratorContents" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="GeneratorContents" class="form-control-static"></p>
+        <span asp-validation-for="GeneratorContents" class="text-danger" style="white-space: pre"></span>
+        @Html.Partial($"_CodeEditor", new CodeEditorSettings
+        (
+            nameof(GeneratedQuestionTemplate.GeneratorContents), 
+            Model.GeneratorContents, 
+            revertContents: null,
+            textArea: true, 
+            minLines: 10, 
+            maxLines: 150
+        ))
+    </div>
+</div>
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "importedClasses",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(GeneratedQuestionTemplate.ImportedClasses)),
+        properties = new[]
+        {
+            nameof(ImportedClass.ClassName)
+        },
+        orderByProp = nameof(ImportedClass.ClassName),
+        startMinRows = 0,
+        textAreas = false
+    })

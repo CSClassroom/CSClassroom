@@ -1,0 +1,28 @@
+﻿@using CSC.CSClassroom.Model.Projects.ServiceResults
+@using CSC.CSClassroom.Model.Users
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@model CSC.CSClassroom.Model.Projects.ServiceResults.ViewFeedbackResult
+@inject ITimeZoneProvider TimeZoneProvider
+
+@{
+    ViewBag.Title = "View Feedback";
+}
+
+<h2>@Project.Name @Checkpoint.DisplayName Feedback</h2>
+
+<h3 style="color: blue">@Model.LastName, @Model.FirstName</h3>
+<h4><b>Commit Date:</b> @Html.Raw(Model.PushDate.FormatShortDateTime(TimeZoneProvider))</h4>
+<h4><b>Submission Contents:</b> @Html.Link(Url.GitHub().PullRequest(Classroom.GitHubOrganization, Model.RepoName, Model.PullRequestNumber), "Link")</h4>
+<h4><b>Feedback:</b></h4>
+<div style="margin-left: 40px; white-space: pre-line">@Model.Feedback</div>
+
+@if (Model.Unread && Model.UserId == User.Id)
+{
+    <br/>
+    <form asp-action="MarkFeedbackRead" method="post">
+        <input type="hidden" name="submissionId" value="@Model.SubmissionId"/>
+        <input type="checkbox" name="Acknowledge" required>@(Model.FutureCheckpoints ? "I acknowledge I have carefully read the feedback, and will fix all mistakes mentioned in the feedback before submitting the next checkpoint." : "I acknowledge I have carefully read the feedback, and will take into account the feedback on future projects.")
+        <br/><br/><input type="submit" name="Mark Feedback Read" value="Mark Feedback Read"/>
+    </form>
+}

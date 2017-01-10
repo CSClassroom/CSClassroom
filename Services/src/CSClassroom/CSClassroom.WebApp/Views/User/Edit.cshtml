@@ -1,0 +1,55 @@
+﻿@model CSC.CSClassroom.Model.Users.User
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<h2>Edit User</h2>
+
+<form asp-action="Edit">
+    <div class="form-horizontal">
+        <hr />
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input type="hidden" asp-for="Id" />
+        <div class="form-group">
+            <label class="col-md-2 control-label">Username</label>
+            <div class="form-control-static col-md-10">
+                <span class="form-control-static">@Model.UserName</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">Last Name</label>
+            <div class="form-control-static col-md-10">
+                <span>@Model.LastName</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">Last Name</label>
+            <div class="form-control-static col-md-10">
+                <span>@Model.FirstName</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="EmailAddress" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="EmailAddress" class="form-control-static"></p>
+                <input asp-for="EmailAddress" class="form-control" />
+                <span asp-validation-for="EmailAddress" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="GitHubLogin" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="GitHubLogin" class="form-control-static"></p>
+                <input asp-for="GitHubLogin" class="form-control" />
+                <span asp-validation-for="GitHubLogin" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Edit" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>

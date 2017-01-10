@@ -1,0 +1,13 @@
+﻿@inject IJsonSerializer Json
+@using CSC.Common.Infrastructure.Serialization
+@model NestedTableConfig
+
+<script type="text/javascript">
+    (function ()
+    {
+        var allColumns = @Html.Raw(Json.Serialize(Model.TableInfo))
+        var allData = @Html.Raw(Json.Serialize(Model.OuterTableEntries));
+
+        createNestedTable($("#@Model.TableElementId"), allColumns, allData, '@Model.EmptyTableText');
+    })();
+</script>

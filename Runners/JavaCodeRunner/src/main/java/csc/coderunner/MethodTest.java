@@ -1,5 +1,7 @@
 package csc.coderunner;
 
+import java.lang.reflect.Method;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -38,9 +40,18 @@ public class MethodTest extends CodeTest
 	@Override
 	protected String getTestMethodBody(Class<?> javaClass)
 	{
-		return String.format("return %s.%s(%s);",
+		Method method = javaClass.getDeclaredMethods()[0];
+		
+		if (method.getReturnType().equals(void.class))
+		{
+			
+		}
+		return String.format("%s%s.%s(%s);",
+			method.getReturnType().equals(void.class)
+				? ""
+				: "return ",
 			javaClass.getSimpleName(),
-			javaClass.getDeclaredMethods()[0].getName(),
+			method.getName(),
 			paramValues);
 	}
 	

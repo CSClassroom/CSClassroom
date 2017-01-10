@@ -1,0 +1,120 @@
+@using System.Threading.Tasks
+@using CSC.CSClassroom.WebApp.ViewModels.Shared
+@model CSC.CSClassroom.Model.Questions.Question
+
+@{
+    ViewData["Title"] = $"{ActionName} {Model.QuestionTypeDisplay}";
+}
+
+<h2>@ActionName @Model.QuestionTypeDisplay</h2>
+
+<form id="questionForm" asp-action="@ActionName">
+    <div class="form-horizontal">
+        <hr />
+        @if (Model.Id > 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+        <input type="hidden" name="QuestionType" value="@Model.GetType().Name" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="QuestionCategoryId" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="QuestionCategoryId" class="form-control-static"></p>
+                <select asp-for="QuestionCategoryId" class="form-control" asp-items="ViewBag.QuestionCategoryId"></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Name" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Name" class="form-control-static"></p>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="PrerequisiteQuestions" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="PrerequisiteQuestions" class="form-control-static"></p>
+                <table id="prerequisiteQuestions" class="equal-width"></table>
+                <span asp-validation-for="PrerequisiteQuestions" class="text-danger"></span>
+            </div>
+        </div>
+
+        @if (Model.IsQuestionTemplate)
+        {
+            <input type="hidden" asp-for="Description" />
+        }
+        else
+        {
+            <div class="form-group">
+                <label asp-for="Description" class="col-md-2 control-label"></label>
+                <div class="col-md-10">
+                    <p asp-description-for="Description" class="form-control-static"></p>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                    @Html.Partial("_MarkdownEditor", new MarkdownEditorSettings("questionDescription", "Description", Model.Description))
+                </div>
+            </div>
+        }
+
+        <div class="form-group">
+            <label asp-for="IsPrivate" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="IsPrivate" class="form-control-static"></p>
+                <input asp-for="IsPrivate" class="checkbox" type="checkbox" value="true" />
+                <input type="hidden" name="IsPrivate" value="false" />
+                <span asp-validation-for="IsPrivate" class="text-danger"></span>
+            </div>
+        </div>
+
+        @Html.Partial($"CreateEdit/_{Model.GetType().Name}", Model)
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="@ActionName" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <environment names="Development">
+        <script src="~/js/markdownBundle.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/js/markdownBundle.min.js" asp-append-version="true"></script>
+    </environment>
+}
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "prerequisiteQuestions",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Question.PrerequisiteQuestions)),
+        properties = new[]
+        {
+            nameof(PrerequisiteQuestion.FirstQuestionId)
+        },
+        orderByProp = nameof(PrerequisiteQuestion.Order),
+        startMinRows = 0,
+        textAreas = false,
+        dropDownLists = new List<DropDownList>()
+        {
+            new DropDownList
+            (
+                nameof(PrerequisiteQuestion.FirstQuestionId),
+                ((IList<Question>)ViewBag.AvailableQuestions).Cast<object>().ToList(),
+                (Func<object, DropDownListItem>)(question => new DropDownListItem(((Question)question).Name, ((Question)question).Id)),
+                "Category",
+                (Func<object, DropDownListItem>)(question => new DropDownListItem(((Question)question).QuestionCategory.Name, ((Question)question).QuestionCategoryId))
+            )
+        }
+    })

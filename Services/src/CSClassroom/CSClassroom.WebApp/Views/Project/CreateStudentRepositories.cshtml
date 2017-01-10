@@ -1,0 +1,118 @@
+@using CSC.CSClassroom.Model.Projects.ServiceResults
+@model CreateStudentReposViewModel
+
+@{
+    ViewData["Title"] = "Create student repositories";
+}
+
+<h2>Create student repositories</h2>
+
+
+<form asp-action="@ViewBag.ActionName">
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label asp-for="Project.Name" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p class="form-control-static">@Model.Project.Name</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Project.ExplicitSubmissionRequired" class="col-md-2 control-label"></label>
+            <div class="col-md-10 form-control-static">
+                @Html.DisplayFor(Model => Model.Project.ExplicitSubmissionRequired, "YesNo")
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Project.PrivateFilePaths" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                @if (Model.Project.PrivateFilePaths.Count > 0)
+                {
+                    foreach (var path in Model.Project.PrivateFilePaths)
+                    {
+                        <p class="form-control-static">@path.Path</p>
+                    }
+                }
+                else
+                {
+                    <p class="form-control-static">None</p>
+                }
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Project.ImmutableFilePaths" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                @if (Model.Project.ImmutableFilePaths.Count > 0)
+                {
+                    foreach (var path in Model.Project.ImmutableFilePaths)
+                    {
+                        <p class="form-control-static">@path.Path</p>
+                    }
+                }
+                else
+                {
+                    <p class="form-control-static">None</p>
+                }
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">Project contents</label>
+            <div class="col-md-10">
+                <table class="table">
+                    <tr>
+                        <th>
+                            @Html.DisplayName("File path")
+                        </th>
+                        <th>
+                            @Html.DisplayName("Include in project?")
+                        </th>
+                    </tr>
+
+                    @foreach (var file in Model.Files)
+                    {
+                        <tr>
+                            <td>
+                                <span>@file.Path</span>
+                            </td>
+                            <td>
+                                @switch (file.FileType)
+                                {
+                                    case FileType.Public:
+                                        <span style="color: green; font-weight: bold">Yes</span>
+                                        break;
+                                    case FileType.Private:
+                                        <span style="color: red; font-weight: bold">No</span>
+                                        break;
+                                    case FileType.Immutable:
+                                        <span style="color: blue; font-weight: bold">Yes (immutable)</span>
+                                        break;
+                                }
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">Section</label>
+            <div class="col-md-10">
+                @Html.DropDownList("SectionName", Model.Sections, "Select a section", new { @class = "form-control", required = "required" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">Overwrite existing unchanged repositories?</label>
+            <div class="col-md-10">
+                @Html.CheckBox("Overwrite", new { @class = "form-control " })
+            </div>
+        </div>
+        <br/>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create Student Repositories" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+
+   

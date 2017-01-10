@@ -1,0 +1,58 @@
+@model IEnumerable<Checkpoint>
+
+@{
+    ViewData["Title"] = "Checkpoints";
+}
+
+<h2>@Project.Name Checkpoints</h2>
+
+<p>
+    <a asp-action="Create">Create Checkpoint</a><br />
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DisplayName)
+            </th>
+            <th>
+                Submissions
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DisplayName)
+            </td>
+            <td>
+                <table class="display dataTable no-footer" align="left" cellpadding="0" cellspacing="0" style="width: auto; border: 0px solid black">
+                    <tbody>
+                        @foreach (var classSection in Classroom.Sections)
+                        {
+                            <tr>
+                                <td style="padding: 0px; text-align: center">
+                                    <a asp-action="List" asp-controller="Submission" asp-route-checkpointName="@item.Name" asp-route-sectionName="@classSection.Name">@classSection.DisplayName</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-checkpointName="@item.Name">Edit</a> |
+                <a asp-action="Delete" asp-route-checkpointName="@item.Name">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
