@@ -32,6 +32,12 @@ namespace CSC.Common.Infrastructure.Email
 			string subject, 
 			string body)
 		{
+			if (_apiKey == null)
+			{
+				// E-mail is disabled.
+				return;
+			}
+
 			var sendGridMessage = new SendGridMessage();
 			sendGridMessage.AddTo(toAddress);
 			sendGridMessage.From = new MailAddress(fromAddress, fromName);

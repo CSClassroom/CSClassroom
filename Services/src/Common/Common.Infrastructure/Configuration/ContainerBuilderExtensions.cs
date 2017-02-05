@@ -68,7 +68,7 @@ namespace CSC.Common.Infrastructure.Configuration
 		/// </summary>
 		private static IEmailProvider CreateSendGridMailProvider(IConfigurationSection sendGridSettings)
 		{
-			return new SendGridEmailProvider(sendGridSettings["ApiKey"]);
+			return new SendGridEmailProvider(sendGridSettings?["ApiKey"]);
 		}
 
 		/// <summary>
