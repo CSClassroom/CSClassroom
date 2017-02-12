@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Async;
+using CSC.Common.Infrastructure.Extensions;
 using CSC.Common.Infrastructure.System;
 using Octokit;
 
@@ -571,14 +572,16 @@ namespace CSC.Common.Infrastructure.GitHub
 			{
 				return _archiveFactory.CreateUncompressedArchive
 				(
-					zipArchive.Entries.ToDictionary
-					(
-						entry => entry.FullName.Substring
+					zipArchive.Entries
+						.Where(entry => entry.IsFile())
+						.ToDictionary
 						(
-							entry.FullName.IndexOf("/") + 1
-						),
-						GetRawFileData
-					)
+							entry => entry.FullName.Substring
+							(
+								entry.FullName.IndexOf("/") + 1
+							),
+							GetRawFileData
+						)
 				);
 			}
 		}
