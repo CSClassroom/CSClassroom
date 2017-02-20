@@ -1,7 +1,6 @@
 @using CSC.CSClassroom.WebApp.Extensions
 @using CSC.CSClassroom.WebApp.Providers
 @model ProjectStatusResultsViewModel
-@inject ITimeZoneProvider TimeZoneProvider
 @{
     ViewData["Title"] = "Project Status";
 }
@@ -41,7 +40,7 @@
                                 Last Commit Date
                             </th>
                             <td>
-                                @projectStatus.LastCommitDate.FormatLongDateTime(TimeZoneProvider)
+                                @projectStatus.LastCommitDate
                             </td>
                         </tr>
                         <tr>

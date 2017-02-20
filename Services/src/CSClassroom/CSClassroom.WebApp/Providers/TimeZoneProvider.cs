@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Http;
+using NodaTime;
 
 namespace CSC.CSClassroom.WebApp.Providers
 {
@@ -8,54 +9,37 @@ namespace CSC.CSClassroom.WebApp.Providers
 	/// </summary>
 	public class TimeZoneProvider : ITimeZoneProvider
 	{
-		/// <summary>
-		/// The HTTP context accessor.
-		/// </summary>
-		private readonly IHttpContextAccessor _httpContextAccessor;
+        /// <summary>
+        /// The current time zone.
+        /// </summary>
+        private static readonly DateTimeZone LocalTimeZone 
+            = DateTimeZoneProviders.Tzdb["America/Los_Angeles"];
 
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		public TimeZoneProvider(IHttpContextAccessor httpContextAccessor)
-		{
-			_httpContextAccessor = httpContextAccessor;
-		}
+        /// <summary>
+        /// Returns the given UTC datetime, converted to the user's local timezone.
+        /// </summary>
+        public DateTime ToUserLocalTime(DateTime utcDateTime)
+        {
+            if (utcDateTime == DateTime.MinValue)
+                return DateTime.MinValue;
 
-		/// <summary>
-		/// Returns the given timezone offset.
-		/// </summary>
-		private TimeSpan GetTimeZoneOffset()
-		{
-			var timeZoneOffsetStr = _httpContextAccessor?.HttpContext?.Request?.Cookies["_timeZoneOffset"];
-			double timeZoneOffset;
-			if (timeZoneOffsetStr != null && double.TryParse(timeZoneOffsetStr, out timeZoneOffset))
-			{
-				return TimeSpan.FromMinutes(timeZoneOffset);
-			}
-			else
-			{
-				return TimeSpan.Zero;
-			}
-		}
+            return Instant
+                .FromDateTimeUtc(DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc))
+                .InZone(LocalTimeZone)
+                .ToDateTimeUnspecified();
+        }
 
-		/// <summary>
-		/// Returns the given UTC datetime, converted to the user's local timezone.
-		/// </summary>
-		public DateTime ToUserLocalTime(DateTime utcDateTime)
-		{
-			return utcDateTime != DateTime.MinValue
-				? utcDateTime + GetTimeZoneOffset()
-				: utcDateTime;
-		}
+        /// <summary>
+        /// Returns the given user local time, converted to UTC.
+        /// </summary>
+        public DateTime ToUtcTime(DateTime userLocalTime)
+        {
+            if (userLocalTime == DateTime.MinValue)
+                return DateTime.MinValue;
 
-		/// <summary>
-		/// Returns the given user local time, converted to UTC.
-		/// </summary>
-		public DateTime ToUtcTime(DateTime userLocalTime)
-		{
-			return userLocalTime != DateTime.MinValue
-				? userLocalTime - GetTimeZoneOffset()
-				: userLocalTime;
-		}
+            return LocalTimeZone
+                .AtLeniently(LocalDateTime.FromDateTime(userLocalTime))
+                .ToDateTimeUtc();
+        }
 	}
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
 using CSC.CSClassroom.Model.Users;
+using CSC.CSClassroom.WebApp.Extensions;
 using CSC.CSClassroom.WebApp.Providers;
 
 namespace CSC.CSClassroom.WebApp.ViewModels.Build
@@ -24,9 +25,14 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 		public CheckpointSubmissionsViewModel Submissions { get; }
 
 		/// <summary>
-		/// The push date for this build.
+		/// The long push date for this build.
 		/// </summary>
-		public DateTime PushDate { get; }
+		public string PushDateLong { get; }
+
+		/// <summary>
+		/// The short push date for this build.
+		/// </summary>
+		public string PushDateShort { get; }
 
 		/// <summary>
 		/// The commit message.
@@ -95,7 +101,8 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 				buildResult.Submissions, 
 				timeZoneProvider
 			);
-			PushDate = buildResult.Build.Commit.PushDate;
+			PushDateLong = buildResult.Build.Commit.PushDate.FormatLongDateTime(timeZoneProvider);
+			PushDateShort = buildResult.Build.Commit.PushDate.FormatShortDateTime(timeZoneProvider);
 			CommitMessage = buildResult.Build.Commit.Message;
 			CommitSha = buildResult.Build.Commit.Sha;
 			CommitUrl = commitUrlBuilder(buildResult.Build);
@@ -115,7 +122,8 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 						buildResult.AllBuildTestCounts, 
 						buildResult.Build.Commit.Project.Name, 
 						buildResult.Build, 
-						thumbnail: false
+						false /*thumbnail*/,
+						timeZoneProvider
 					)
 				: null;
 			UnreadFeedback = unreadFeedback.Select

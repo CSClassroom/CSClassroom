@@ -1,4 +1,7 @@
-﻿@model HistoryViewModel
+﻿@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@model HistoryViewModel
+@inject ITimeZoneProvider TimeZoneProvider
 
 @{
     ViewBag.Title = "Build history";
@@ -31,7 +34,7 @@
     {
         <tr>
             <td>
-                @item.Commit.PushDate.ToLocalTime().ToString("MM/dd/yyyy h:mm tt")
+                @item.Commit.PushDate.FormatShortDateTime(TimeZoneProvider)
             </td>
             <td>
                 @item.Commit.Message

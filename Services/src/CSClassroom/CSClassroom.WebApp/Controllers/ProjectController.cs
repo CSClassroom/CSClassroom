@@ -106,7 +106,8 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			var viewModel = new ProjectStatusResultsViewModel
 			(
-				projectStatusResults
+				projectStatusResults,
+				TimeZoneProvider
 			);
 
 			return View(viewModel);

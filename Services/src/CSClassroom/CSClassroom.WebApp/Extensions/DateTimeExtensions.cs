@@ -31,5 +31,17 @@ namespace CSC.CSClassroom.WebApp.Extensions
 
 			return userTime.ToString("M/d/yyyy h:mm tt");
 		}
+
+		/// <summary>
+		/// Formats the given date, in the correct timezone.
+		/// </summary>
+		public static string FormatShortDate(
+			this DateTime dateTime,
+			ITimeZoneProvider timeZoneProvider)
+		{
+			var userTime = timeZoneProvider.ToUserLocalTime(dateTime);
+
+			return userTime.ToString("M/d");
+		}
 	}
 }

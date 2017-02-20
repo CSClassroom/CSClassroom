@@ -2,6 +2,7 @@
 using System.Linq;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
+using CSC.CSClassroom.WebApp.Providers;
 
 namespace CSC.CSClassroom.WebApp.ViewModels.Project
 {
@@ -34,7 +35,8 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Project
 		/// Constructor.
 		/// </summary>
 		public ProjectStatusResultsViewModel(
-			ProjectStatusResults projectStatusResults)
+			ProjectStatusResults projectStatusResults,
+			ITimeZoneProvider timeZoneProvider)
 		{
 			LastName = projectStatusResults.LastName;
 			FirstName = projectStatusResults.FirstName;
@@ -42,7 +44,11 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Project
 			ProjectStatus = projectStatusResults.ProjectStatus
 				.Select
 				(
-					projectStatus => new ProjectStatusViewModel(projectStatus)
+					projectStatus => new ProjectStatusViewModel
+					(
+						projectStatus, 
+						timeZoneProvider
+					)
 				).ToList();
 		}
 	}

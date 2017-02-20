@@ -1,6 +1,8 @@
 ﻿using System;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
+using CSC.CSClassroom.WebApp.Extensions;
+using CSC.CSClassroom.WebApp.Providers;
 using CSC.CSClassroom.WebApp.ViewModels.Build;
 
 namespace CSC.CSClassroom.WebApp.ViewModels.Project
@@ -18,7 +20,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Project
 		/// <summary>
 		/// The last commit date.
 		/// </summary>
-		public DateTime LastCommitDate { get; }
+		public string LastCommitDate { get; }
 
 		/// <summary>
 		/// Whether or not the last build succeeded.
@@ -34,17 +36,19 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Project
 		/// Constructor.
 		/// </summary>
 		public ProjectStatusViewModel(
-			ProjectStatus projectStatus)
+			ProjectStatus projectStatus,
+			ITimeZoneProvider timeZoneProvider)
 		{
 			ProjectName = projectStatus.ProjectName;
-			LastCommitDate = projectStatus.LastCommitDate;
+			LastCommitDate = projectStatus.LastCommitDate.FormatLongDateTime(timeZoneProvider);
 			LastBuildSucceeded = projectStatus.LastBuildSucceeded;
 			TestTrend = new TestTrendViewModel
 			(
 				projectStatus.BuildTestCounts,
 				projectStatus.ProjectName,
-				currentBuild: null,
-				thumbnail: true
+				null /*currentBuild*/,
+				true /*thumbnail*/,
+				timeZoneProvider
 			);
 		}
 	}

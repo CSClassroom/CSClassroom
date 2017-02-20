@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
+using CSC.CSClassroom.WebApp.Extensions;
+using CSC.CSClassroom.WebApp.Providers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CSC.CSClassroom.WebApp.ViewModels.Build
@@ -12,6 +14,12 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 	/// </summary>
 	public class TestTrendViewModel
 	{
+		/// <summary>
+		/// The time zone provider.
+		/// </summary>
+
+		private readonly ITimeZoneProvider _timeZoneProvider;
+
 		/// <summary>
 		/// All passed/failed test counts.
 		/// </summary>
@@ -39,7 +47,8 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 			IList<BuildTestCount> allBuildTestCounts,
 			string projectName,
 			Model.Projects.Build currentBuild,
-			bool thumbnail)
+			bool thumbnail,
+			ITimeZoneProvider timeZoneProvider)
 		{
 			AllBuildTestCounts = GetTestCounts(allBuildTestCounts);
 
@@ -50,6 +59,8 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 				: (int?)null;
 
 			Thumbnail = thumbnail;
+
+			_timeZoneProvider = timeZoneProvider;
 		}
 
 		/// <summary>
@@ -85,9 +96,9 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 						? value.PassedCount
 						: totalTests - value.PassedCount,
 					ShortCommitDate = dayBoundaries[index]
-						? value.PushDate.ToLocalTime().ToString("MM/dd")
+						? value.PushDate.FormatShortDate(_timeZoneProvider)
 						: "--",
-					LongCommitDate = value.PushDate.ToLocalTime().ToString("MM/dd/yyyy h:mm tt"),
+					LongCommitDate = value.PushDate.FormatShortDateTime(_timeZoneProvider),
 					BuildUrl = urlHelper.Action
 					(
 						"BuildResult",
@@ -128,7 +139,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 			DateTime prevValue = DateTime.MinValue;
 			for (int index = 0; index < AllBuildTestCounts.Count; index++)
 			{
-				var value = AllBuildTestCounts[index].PushDate.ToLocalTime().Date;
+				var value = _timeZoneProvider.ToUserLocalTime(AllBuildTestCounts[index].PushDate).Date;
 				if (value != prevValue)
 				{
 					days[index] = true;

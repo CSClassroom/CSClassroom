@@ -3,7 +3,7 @@
 @{ 
     ViewBag.Title = "Build result";
 }
-<h2>@Project.Name: @(Model.IsLatestBuild ? "Latest Build" : $"Build on { Model.PushDate.ToLocalTime().ToString("MM/dd/yyyy") } at { Model.PushDate.ToLocalTime().ToString("h:mm tt") }")</h2>
+<h2>@Project.Name: @(Model.IsLatestBuild ? "Latest Build" : $"Build on { Model.PushDateLong }")</h2>
 <h4 style="color: blue">Student: @Model.User.FirstName @Model.User.LastName</h4>
 @if (!Model.IsLatestBuild)
 {
@@ -41,7 +41,7 @@
 
     <tr>
         <td>
-            @Model.PushDate.ToLocalTime().ToString("MM/dd/yyyy h:mm tt")
+            @Model.PushDateShort
         </td>
         <td>
             @Model.CommitMessage
