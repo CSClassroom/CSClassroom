@@ -15,7 +15,6 @@ namespace CSC.CSClassroom.Model.Questions
 		/// <summary>
 		/// The name of the test.
 		/// </summary>
-		[Required]
 		[Display(Name = "Test Name")]
 		public string Name { get; set; }
 
