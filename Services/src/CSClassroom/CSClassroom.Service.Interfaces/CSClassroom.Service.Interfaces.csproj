@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <DebugType>portable</DebugType>
+    <AssemblyName>CSClassroom.Service.Interfaces</AssemblyName>
+    <PackageId>CSClassroom.Service.Interfaces</PackageId>
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../BuildService/BuildService.Model/BuildService.Model.csproj" />
+    <ProjectReference Include="../../Common/Common.Infrastructure.Interfaces/Common.Infrastructure.Interfaces.csproj" />
+    <ProjectReference Include="../CSClassroom.Model/CSClassroom.Model.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,14 +1,9 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26114.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{743DCCB0-18B1-45C4-AFEB-EB117494418A}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "BuildService.Model", "src\BuildService\BuildService.Model\BuildService.Model.xproj", "{0DD9CBE6-7D0A-4E0C-B177-2F689590F674}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildService.Model", "src\BuildService\BuildService.Model\BuildService.Model.csproj", "{0DD9CBE6-7D0A-4E0C-B177-2F689590F674}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildService", "BuildService", "{D31D9214-03C7-44E4-A739-0C33559B1FAC}"
 EndProject
@@ -21,39 +16,39 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D251C224-2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{B470776B-0B85-4C00-9816-4FF904113452}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "BuildService.Service.Interfaces", "src\BuildService\BuildService.Service.Interfaces\BuildService.Service.Interfaces.xproj", "{8B570E71-7E20-4A29-BE9C-F72C6D52F857}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildService.Service.Interfaces", "src\BuildService\BuildService.Service.Interfaces\BuildService.Service.Interfaces.csproj", "{8B570E71-7E20-4A29-BE9C-F72C6D52F857}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "BuildService.Service", "src\BuildService\BuildService.Service\BuildService.Service.xproj", "{13B5638F-64A4-47A2-AA16-3479CF9BA86D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildService.Service", "src\BuildService\BuildService.Service\BuildService.Service.csproj", "{13B5638F-64A4-47A2-AA16-3479CF9BA86D}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Common.Infrastructure", "src\Common\Common.Infrastructure\Common.Infrastructure.xproj", "{4D0115CA-904E-4611-8B25-982CFCF9D943}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Infrastructure", "src\Common\Common.Infrastructure\Common.Infrastructure.csproj", "{4D0115CA-904E-4611-8B25-982CFCF9D943}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSClassroom", "CSClassroom", "{72DE9004-5769-4200-B2ED-21F0916A84DE}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CSClassroom.WebApp", "src\CSClassroom\CSClassroom.WebApp\CSClassroom.WebApp.xproj", "{1D72EF76-F25F-489E-8AE0-E53FC2915D3C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSClassroom.WebApp", "src\CSClassroom\CSClassroom.WebApp\CSClassroom.WebApp.csproj", "{1D72EF76-F25F-489E-8AE0-E53FC2915D3C}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Common.Infrastructure.Interfaces", "src\Common\Common.Infrastructure.Interfaces\Common.Infrastructure.Interfaces.xproj", "{8FDB276F-3E31-4035-A701-F58EB5D980FA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Infrastructure.Interfaces", "src\Common\Common.Infrastructure.Interfaces\Common.Infrastructure.Interfaces.csproj", "{8FDB276F-3E31-4035-A701-F58EB5D980FA}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CSClassroom.Model", "src\CSClassroom\CSClassroom.Model\CSClassroom.Model.xproj", "{11363505-D6FC-45A2-AC3D-16AECB644015}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSClassroom.Model", "src\CSClassroom\CSClassroom.Model\CSClassroom.Model.csproj", "{11363505-D6FC-45A2-AC3D-16AECB644015}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CSClassroom.Service", "src\CSClassroom\CSClassroom.Service\CSClassroom.Service.xproj", "{CCA7028F-F139-46C4-BC32-7C2B26ECB459}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSClassroom.Service", "src\CSClassroom\CSClassroom.Service\CSClassroom.Service.csproj", "{CCA7028F-F139-46C4-BC32-7C2B26ECB459}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CSClassroom.Service.Interfaces", "src\CSClassroom\CSClassroom.Service.Interfaces\CSClassroom.Service.Interfaces.xproj", "{BA6802AE-0EB6-4534-8E2D-8AAFE649BA3F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSClassroom.Service.Interfaces", "src\CSClassroom\CSClassroom.Service.Interfaces\CSClassroom.Service.Interfaces.csproj", "{BA6802AE-0EB6-4534-8E2D-8AAFE649BA3F}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "BuildService.Endpoint", "src\BuildService\BuildService.Endpoint\BuildService.Endpoint.xproj", "{F44460CA-ED78-4693-8C3B-0725C586C059}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildService.Endpoint", "src\BuildService\BuildService.Endpoint\BuildService.Endpoint.csproj", "{F44460CA-ED78-4693-8C3B-0725C586C059}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CSClassroom.Service.UnitTests", "test\CSClassroom\CSClassroom.Service.UnitTests\CSClassroom.Service.UnitTests.xproj", "{AE856E85-0063-47AF-B966-EA5CC2CD586F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSClassroom.Service.UnitTests", "test\CSClassroom\CSClassroom.Service.UnitTests\CSClassroom.Service.UnitTests.csproj", "{AE856E85-0063-47AF-B966-EA5CC2CD586F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSClassroom", "CSClassroom", "{3C5B2729-6374-4B61-A819-A7BCD298F74A}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CSClassroom.Repository", "src\CSClassroom\CSClassroom.Repository\CSClassroom.Repository.xproj", "{345385CC-4629-4D13-BFF1-F75EDE1B226D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSClassroom.Repository", "src\CSClassroom\CSClassroom.Repository\CSClassroom.Repository.csproj", "{345385CC-4629-4D13-BFF1-F75EDE1B226D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildService", "BuildService", "{729585BA-B80E-454B-BD44-8ABC3FD7A0D2}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "BuildService.Service.UnitTests", "test\BuildService\BuildService.Service.UnitTests\BuildService.Service.UnitTests.xproj", "{3716ABB3-918A-4885-BD74-BBAD41CE76D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildService.Service.UnitTests", "test\BuildService\BuildService.Service.UnitTests\BuildService.Service.UnitTests.csproj", "{3716ABB3-918A-4885-BD74-BBAD41CE76D4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{1045C8FF-5168-47B8-8954-4DD5C19729CF}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Common.TestDoubles", "test\Common\Common.TestDoubles\Common.TestDoubles.xproj", "{5F8A8375-26C8-4818-98EB-46CE2D5A5575}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.TestDoubles", "test\Common\Common.TestDoubles\Common.TestDoubles.csproj", "{5F8A8375-26C8-4818-98EB-46CE2D5A5575}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
