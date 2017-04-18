@@ -2,7 +2,6 @@ imageName="csclassroom/csclassroom.webapp"
 projectName="csclassroomwebapp"
 serviceName="csclassroom.webapp"
 containerName="${projectName}_${serviceName}_1"
-runtimeID="debian.8-x64"
 framework="netcoreapp1.1"
 
 # Kills all running containers of an image and then removes them.
@@ -29,7 +28,7 @@ buildImage () {
 
     if [ "$environment" == "Debug" ]; then
       npm run gulp-Debug
-      dotnet build -f $framework -r $runtimeID -c $environment
+      dotnet build -f $framework -c $environment
       if [ $? == 0 ]; then
         if [[ ! -f "$targetFolder/obj/Docker/empty" ]]; then
           mkdir -p $targetFolder/obj/Docker/empty
@@ -38,7 +37,7 @@ buildImage () {
         buildFailure=1
       fi
     else
-      dotnet publish -f $framework -r $runtimeID -c $environment -o $targetFolder
+      dotnet publish -f $framework -c $environment -o $targetFolder
       if [ $? != 0 ]; then
         buildFailure=1
       fi
@@ -71,30 +70,15 @@ compose () {
   fi
 }
 
-startDebugging () {
-  echo "Starting the remote debugger..."
-
-  containerId=$(docker ps -f "name=$containerName" -q -n=1)
-  if [[ -z $containerId ]]; then
-    echo "Could not find a container named $containerName"
-  else
-    docker exec -i $containerId pkill dotnet
-    docker exec -i $containerId /clrdbg2/clrdbg --interpreter=mi
-  fi
-
-}
-
 # Shows the usage for the script.
 showUsage () {
   echo "Usage: dockerTask.sh [COMMAND] (environment)"
   echo "    Runs build or compose using specific environment (if not provided, debug environment is used)"
   echo ""
   echo "Commands:"
-  echo "    build: Builds a Docker image ('$imageName')."
-  echo "    compose: Runs docker-compose."
   echo "    clean: Removes the image '$imageName' and kills all containers based on that image."
-  echo "    composeForDebug: Builds the image and runs docker-compose."
-  echo "    startDebugging: Finds the running container and starts the debugger inside of it."
+  echo "    build: Builds a Docker image ('$imageName')."
+  echo "    run: Starts the Docker container."
   echo ""
   echo "Environments:"
   echo "    Debug: Uses debug environment."
@@ -121,7 +105,7 @@ else
     export TAG=:Debug
   fi
 
-  environmentLower=${environment,,}
+  environmentLower=$(echo "$environment" | tr '[:upper:]' '[:lower:]')
   scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  
   composeFileName="docker-compose.dev.$environmentLower.yml"
   targetFolder="."
@@ -141,9 +125,6 @@ else
     "run")
             buildImage
             compose
-            ;;
-    "startDebugging")
-            startDebugging
             ;;
     *)
             showUsage

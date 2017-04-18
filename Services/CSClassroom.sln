@@ -1,8 +1,9 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26114.2
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "vsdocker\docker-compose.dcproj", "{E4A97C7A-2282-4595-8D1E-7940BD047334}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildService.Model", "src\BuildService\BuildService.Model\BuildService.Model.csproj", "{0DD9CBE6-7D0A-4E0C-B177-2F689590F674}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildService", "BuildService", "{D31D9214-03C7-44E4-A739-0C33559B1FAC}"
@@ -56,6 +57,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E4A97C7A-2282-4595-8D1E-7940BD047334}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4A97C7A-2282-4595-8D1E-7940BD047334}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4A97C7A-2282-4595-8D1E-7940BD047334}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4A97C7A-2282-4595-8D1E-7940BD047334}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0DD9CBE6-7D0A-4E0C-B177-2F689590F674}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0DD9CBE6-7D0A-4E0C-B177-2F689590F674}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DD9CBE6-7D0A-4E0C-B177-2F689590F674}.Release|Any CPU.ActiveCfg = Release|Any CPU

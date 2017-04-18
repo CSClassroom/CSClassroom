@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+
+  csclassroom.webapp:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  buildservice.endpoint:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development

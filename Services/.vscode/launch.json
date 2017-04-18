@@ -29,13 +29,16 @@
             },
 
             "pipeTransport": {
+                "debuggerPath": "/vsdbg/vsdbg",
                 "pipeProgram": "/bin/bash",
                 "pipeCwd": "${workspaceRoot}/src/CSClassroom/CSClassroom.WebApp",
-                "pipeArgs": [ "./dockerTask.sh", "startDebugging", "Debug" ],
+                "pipeArgs": [ "-c", "docker exec -i csclassroomwebapp_csclassroom.webapp_1 /bin/bash /app/debug.sh"],
                 "windows": {
-                    "pipeProgram": "${env.windir}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                    "debuggerPath": "/vsdbg/vsdbg",
+                    "pipeProgram": "docker",
                     "pipeCwd": "${workspaceRoot}/src/CSClassroom/CSClassroom.WebApp",
-                    "pipeArgs": [ ".\\dockerTask.ps1", "-StartDebugging", "-Environment", "Debug" ]
+                    "pipeArgs": [ "exec -i csclassroomwebapp_csclassroom.webapp_1 /bin/bash /app/debug.sh" ],
+                    "quoteArgs": false
                 }
             }
         },  
@@ -51,14 +54,20 @@
                 "/app": "${workspaceRoot}/src/BuildService/BuildService.Endpoint"
             },
 
+            "logging": {
+                "engineLogging": true
+            },
             "pipeTransport": {
+                "debuggerPath": "/vsdbg/vsdbg",
                 "pipeProgram": "/bin/bash",
                 "pipeCwd": "${workspaceRoot}/src/BuildService/BuildService.Endpoint",
-                "pipeArgs": [ "./dockerTask.sh", "startDebugging", "Debug" ],
+                "pipeArgs": [ "-c", "docker exec -i buildserviceendpoint_buildservice.endpoint_1 /bin/bash /app/debug.sh"],
                 "windows": {
-                    "pipeProgram": "${env.windir}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                    "debuggerPath": "/vsdbg/vsdbg",
+                    "pipeProgram": "docker",
                     "pipeCwd": "${workspaceRoot}/src/BuildService/BuildService.Endpoint",
-                    "pipeArgs": [ ".\\dockerTask.ps1", "-StartDebugging", "-Environment", "Debug" ]
+                    "pipeArgs": [ "exec -i buildserviceendpoint_buildservice.endpoint_1 /bin/bash /app/debug.sh" ],
+                    "quoteArgs": false
                 }
             }
         }

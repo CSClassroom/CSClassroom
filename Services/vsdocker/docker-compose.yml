@@ -1,0 +1,38 @@
+version: '2'
+
+services:
+
+  csclassroom.webapp:
+    image: csclassroom/csclassroom.webapp
+    build:
+      context: ../src/CSClassroom/CSClassroom.Webapp
+      dockerfile: Dockerfile
+    ports:
+      - "10000:80"
+    volumes:
+      - ../src/CSClassroom/CSClassroom.WebApp/appsettings.Environment.json:/app/appsettings.Environment.json
+    environment:
+      - RollingLogPath=/var/log/csclassroom/log.txt
+      
+  buildservice.endpoint:
+    image: csclassroom/buildservice.endpoint
+    build:
+      context: ../src/BuildService/BuildService.Endpoint
+      dockerfile: Dockerfile
+    ports:
+      - "10001:80"
+    volumes:
+      - ../src/BuildService/BuildService.Endpoint/appsettings.Environment.json:/app/appsettings.Environment.json
+      - /tmp/CSClassroom:/tmp/CSClassroom
+      - /var/run/docker.sock:/var/run/docker.sock
+      
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - data-volume:/var/lib/postgresql/data
+
+volumes:
+  data-volume:

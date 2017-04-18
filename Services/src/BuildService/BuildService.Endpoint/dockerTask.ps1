@@ -7,8 +7,6 @@ Removes the image buildservice.endpoint and kills all containers based on that i
 Builds a Docker image.
 .PARAMETER Run
 Builds the image and runs docker-compose.
-.PARAMETER StartDebugging
-Finds the running container and starts the debugger inside of it.
 .PARAMETER Environment
 The enviorment to build for (Debug or Release), defaults to Debug
 .EXAMPLE
@@ -23,12 +21,9 @@ Param(
     [switch]$Build,
     [Parameter(Mandatory=$True,ParameterSetName="Run")]
     [switch]$Run,
-    [Parameter(Mandatory=$True,ParameterSetName="StartDebugging")]
-    [switch]$StartDebugging,
     [parameter(ParameterSetName="Clean")]
     [parameter(ParameterSetName="Build")]
     [Parameter(ParameterSetName="Run")]
-    [parameter(ParameterSetName="StartDebugging")]
     [ValidateNotNullOrEmpty()]
     [String]$Environment = "Debug"
 )
@@ -37,7 +32,6 @@ $imageName="buildservice.endpoint"
 $projectName="buildserviceendpoint"
 $serviceName="buildservice.endpoint"
 $containerName="${projectName}_${serviceName}_1"
-$runtimeID = "debian.8-x64"
 $framework = "netcoreapp1.1"
 
 # Kills all running containers of an image and then removes them.
@@ -61,7 +55,7 @@ function BuildImage () {
         Write-Host "Building the project ($ENVIRONMENT)."
    
         if ($Environment -eq "Debug") {
-            dotnet build -f $framework -r $runtimeID -c $Environment
+            dotnet build -f $framework -c $Environment
             if ($lastExitCode -eq 0) {
                 if (-Not(Test-Path "obj\Docker\empty")) {
                     New-Item "obj\Docker\empty" -ItemType Directory
@@ -72,7 +66,7 @@ function BuildImage () {
             }
         }
         else {
-            dotnet publish -f $framework -r $runtimeID -c $Environment -o $targetFolder
+            dotnet publish -f $framework -c $Environment -o $targetFolder
             if ($lastExitCode -ne 0) {
                 $global:buildFailure = $true
             }
@@ -111,18 +105,6 @@ function Compose () {
     }
 }
 
-function StartDebugging () {
-    Write-Host "Starting the remote debugger..."
-
-    $containerId = (docker ps -f "name=$containerName" -q -n=1)
-    if ([System.String]::IsNullOrWhiteSpace($containerId)) {
-        Write-Error "Could not find a container named $containerName"
-    }
-
-    docker exec -i $containerId pkill dotnet       
-    docker exec -i $containerId /clrdbg2/clrdbg --interpreter=mi
-}
-
 $global:buildFailure = $false
 
 if($Environment -ne "Debug" -and $Environment -ne "Release") {
@@ -153,9 +135,6 @@ elseif($Build) {
 elseif($Run) {
     BuildImage
     Compose
-}
-elseif($StartDebugging) {
-    StartDebugging
 }
 
 Pop-Location

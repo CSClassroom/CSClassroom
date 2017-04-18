@@ -7,6 +7,8 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Npgsql;
+using System.Threading;
 
 namespace CSC.Common.Infrastructure.Configuration
 {
@@ -15,6 +17,16 @@ namespace CSC.Common.Infrastructure.Configuration
 	/// </summary>
 	public static class ServiceCollectionExtensions
 	{
+		/// <summary>
+		/// How long to wait before retrying if the database does not exist.
+		/// </summary>
+		private static TimeSpan c_storageRetryDelay = TimeSpan.FromMinutes(1);
+
+		/// <summary>
+		/// The code PostgreSql returns if the database does not exist.
+		/// </summary>
+		private static string c_databaseNotFoundCode = "3D000";
+
 		/// <summary>
 		/// Configures logging.
 		/// </summary>
@@ -48,19 +60,47 @@ namespace CSC.Common.Infrastructure.Configuration
 				config =>
 				{
 					var logProvider = new HangfireLogProvider(loggerFactory);
-
-					var storage = new PostgreSqlStorage
-					(
-						connectionString,
-						new PostgreSqlStorageOptions()
-						{
-							QueuePollInterval = TimeSpan.FromSeconds(1)
-						}
-					);
+					var storage = RetryGetHangfireStorage(connectionString);
 
 					config
 						.UseLogProvider(logProvider)
 						.UseStorage(storage);
+				}
+			);
+		}
+
+		/// <summary>
+		/// Makes one attempt to retry connecting to the database after a failed attempt,
+		/// before giving up.
+		/// </summary>
+		private static PostgreSqlStorage RetryGetHangfireStorage(string connectionString)
+		{
+			try
+			{
+				return GetHangfireStorage(connectionString);
+			}
+			catch (PostgresException ex) when (ex.SqlState == c_databaseNotFoundCode)
+			{
+				// This could happen if both the webapp and buildservice are starting 
+				// simultaneously, if the buildservice tries to connect before the webapp 
+				// creates the database. Give the webapp time to create the database.
+				Thread.Sleep(c_storageRetryDelay);
+
+				return GetHangfireStorage(connectionString);
+			}
+		}
+
+		/// <summary>
+		/// Returns the storage configuration for Hangfire.
+		/// </summary>
+		private static PostgreSqlStorage GetHangfireStorage(string connectionString)
+		{
+			return new PostgreSqlStorage
+			(
+				connectionString,
+				new PostgreSqlStorageOptions()
+				{
+					QueuePollInterval = TimeSpan.FromSeconds(1)
 				}
 			);
 		}

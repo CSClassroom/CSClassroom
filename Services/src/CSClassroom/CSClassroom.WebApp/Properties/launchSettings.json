@@ -13,14 +13,11 @@
       "launchBrowser": true,
       "launchUrl": "http://localhost:10000",
       "environmentVariables": {
+        "ASPNETCORE_URLS": "http://0.0.0.0:10000",
         "RollingLogPath": "c:\\windows\\temp\\csclassroom-log.txt",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "http://0.0.0.0:10000"
-      }
-    },
-    "Docker": {
-      "launchBrowser": true,
-      "launchUrl": "http://localhost:10000"
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:10000"
     },
     "IIS Express": {
       "commandName": "IISExpress",

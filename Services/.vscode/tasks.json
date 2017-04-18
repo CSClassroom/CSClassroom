@@ -2,7 +2,7 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "0.1.0",
-    
+    "linux": {
         "command": "/bin/bash",
         "options": {
             "cwd": "${workspaceRoot}"
@@ -75,7 +75,7 @@
             {
                 "taskName": "Test BuildService (Debug)",
                 "suppressTaskName": true,
-                "args": ["-c", "dotnet test -c Debug ./test/BuildService/BuildService.Service.UnitTests" ],
+                "args": ["-c", "pushd ./test/BuildService/BuildService.Service.UnitTests && dotnet xunit -configuration Debug && popd" ],
                 "showOutput": "always",
                 "echoCommand": true,
                 "problemMatcher": "$msCompile"
@@ -83,7 +83,7 @@
             {
                 "taskName": "Test BuildService (Release)",
                 "suppressTaskName": true,
-                "args": ["-c", "dotnet test -c Release ./test/BuildService/BuildService.Service.UnitTests" ],
+                "args": ["-c", "pushd ./test/BuildService/BuildService.Service.UnitTests && dotnet xunit -configuration Release && popd" ],
                 "showOutput": "always",
                 "echoCommand": true,
                 "problemMatcher": "$msCompile"
@@ -91,7 +91,7 @@
             {
                 "taskName": "Test WebApp (Debug)",
                 "suppressTaskName": true,
-                "args": ["-c", "dotnet test -c Debug ./test/CSClassroom/CSClassroom.Service.UnitTests" ],
+                "args": ["-c", "pushd ./test/CSClassroom/CSClassroom.Service.UnitTests && dotnet xunit -configuration Debug && popd" ],
                 "showOutput": "always",
                 "echoCommand": true,
                 "problemMatcher": "$msCompile"
@@ -99,7 +99,7 @@
             {
                 "taskName": "Test WebApp (Release)",
                 "suppressTaskName": true,
-                "args": ["-c", "dotnet test -c Release ./test/CSClassroom/CSClassroom.Service.UnitTests" ],
+                "args": ["-c", "pushd ./test/CSClassroom/CSClassroom.Service.UnitTests && dotnet xunit -configuration Release && popd" ],
                 "showOutput": "always",
                 "echoCommand": true,
                 "problemMatcher": "$msCompile"
@@ -112,8 +112,120 @@
                 "echoCommand": false,
                 "problemMatcher": "$msCompile"
             }
-        ],
-
+        ]
+    },
+    "osx": {
+        "command": "/bin/bash",
+        "options": {
+            "cwd": "${workspaceRoot}"
+        },
+        "tasks": [
+            {
+                "taskName": "Build BuildService (Debug)",
+                "suppressTaskName": true,
+                "args": ["./src/BuildService/BuildService.Endpoint/dockerTask.sh", "build", "Debug" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Build BuildService (Release)",
+                "suppressTaskName": true,
+                "args": ["./src/BuildService/BuildService.Endpoint/dockerTask.sh", "build", "Release" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Build WebApp (Debug)",
+                "suppressTaskName": true,
+                "args": ["./src/CSClassroom/CSClassroom.WebApp/dockerTask.sh", "build", "Debug" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Build WebApp (Release)",
+                "suppressTaskName": true,
+                "args": ["./src/CSClassroom/CSClassroom.WebApp/dockerTask.sh", "build", "Release" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Run BuildService (Debug)",
+                "suppressTaskName": true,
+                "args": ["./src/BuildService/BuildService.Endpoint/dockerTask.sh", "run", "Debug" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Run BuildService (Release)",
+                "suppressTaskName": true,
+                "args": ["./src/BuildService/BuildService.Endpoint/dockerTask.sh", "run", "Release" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Run WebApp (Debug)",
+                "suppressTaskName": true,
+                "args": ["./src/CSClassroom/CSClassroom.WebApp/dockerTask.sh", "run", "Debug" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Run WebApp (Release)",
+                "suppressTaskName": true,
+                "args": ["./src/CSClassroom/CSClassroom.WebApp/dockerTask.sh", "run", "Release" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Test BuildService (Debug)",
+                "suppressTaskName": true,
+                "args": ["-c", "pushd ./test/BuildService/BuildService.Service.UnitTests && dotnet xunit -configuration Debug && popd" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Test BuildService (Release)",
+                "suppressTaskName": true,
+                "args": ["-c", "pushd ./test/BuildService/BuildService.Service.UnitTests && dotnet xunit -configuration Release && popd" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Test WebApp (Debug)",
+                "suppressTaskName": true,
+                "args": ["-c", "pushd ./test/CSClassroom/CSClassroom.Service.UnitTests && dotnet xunit -configuration Debug && popd" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "Test WebApp (Release)",
+                "suppressTaskName": true,
+                "args": ["-c", "pushd ./test/CSClassroom/CSClassroom.Service.UnitTests && dotnet xunit -configuration Release && popd" ],
+                "showOutput": "always",
+                "echoCommand": true,
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "taskName": "build",
+                "suppressTaskName": true,
+                "args": ["-c", "echo Press Control-P and select Run Task to select the project to build."],
+                "showOutput": "always",
+                "echoCommand": false,
+                "problemMatcher": "$msCompile"
+            }
+        ]
+    },
     "windows": {
         "command": "powershell",
         "options": {
@@ -187,7 +299,7 @@
             {
                 "taskName": "Test BuildService (Debug)",
                 "suppressTaskName": true,
-                "args": ["Invoke-Expression \"dotnet test -c Debug .\\test\\BuildService\\BuildService.Service.UnitTests\""],
+                "args": ["Invoke-Expression \"pushd test\\BuildService\\BuildService.Service.UnitTests; dotnet xunit -configuration Debug; popd\""],
                 "showOutput": "always",
                 "echoCommand": true,
                 "problemMatcher": "$msCompile"
@@ -195,7 +307,7 @@
             {
                 "taskName": "Test BuildService (Release)",
                 "suppressTaskName": true,
-                "args": ["Invoke-Expression \"dotnet test -c Release .\\test\\BuildService\\BuildService.Service.UnitTests\""],
+                "args": ["Invoke-Expression \"pushd test\\BuildService\\BuildService.Service.UnitTests; dotnet xunit -configuration Release; popd\""],
                 "showOutput": "always",
                 "echoCommand": true,
                 "problemMatcher": "$msCompile"
@@ -203,7 +315,7 @@
             {
                 "taskName": "Test WebApp (Debug)",
                 "suppressTaskName": true,
-                "args": ["Invoke-Expression \"dotnet test -c Debug .\\test\\CSClassroom\\CSClassroom.Service.UnitTests\""],
+                "args": ["Invoke-Expression \"pushd test\\CSClassroom\\CSClassroom.Service.UnitTests; dotnet xunit -configuration Debug; popd\""],
                 "showOutput": "always",
                 "echoCommand": true,
                 "problemMatcher": "$msCompile"
@@ -211,7 +323,7 @@
             {
                 "taskName": "Test WebApp (Release)",
                 "suppressTaskName": true,
-                "args": ["Invoke-Expression \"dotnet test -c Release .\\test\\CSClassroom\\CSClassroom.Service.UnitTests\""],
+                "args": ["Invoke-Expression \"pushd test\\CSClassroom\\CSClassroom.Service.UnitTests; dotnet xunit -configuration Release; popd\""],
                 "showOutput": "always",
                 "echoCommand": true,
                 "problemMatcher": "$msCompile"

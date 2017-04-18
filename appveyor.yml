@@ -47,10 +47,12 @@ test_script:
   - cd Runners\JavaProjectRunner
   - mvn test
   - cd ..\..
-  - cd Services\test
-  - dotnet test "BuildService\BuildService.Service.UnitTests" -c %CONFIGURATION%
-  - dotnet test "CSClassroom\CSClassroom.Service.UnitTests" -c %CONFIGURATION%
-  - cd ..\..
+  - cd Services\test\BuildService\BuildService.Service.UnitTests
+  - dotnet xunit -configuration %CONFIGURATION%
+  - cd ..\..\..\..
+  - cd Services\test\CSClassroom\CSClassroom.Service.UnitTests
+  - dotnet xunit -configuration %CONFIGURATION%
+  - cd ..\..\..\..
 cache:
   - Services\src\CSClassroom\CSClassroom.WebApp\node_modules # project npm modules
   - '%APPDATA%\npm-cache'               # npm cache

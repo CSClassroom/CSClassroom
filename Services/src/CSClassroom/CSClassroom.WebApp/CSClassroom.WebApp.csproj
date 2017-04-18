@@ -11,6 +11,7 @@
     <RuntimeFrameworkVersion>1.1.0</RuntimeFrameworkVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;dnxcore50;portable-net45+win8</PackageTargetFallback>
     <MvcRazorCompileOnPublish>true</MvcRazorCompileOnPublish>
+    <DockerComposeProjectPath>..\..\..\vsdocker\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
