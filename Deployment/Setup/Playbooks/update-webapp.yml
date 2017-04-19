@@ -1,0 +1,24 @@
+---
+
+- name: Update webapp
+  hosts: linode_group=webapp
+  tasks:
+    - name: Include configuration variables
+      include_vars: ../Configuration/service-config.yml
+    - name: Create ~/webapp folder
+      file: path=~/webapp state=directory
+    - name: Update SSL Certificate
+      copy: src=../Configuration/ssl.crt dest=~/webapp/nginx.crt
+    - name: Update SSL Private Key
+      copy: src=../Configuration/ssl.key dest=~/webapp/nginx.key
+    - name: Update nginx configuration from template
+      template: src=../Templates/WebApp/nginx.conf.tpl dest=~/webapp/nginx.conf
+    - name: Update docker-compose.yaml from template
+      template: src=../Templates/WebApp/docker-compose.yaml.tpl dest=~/webapp/docker-compose.yaml
+    - name: Update appsettings.Environment.json from template
+      template: src=../Templates/WebApp/appsettings.Environment.json.tpl dest=~/webapp/appsettings.Environment.json
+    - docker_service:
+        project_src: ~/webapp
+        pull: yes
+        state: present
+        restarted: yes

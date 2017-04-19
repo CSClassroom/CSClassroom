@@ -1,0 +1,7 @@
+deployment-configuration.tf
+service-config.yml
+terraform.tfstate
+terraform.tfstate.backup
+ssl.crt
+ssl.key
+*.retry

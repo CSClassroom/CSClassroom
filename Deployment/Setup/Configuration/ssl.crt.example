@@ -1,0 +1,5 @@
+-----BEGIN CERTIFICATE-----
+
+Copy this file to ssl.crt, and replace its contents with a valid SSL certificate.
+
+-----END CERTIFICATE-----

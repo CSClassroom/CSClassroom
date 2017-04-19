@@ -1,0 +1,5 @@
+variable "linode_api_key" { default = "REPLACE_WITH_LINODE_API_KEY" }
+variable "linode_region" { default = "REPLACE_WITH_LINODE_REGION" }
+variable "num_buildservice_nodes" { default = "REPLACE_WITH_NUMBER_OF_BUILDSERVICE_NODES" }
+variable "ssh_public_key" { default = "REPLACE_WITH_SSH_PUBLIC_KEY" }
+variable "initial_root_password" { default="REPLACE_WITH_INITIAL_ROOT_PASSWORD" }

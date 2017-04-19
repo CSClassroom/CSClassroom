@@ -1,0 +1,16 @@
+- name: Update build service
+  hosts: linode_group=buildservice
+  tasks:
+    - name: Include configuration variables
+      include_vars: ../Configuration/service-config.yml
+    - name: Create ~/buildservice folder
+      file: path=~/buildservice state=directory
+    - name: Update docker-compose.yaml from template
+      template: src=../Templates/BuildService/docker-compose.yaml.tpl dest=~/buildservice/docker-compose.yaml
+    - name: Update appsettings.Environment.json from template
+      template: src=../Templates/BuildService/appsettings.Environment.json.tpl dest=~/buildservice/appsettings.Environment.json
+    - docker_service:
+        project_src: ~/buildservice
+        pull: yes
+        state: present
+        restarted: yes

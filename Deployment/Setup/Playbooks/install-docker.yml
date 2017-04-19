@@ -1,0 +1,31 @@
+---
+- name: Install docker on all nodes
+  hosts: linode_group=webapp linode_group=buildservice
+  roles:
+    - angstwad.docker_ubuntu
+
+- name: Initial pull of docker images required for the web app
+  hosts: linode_group=webapp
+  tasks:
+    - docker_image:
+        name: csclassroom/csclassroom.webapp
+        tag: latest
+    - docker_image:
+        name: postgres
+        tag: 9.5.4
+    - docker_image:
+        name: nginx
+        tag: 1.11.3
+ 
+- name: Initial pull of docker images required for the build service
+  hosts: linode_group=buildservice
+  tasks:
+    - docker_image:
+        name: csclassroom/buildservice.endpoint
+        tag: latest
+    - docker_image:
+        name: csclassroom/coderunner-java
+        tag: latest
+    - docker_image:
+        name: csclassroom/projectrunner-java
+        tag: latest

@@ -47,11 +47,12 @@ Development
 
 3. Install [Node.js](https://nodejs.org/en/download/package-manager/) 7 or higher.
 
-4. Rename appsettings.environment.json.example to appsettings.environment.json in both the Services/src/CSClassroom/CSClassroom.WebApp and Services/src/BuildService/BuildService.Endpoint folders, and complete the configuration.
+4. Copy appsettings.environment.json.example to appsettings.environment.json in both the Services/src/CSClassroom/CSClassroom.WebApp and Services/src/BuildService/BuildService.Endpoint folders, and complete the configuration. These files are ignored by source control.
 
 4. Pick an IDE before continuing: Visual Studio 2017 or Visual Studio Code.
 
-	**Visual Studio 2017**
+	### Visual Studio 2017
+	
 	Visual Studio 2017 is a full IDE for Windows. Here are the instructions for obtaining and setting up Visual Studio 2017 to run this project.
 
 	1. Install [Visual Studio 2017](https://www.visualstudio.com/). Make sure to select the following in the installation options:
@@ -66,7 +67,8 @@ Development
 	
 		- This will launch both the webapp and the build service, and open a browser to the local URL.
 
-	**Visual Studio Code**
+	### Visual Studio Code
+	
 	Visual Studio Code is a light-weight cross-platform code editor/debugger that works on Windows, OSX, and Linux. Here are the instructions for obtaining and setting up Visual Studio Code to run this project.
 
 	1. Install the [Visual Studio Code editor](http://code.visualstudio.com/docs/setup/setup-overview).
@@ -99,6 +101,96 @@ Development
     
 	      - Windows users must restart the Docker service after resuming from sleep, to ensure the time of the Docker VM is correct. This is a [known Docker bug](https://forums.docker.com/t/docker-for-windows-should-resync-vm-time-when-computer-resumes-from-sleep/17825/18).
 
+Deployment
+------------
 
+This repository includes sample deployment scripts (which deploy the service to VMs on Linode). They deploy one node that hosts the web service and database, and an arbitrary number of nodes hosting the build service. These example scripts require a bash shell to run.
 
+### Prerequisites
 
+In order to deploy and use this service, you must have the following:
+
+* A domain name.
+
+* An SSL certificate for your domain name.
+
+* A Linode account (if you are following these instructions to deploy).
+
+* An Azure Active Directory (AAD) application. You can add a new application [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-integrating-applications). Your application should be configured as a multi-tenant application. The sign-on URL should be https://yourdomain.com, and the reply URL should be https://yourdomain.com/signin-oidc. You may also wish to create a separate application for use when you are developing the service.
+
+* A GitHub account, with one or more organizations for your classes. If you are using this service to manage projects, it is highly recommended that your class organizations permit private repositories. You can request a free organization account for educational use from [GitHub](https://education.github.com/). (Note that the service will be using your account to create pull requests, so it is best to avoid using your personal GitHub account.) You will need a [personal access token](https://github.com/settings/tokens) for the account you use.
+
+* A [SendGrid](http://sendgrid.com/) account, for sending e-mails.
+
+* An [Azure Application Insights](https://azure.microsoft.com/en-us/services/application-insights/) account, for receiving telemetry.
+
+### Provisioning
+
+[Terraform](https://www.terraform.io/) is used to provision the VMs, using a [fork](https://github.com/smithandr/terraform-provider-linode) of a [Linode provider plugin](https://github.com/btobolaski/terraform-provider-linode). 
+
+1. Install [Terraform](https://www.terraform.io/).
+
+2. Install this [Linode provider](https://github.com/SmithAndr/terraform-provider-linode/releases/tag/v0.1.1-alpha) for Terraform. Extract the binary to the same location that Terraform was installed to.
+
+3. Copy deployment-configuration.tf.example to deployment-configuration, and replace all settings with appropriate values. This file is ignored by source control.
+
+	| Setting       | Description |
+	| ------------- | ------------- |
+	| linode_api_key  | Your Linode API key.  |
+	| linode_region  | The region in which you would like your VMs to be deployed. (Example: "Fremont, CA, USA")  |
+	| num_buildservice_nodes  | The number of build service nodes to deploy. |
+	| ssh_public_key  | The full contents of an SSH public key that will be used to provide root access to the deployment infrastructure. Your private key must live in ~/.ssh/id_rsa for provisioning and setup to be successful. |
+	| initial_root_password  | The initial root password to set. |
+
+4. In the Deployment/Provision folder, type 
+
+		terraform plan
+	
+   This command outputs what deployment operations terraform will execute in the next step. Review this to verify the operations terraform will execute.
+   
+5. In the Deployment/Provision folder, type 
+
+		terraform apply
+		
+   This command will deploy the infrastructure listed in step 2 (one VM for the web service/database, and the number VMs you configured for the build service). It will save the deployment state to terraform.tfstate (ignored by source control).
+   
+6. Have your domain point to the IP address of the web service/database VM.
+   
+### Setup
+   
+[Ansible](https://www.ansible.com/) is used to deploy the service to the VMs.
+
+1. Install [Ansible](https://www.ansible.com/).
+
+2. In the Deployment/Setup/Configuration folder, copy service-config.yml.example to service-config.yml, and replace all settings with appropriate values. This file is ignored by source control.
+
+	| Setting       | Description |
+	| ------------- | ------------- |
+	| domain  | The domain name you will use to host the site.  |
+	| aad_client_id | The client ID for your Azure Active Directory (AAD) application.  |
+	| activation_token  | A long, arbitrary string that is difficult to guess. This token will be required to setup the service for the first time. |
+	| github_oauth_token  | A personal access token for your GitHub account. |
+	| github_webhook_secret  | A long, arbitrary string that is difficult to guess. This will be used to validate GitHub webhook notifications. |
+	| sendgrid_apikey  | Your SendGrid API key. |
+	| postgres_password  | A long, arbitrary string that is difficult to guess. This will be the password to connect to the database. |
+	| appinsights_instrumentation_key | Your Azure Application Insights instrumentation key. |
+	
+3. In the Deployment/Setup/Configuration folder, copy ssl.crt.example and ssl.key.example to ssl.crt and ssl.key, and replace their contents with your SSL certificate and SSL private key. These files are ignored by source control.
+
+4. In the Deployment/Setup folder, type
+
+		./install-docker.sh
+		
+   This will install Docker on all previously-provisioned VMs. This only needs to be run once.
+   
+5. In the Deployment/Setup folder, type
+
+		./update-webapp.sh
+		
+   This will deploy the web service and database to the corresponding VM. This can be run whenever you want to update the web service to the [latest version](https://hub.docker.com/r/csclassroom/csclassroom.webapp/) on the Docker registry, or after you make changes to service-config.yml. Note that this will restart the web app, which could interrupt existing requests.
+
+6. In the Deployment/Setup folder, type
+
+		./update-buildservice.sh
+		
+   This will deploy the build service to the corresponding VMs. Like with the web service, this can be run whenever you want to update the build service to the [latest version](https://hub.docker.com/r/csclassroom/buildservice.endpoint/) on the Docker registry, or after you make changes to service-config.yml. Note that this will restart the build service, which could interrupt existing requests.

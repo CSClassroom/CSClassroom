@@ -1,0 +1,9 @@
+- name: Update runners used by build service
+  hosts: linode_group=buildservice
+  tasks:
+    - docker_image:
+        name: csclassroom/coderunner-java
+        tag: latest
+    - docker_image:
+        name: csclassroom/projectrunner-java
+        tag: latest
