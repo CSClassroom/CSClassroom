@@ -35,6 +35,12 @@ namespace CSC.CSClassroom.Model.Questions
 		public string Answer { get; set; }
 
 		/// <summary>
+		/// Whether or not the answer is a regular expression.
+		/// </summary>
+		[Display(Name = "Regular Expression")]
+		public bool Regex { get; set; }
+
+		/// <summary>
 		/// The order of the blanks.
 		/// </summary>
 		public int Order { get; set; }

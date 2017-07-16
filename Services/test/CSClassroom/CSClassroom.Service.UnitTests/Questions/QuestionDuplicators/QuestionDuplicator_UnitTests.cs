@@ -23,8 +23,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionDuplicators
 			var question = database.Context
 				.ClassQuestions
 				.Include(q => q.QuestionCategory)
-				.Include(q => q.PrerequisiteQuestions)
-					.ThenInclude(pq => pq.FirstQuestion)
 				.Single(q => q.Name == "Question2");
 
 			var duplicator = GetCodeQuestionDuplicator(database, question);
@@ -34,11 +32,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionDuplicators
 			Assert.Equal("Question2", result.Name);
 			Assert.Equal("ClassName", result.ClassName);
 			Assert.Equal(question.QuestionCategory, result.QuestionCategory);
-			Assert.Equal(1, result.PrerequisiteQuestions.Count);
-			Assert.True(question.PrerequisiteQuestions[0] != result.PrerequisiteQuestions[0]);
-			Assert.Equal(0, result.PrerequisiteQuestions[0].Id);
-			Assert.Equal(0, result.PrerequisiteQuestions[0].SecondQuestionId);
-			Assert.Equal(question.PrerequisiteQuestions[0].FirstQuestionId, result.PrerequisiteQuestions[0].FirstQuestionId);
 		}
 
 		/// <summary>

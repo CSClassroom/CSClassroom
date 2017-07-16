@@ -31,9 +31,10 @@ namespace CSC.CSClassroom.Model.Questions
 		public virtual IList<ProgramQuestionTest> Tests { get; set; }
 
 		/// <summary>
-		/// Returns whether or not this question is a template for another question.
+		/// The type of solver(s) supported for this question.
 		/// </summary>
-		public override bool IsQuestionTemplate => false;
+		protected override QuestionSolverType SolverTypes
+			=> QuestionSolverType.Interactive;
 
 		/// <summary>
 		/// The string displayed for the type of question
@@ -61,6 +62,11 @@ namespace CSC.CSClassroom.Model.Questions
 		{
 			return Tests;
 		}
+
+		/// <summary>
+		/// Returns whether or not the question is a generated question template.
+		/// </summary>
+		public override bool IsQuestionTemplate => false;
 
 		/// <summary>
 		/// Accepts a question visitor.

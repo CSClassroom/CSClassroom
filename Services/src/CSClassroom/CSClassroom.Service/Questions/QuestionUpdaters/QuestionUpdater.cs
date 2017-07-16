@@ -42,16 +42,6 @@ namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
 		/// </summary>
 		public async Task UpdateQuestionAsync()
 		{
-			UpdatePrerequisiteQuestions(Question.PrerequisiteQuestions);
-
-			DbContext.RemoveUnwantedObjects
-			(
-				DbContext.PrerequisiteQuestions,
-				pq => pq.Id,
-				pq => pq.SecondQuestionId == Question.Id,
-				Question.PrerequisiteQuestions
-			);
-
 			await UpdateQuestionImplAsync();
 		}
 
@@ -59,22 +49,5 @@ namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
 		/// Updates any subclass-specific related properties of the question in the database.
 		/// </summary>
 		protected abstract Task UpdateQuestionImplAsync();
-
-		/// <summary>
-		/// Updates each code constraint.
-		/// </summary>
-		private void UpdatePrerequisiteQuestions(IEnumerable<PrerequisiteQuestion> prereqs)
-		{
-			if (prereqs != null)
-			{
-				int order = 0;
-				foreach (var prereq in prereqs)
-				{
-					prereq.Order = order;
-					prereq.SecondQuestionId = Question.Id;
-					order++;
-				}
-			}
-		}
 	}
 }

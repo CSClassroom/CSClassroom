@@ -49,7 +49,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			var userService = new Mock<IUserService>();
 			userService
 				.Setup(us => us.GetAndUpdateCurrentUserAsync())
-				.ReturnsAsync(null);
+				.ReturnsAsync((User)null);
 
 			var userProvider = new UserProvider(userService.Object, identityProvider.Object);
 			var identityState = await userProvider.GetCurrentIdentityStateAsync();
@@ -116,7 +116,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			var userService = new Mock<IUserService>();
 			userService
 				.Setup(us => us.GetAndUpdateCurrentUserAsync())
-				.ReturnsAsync(null);
+				.ReturnsAsync((User)null);
 
 			var userProvider = new UserProvider(userService.Object, identityProvider.Object);
 			var currentUser = await userProvider.GetCurrentUserAsync();
@@ -160,7 +160,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			var userService = new Mock<IUserService>();
 			userService
 				.Setup(us => us.GetAndUpdateCurrentUserAsync())
-				.ReturnsAsync(null);
+				.ReturnsAsync((User)null);
 			userService
 				.Setup(us => us.AnyRegisteredUsersAsync())
 				.ReturnsAsync(false);
@@ -184,7 +184,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			var userService = new Mock<IUserService>();
 			userService
 				.Setup(us => us.GetAndUpdateCurrentUserAsync())
-				.ReturnsAsync(null);
+				.ReturnsAsync((User)null);
 			userService
 				.Setup(us => us.AnyRegisteredUsersAsync())
 				.ReturnsAsync(true);

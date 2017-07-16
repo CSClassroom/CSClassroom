@@ -26,16 +26,23 @@
 		public string Error { get; }
 
 		/// <summary>
+		/// The seed used to generate the question.
+		/// </summary>
+		public int? Seed { get; }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public QuestionGenerationResult(
 			string serializedQuestion,
 			string fullGeneratorFileContents,
-			int fullGeneratorFileLineOffset)
+			int fullGeneratorFileLineOffset,
+			int seed)
 		{
 			SerializedQuestion = serializedQuestion;
 			FullGeneratorFileContents = fullGeneratorFileContents;
 			FullGeneratorFileLineOffset = fullGeneratorFileLineOffset;
+			Seed = seed;
 		}
 
 		/// <summary>

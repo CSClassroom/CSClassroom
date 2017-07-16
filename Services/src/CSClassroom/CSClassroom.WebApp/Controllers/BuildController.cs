@@ -429,7 +429,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			return new TableInfo
 			(
 				buildIdentifierColumns.Concat(new[] { allTestsColumn }).Concat(testResultColumns).ToList(),
-				new TableInfo(typeof(TestClassTableEntry), showHeader: true),
+				new List<TableInfo>() { new TableInfo(typeof(TestClassTableEntry), showHeader: true) },
 				showHeader: true
 			);
 		}

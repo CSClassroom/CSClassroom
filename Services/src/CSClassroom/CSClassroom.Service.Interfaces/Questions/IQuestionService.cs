@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Questions;
@@ -15,6 +16,13 @@ namespace CSC.CSClassroom.Service.Questions
 		/// Returns the list of questions.
 		/// </summary>
 		Task<IList<Question>> GetQuestionsAsync(string classroomName);
+
+		/// <summary>
+		/// Returns the list of question choices for a randomly selected question.
+		/// </summary>
+		Task<QuestionCategory> GetQuestionChoicesAsync(
+			string classroomName, 
+			int questionId);
 
 		/// <summary>
 		/// Returns the question with the given id.
@@ -40,17 +48,16 @@ namespace CSC.CSClassroom.Service.Questions
 		/// <summary>
 		/// Removes a question.
 		/// </summary>
-		Task DeleteQuestionAsync(string classroomName, int id);
+		Task<QuestionCategory> DeleteQuestionAsync(string classroomName, int id);
 
 		/// <summary>
-		/// Returns the question with the given ID, along with any unsolved prerequisites
-		/// for this question (if any), and the student's previous submission contents 
-		/// (if any).
+		/// Returns the specific instance of a generated question template
+		/// that corresponds to the given seed.
 		/// </summary>
-		Task<QuestionToSolve> GetQuestionToSolveAsync(
+		Task<GeneratedQuestionInstance> GetQuestionInstanceAsync(
 			string classroomName,
-			int userId,
-			int questionId);
+			int id,
+			int seed);
 
 		/// <summary>
 		/// Returns a copy of an existing quesrtion. The copy is not saved unless and until
@@ -69,13 +76,5 @@ namespace CSC.CSClassroom.Service.Questions
 			string classroomName, 
 			int existingQuestionId);
 
-		/// <summary>
-		/// Grades a question submission (returning and storing the result).
-		/// </summary>
-		Task<ScoredQuestionResult> GradeSubmissionAsync(
-			string classroomName,
-			int userId,
-			int questionId,
-			QuestionSubmission submission);
 	}
 }

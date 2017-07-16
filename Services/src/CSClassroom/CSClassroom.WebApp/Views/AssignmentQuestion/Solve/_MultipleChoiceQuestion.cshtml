@@ -1,0 +1,49 @@
+﻿@using CSC.CSClassroom.Model.Questions.ServiceResults
+@model CSC.CSClassroom.Model.Questions.ServiceResults.QuestionToSolve
+@{
+    var question = Model.Question as MultipleChoiceQuestion;
+    var inputType = (question.AllowMultipleCorrectAnswers ? "checkbox" : "radio");
+    var prefix = (ViewBag.Prefix != null ? ViewBag.Prefix : "");
+}
+
+<input type="hidden" name="@($"{prefix}QuestionSubmissionType")" value="MultipleChoiceQuestionSubmission" />
+<table class="table" style="width: auto">
+    <tbody>
+    @{ var orderedChoices = question.Choices.OrderBy(c => c.Order).ToList(); }
+    @foreach (var choice in orderedChoices)
+    {
+        <tr>
+            <td>
+                <input type="@inputType" name="@($"{prefix}SelectedChoices")" value="@choice.Value"/>
+
+                <span style="white-space: pre-wrap; vertical-align: top">@(char.ConvertFromUtf32('A' + orderedChoices.IndexOf(choice)).ToString()))</span>
+            </td>
+            <td>
+                <div style="white-space: pre-wrap">@choice.Value</div>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+@if (Model.Interactive)
+{
+    <span id="result" style="display: none"></span>
+    <script type="text/javascript">
+        function displayResult(response)
+        {
+            var result = $('#result');
+            result.css('display', 'inherit');
+            result.css('font-weight', 'bold');
+            if (response.result.correct)
+            {
+                result.text('Correct!');
+                result.css('color', 'green');
+            }
+            else
+            {
+                result.text('Incorrect.');
+                result.css('color', 'red');
+            }
+        }
+    </script>
+}

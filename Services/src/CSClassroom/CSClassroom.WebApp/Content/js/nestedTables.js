@@ -1,5 +1,4 @@
-﻿function getTableHtml(tableInfo, hasParent) {
-    var hasChildren = !!tableInfo.childTableInfo;
+﻿function getTableHtml(tableInfo, hasParent, hasChildren) {
     var columns = tableInfo.columns;
 
     var tableHtml = "";
@@ -29,14 +28,29 @@
     return tableHtml;
 }
 
-function createFlatTable(parentRow, tableInfo) {
+function createFlatTable(parentRow, tableInfo, hasChildren) {
     if (parentRow instanceof jQuery) {
-        var newFlatTable = $(getTableHtml(tableInfo, false /*hasParent*/));
+        var newFlatTable = $(getTableHtml(tableInfo, false /*hasParent*/, hasChildren));
         parentRow.append(newFlatTable);
         return newFlatTable;
     } else {
-        parentRow.child(getTableHtml(tableInfo, true /*hasParent*/)).show();
+        parentRow.child(getTableHtml(tableInfo, true /*hasParent*/, hasChildren)).show();
         return $(parentRow.node()).next().find('table');
+    }
+}
+
+function getChildTableInfo(childTableInfos, type) {
+    if (childTableInfos.length === 1) {
+        return childTableInfos[0];
+    } else {
+        for (var index = 0; index < childTableInfos.length; index++) {
+            var actualType = type.substr(0, type.indexOf(","));
+            if (childTableInfos[index].type === actualType) {
+                return childTableInfos[index];
+            }
+        }
+
+        throw new Error("Invalid child table type.");
     }
 }
 
@@ -48,11 +62,20 @@ function createNestedTable(parentRow, tableInfo, jsonArray, emptyTableLanguage, 
         order = [];
 
     var columns = tableInfo.columns;
-    var flatTable = createFlatTable(parentRow, tableInfo);
+
+    var hasChildren = false;
+    if (!!tableInfo.childTableInfos) {
+        for (var index = 0; index < jsonArray.length; index++) {
+            var childTableData = jsonArray[index].childTableData;
+            if (childTableData && childTableData.length > 0) {
+                hasChildren = true;
+            }
+        }
+    }
 
     var columnInput = [];
 
-    if (!!tableInfo.childTableInfo) {
+    if (hasChildren) {
         columnInput.push({
             "className": 'details-control',
             "orderable": false,
@@ -64,6 +87,8 @@ function createNestedTable(parentRow, tableInfo, jsonArray, emptyTableLanguage, 
     for (var columnIndex = 0; columnIndex < columns.length; columnIndex++) {
         columnInput.push({ data: columns[columnIndex].name });
     }
+
+    var flatTable = createFlatTable(parentRow, tableInfo, hasChildren);
 
     var dataTable = flatTable.DataTable({
         "data": jsonArray,
@@ -79,14 +104,14 @@ function createNestedTable(parentRow, tableInfo, jsonArray, emptyTableLanguage, 
         }
     });
 
-    if (!!tableInfo.childTableInfo) {
+    if (!!tableInfo.childTableInfos) {
         var flatTableBody = flatTable.find('tbody');
         flatTableBody.children('tr').children('td.details-control').each(function (iteration) {
             var tb = flatTableBody;
             var tr = $(this).closest('tr');
             var row = dataTable.row(tr);
 
-            if (row.data().childTableData) {
+            if (row.data().childTableData && row.data().childTableData.length > 0) {
                 $(this).on('click', function () {
                     if (row.child.isShown()) {
                         // This row is already open - close it
@@ -96,7 +121,8 @@ function createNestedTable(parentRow, tableInfo, jsonArray, emptyTableLanguage, 
                     }
                     else {
                         // Open this row
-                        createNestedTable(row, tableInfo.childTableInfo, row.data().childTableData);
+                        var childTableInfo = getChildTableInfo(tableInfo.childTableInfos, row.data().childTableData[0]["$type"]);
+                        createNestedTable(row, childTableInfo, row.data().childTableData);
                         tr.next().prepend($('<td></td>'));
                         tr.next().children().last().attr("colspan", 3);
                         tr.addClass('shown');

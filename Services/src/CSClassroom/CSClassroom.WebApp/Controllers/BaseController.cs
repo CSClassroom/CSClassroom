@@ -24,11 +24,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		public ILogContext LogContext { get; }
 
 		/// <summary>
-		/// The identity provider.
-		/// </summary>
-		public IIdentityProvider IdentityProvider { get; }
-
-		/// <summary>
 		/// The user provider.
 		/// </summary>
 		public IUserProvider UserProvider { get; }
@@ -43,12 +38,10 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// </summary>
 		public BaseControllerArgs(
 			ILogContext logContext,
-			IIdentityProvider identityProvider,
 			IUserProvider userProvider,
 			ITimeZoneProvider timeZoneProvider)
 		{
 			LogContext = logContext;
-			IdentityProvider = identityProvider;
 			UserProvider = userProvider;
 			TimeZoneProvider = timeZoneProvider;
 		}
@@ -80,11 +73,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		protected ILogContext LogContext { get; }
 
 		/// <summary>
-		/// The identity provider.
-		/// </summary>
-		private readonly IIdentityProvider _identityProvider;
-
-		/// <summary>
 		/// The user provider.
 		/// </summary>
 		private readonly IUserProvider _userProvider;
@@ -96,7 +84,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		{
 			LogContext = args.LogContext;
 			TimeZoneProvider = args.TimeZoneProvider;
-			_identityProvider = args.IdentityProvider;
 			_userProvider = args.UserProvider;
 		}
 

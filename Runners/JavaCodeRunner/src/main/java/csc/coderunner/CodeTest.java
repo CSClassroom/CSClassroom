@@ -59,7 +59,7 @@ public abstract class CodeTest
 		String returnType = getTestMethodReturnType(javaClass);
 		String methodName = getTestName();
 		
-		builder.addLine("public static %s %s()", returnType, methodName)
+		builder.addLine("public static %s %s() throws Exception", returnType, methodName)
 			.beginScope()
 				.addLines(getTestMethodBody(javaClass))
 			.endScope();

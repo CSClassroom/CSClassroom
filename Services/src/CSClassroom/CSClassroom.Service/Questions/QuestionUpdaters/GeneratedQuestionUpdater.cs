@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.System;
 using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Repository;
@@ -18,16 +19,23 @@ namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
 		private readonly IQuestionGenerator _questionGenerator;
 
 		/// <summary>
+		/// The time provider.
+		/// </summary>
+		private readonly ITimeProvider _timeProvider;
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public GeneratedQuestionUpdater(
 			DatabaseContext dbContext, 
 			GeneratedQuestionTemplate question, 
 			IModelErrorCollection errors, 
-			IQuestionGenerator questionGenerator) 
+			IQuestionGenerator questionGenerator,
+			ITimeProvider timeProvider) 
 				: base(dbContext, question, errors)
 		{
 			_questionGenerator = questionGenerator;
+			_timeProvider = timeProvider;
 		}
 
 		/// <summary>
@@ -35,6 +43,14 @@ namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
 		/// </summary>
 		protected override async Task UpdateQuestionImplAsync()
 		{
+			DbContext.RemoveUnwantedObjects
+			(
+				DbContext.ImportedClasses,
+				importedClass => importedClass.Id,
+				importedClass => importedClass.CodeQuestionId == Question.Id,
+				Question.ImportedClasses
+			);
+
 			var generateResult = await _questionGenerator.GenerateQuestionAsync(Question, 0);
 			if (generateResult.Error != null)
 			{
@@ -42,7 +58,7 @@ namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
 			}
 			else
 			{
-				Question.DateModified = DateTime.Now;
+				Question.DateModified = _timeProvider.UtcNow;
 				Question.FullGeneratorFileContents = generateResult.FullGeneratorFileContents;
 				Question.FullGeneratorFileLineOffset = generateResult.FullGeneratorFileLineOffset;
 			}

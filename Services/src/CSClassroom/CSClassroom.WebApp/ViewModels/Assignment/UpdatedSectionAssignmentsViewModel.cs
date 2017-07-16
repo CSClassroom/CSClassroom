@@ -49,9 +49,9 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		/// </summary>
 		public UpdatedSectionAssignmentsViewModel(
 			UpdatedSectionAssignmentResults results,
-			DateTime submissionsRetrievedDate,
 			SelectAssignmentReport markAssignmentsGraded,
-			ITimeZoneProvider timeZoneProvider)
+			ITimeZoneProvider timeZoneProvider,
+			IAssignmentDisplayProviderFactory displayProviderFactory)
 		{
 			SectionName = results.SectionName;
 
@@ -63,11 +63,15 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 						.FormatLongDateTime(timeZoneProvider)
 					: "The beginning";
 			
-			EndDate = submissionsRetrievedDate.FormatLongDateTime(timeZoneProvider);
+			EndDate = results.ResultsRetrievedDate.FormatLongDateTime(timeZoneProvider);
 
 			AssignmentResults = results.AssignmentResults.Select
 			(
-				result => new AssignmentUpdatesViewModel(result)
+				result => new AssignmentUpdatesViewModel
+				(
+					result,
+					displayProviderFactory
+				)
 			).ToList();
 
 			MarkAssignmentsGraded = markAssignmentsGraded;

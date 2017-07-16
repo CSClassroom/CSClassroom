@@ -74,7 +74,9 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			}
 
 			ViewBag.Classroom = classroom;
-			ViewBag.ClassroomRole = membership?.Role ?? ClassroomRole.Admin;
+			ViewBag.ClassroomRole = User.SuperUser
+				? ClassroomRole.Admin
+				: membership?.Role ?? ClassroomRole.Admin;
 
 			return View(classroom);
 		}

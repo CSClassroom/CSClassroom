@@ -72,9 +72,9 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// <summary>
 		/// Shows all projects.
 		/// </summary>
-		[Route("Projects")]
+		[Route("ProjectsAdmin")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Admin()
 		{
 			var projects = await ProjectService.GetProjectsAsync(ClassroomName);
 
@@ -84,9 +84,9 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// <summary>
 		/// Shows the status of all proejcts.
 		/// </summary>
-		[Route("ProjectStatus")]
+		[Route("Projects")]
 		[ClassroomAuthorization(ClassroomRole.General)]
-		public async Task<IActionResult> Status(int? userId)
+		public async Task<IActionResult> Index(int? userId)
 		{
 			if (userId == null)
 			{
@@ -126,7 +126,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			ViewBag.SectionNames = new List<SelectListItem>
 			(
-				Classroom.Sections.Select
+				Classroom.Sections.OrderBy(s => s.Name).Select
 				(
 					section => new SelectListItem()
 					{
@@ -139,7 +139,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			ViewBag.ProjectNames = new List<SelectListItem>
 			(
-				projects.Select
+				projects.OrderBy(p => p.Name).Select
 				(
 					project => new SelectListItem()
 					{
@@ -198,7 +198,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			{
 				await ProjectService.CreateProjectAsync(ClassroomName, project);
 
-				return RedirectToAction("Index");
+				return RedirectToAction("Admin");
 			}
 			else
 			{
@@ -240,7 +240,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			{
 				await ProjectService.UpdateProjectAsync(ClassroomName, project);
 
-				return RedirectToAction("Index");
+				return RedirectToAction("Admin");
 			}
 			else
 			{
@@ -280,7 +280,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		{
 			await ProjectService.DeleteProjectAsync(ClassroomName, projectName);
 
-			return RedirectToAction("Index");
+			return RedirectToAction("Admin");
 		}
 
 		/// <summary>
@@ -377,7 +377,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				Url.Action("OnBuildCompleted")
 			);
 
-			return RedirectToAction("Index");
+			return RedirectToAction("Admin");
 		}
 
 		/// <summary>

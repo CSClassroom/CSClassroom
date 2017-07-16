@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Serialization;
 using CSC.Common.Infrastructure.System;
 using CSC.Common.Infrastructure.Utilities;
+using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Model.Questions.ServiceResults;
 using CSC.CSClassroom.Model.Questions.ServiceResults.Errors;
@@ -16,7 +17,9 @@ using CSC.CSClassroom.Service.Questions.QuestionGeneration;
 using CSC.CSClassroom.Service.Questions.QuestionGraders;
 using CSC.CSClassroom.Service.Questions.QuestionLoaders;
 using CSC.CSClassroom.Service.Questions.QuestionUpdaters;
+using CSC.CSClassroom.Service.Questions.Validators;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
+using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
@@ -58,6 +61,59 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			Assert.Equal("Class1", orderedQuestions[1].QuestionCategory.Classroom.Name);
 			Assert.Equal("Category2", orderedQuestions[1].QuestionCategory.Name);
 			Assert.Equal("Question2", orderedQuestions[1].Name);
+		}
+
+		/// <summary>
+		/// Ensures that GetQuestionsAsync returns only questions
+		/// for a given classroom.
+		/// </summary>
+		[Fact]
+		public async Task GetQuestionChoicesAsync_ReturnsAllChoices()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddClassroom("Class2")
+				.AddQuestionCategory("Class1", "Category1")
+				.AddQuestion("Class1", "Category1", new RandomlySelectedQuestion()
+				{
+					Name = "Question1",
+					ChoicesCategory = new QuestionCategory()
+					{
+						Name = "ChoicesCategory",
+						Questions = Collections.CreateList
+						(
+							new MethodQuestion() { Name = "Choice1" },
+							new MethodQuestion() { Name = "Choice2" }
+						).Cast<Question>().ToList()
+					}
+				})
+				.AddQuestion("Class1", "Category1", new MultipleChoiceQuestion()
+				{
+					Name = "OtherQuestion"
+				})
+				.Build();
+
+			var questionId = database.Context
+				.RandomlySelectedQuestions
+				.Single()
+				.Id;
+
+			var questionService = CreateQuestionService(database.Context);
+			var choicesCategory = await questionService.GetQuestionChoicesAsync
+			(
+				"Class1",
+				questionId
+			);
+
+			var orderedQuestions = choicesCategory.Questions
+				.OrderBy(q => q.Name)
+				.ToList();
+
+			Assert.Equal(2, orderedQuestions.Count);
+			Assert.Equal("Class1", orderedQuestions[0].QuestionCategory.Classroom.Name);
+			Assert.Equal("Choice1", orderedQuestions[0].Name);
+			Assert.Equal("Class1", orderedQuestions[1].QuestionCategory.Classroom.Name);
+			Assert.Equal("Choice2", orderedQuestions[1].Name);
 		}
 
 		/// <summary>
@@ -122,11 +178,182 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		}
 
 		/// <summary>
-		/// Ensures that CreateQuestionAsync actually creates the question, 
-		/// when there is no existing question with the same name.
+		/// Ensures that GetQuestionInstanceAsync returns null when the given generated
+		/// question template ID does not exist.
 		/// </summary>
 		[Fact]
-		public async Task CreateQuestionAsync_NameCollision_QuestionNotCreated()
+		public async Task GetQuestionInstanceAsync_NoQuestion_ReturnsNull()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.Build();
+
+			var questionService = CreateQuestionService(database.Context);
+			var questionInstance = await questionService.GetQuestionInstanceAsync
+			(
+				"Class1",
+				id: 1,
+				seed: 100
+			);
+
+			Assert.Null(questionInstance);
+		}
+
+		/// <summary>
+		/// Ensures that GetQuestionInstanceAsync throws when given a question that is
+		/// not a generated question template.
+		/// </summary>
+		[Fact]
+		public async Task GetQuestionInstanceAsync_InvalidQuestionType_Throws()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddQuestionCategory("Class1", "Category1")
+				.AddQuestion("Class1", "Category1", new MethodQuestion()
+				{
+					Name = "Question1"
+				})
+				.Build();
+
+			var questionId = database.Context
+				.Questions
+				.First()
+				.Id;
+
+			var loaderFactory = GetMockQuestionLoaderFactory();
+			var questionService = CreateQuestionService
+			(
+				database.Context,
+				questionLoaderFactory: loaderFactory.Object
+			);
+
+			await Assert.ThrowsAsync<InvalidOperationException>
+			(
+				async () => await questionService.GetQuestionInstanceAsync
+				(
+					"Class1",
+					id: questionId,
+					seed: 100
+				)
+			);
+		}
+
+		/// <summary>
+		/// Ensures that GetQuestionInstanceAsync returns the generated instance
+		/// when there is no generation error.
+		/// </summary>
+		[Fact]
+		public async Task GetQuestionInstanceAsync_NoGenerationError_ReturnsQuestionInstance()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddQuestionCategory("Class1", "Category1")
+				.AddQuestion("Class1", "Category1", new GeneratedQuestionTemplate()
+				{
+					Name = "Question1"
+				})
+				.Build();
+
+			var questionId = database.Context
+				.Questions
+				.First()
+				.Id;
+
+			var loaderFactory = GetMockQuestionLoaderFactory();
+			var generator = GetMockQuestionGenerator
+			(
+				questionId, 
+				seed: 12345, 
+				error: false,
+				result: "SerializedQuestion"
+			);
+
+			var expectedResult = new MethodQuestion();
+			var jsonSerializer = GetMockJsonSerializer<Question>
+			(
+				"SerializedQuestion", 
+				expectedResult
+			);
+
+			var questionService = CreateQuestionService
+			(
+				database.Context,
+				questionLoaderFactory: loaderFactory.Object,
+				questionGenerator: generator.Object,
+				jsonSerializer: jsonSerializer.Object	
+			);
+
+			var result = await questionService.GetQuestionInstanceAsync
+			(
+				"Class1",
+				id: 1,
+				seed: 12345
+			);
+
+			loaderFactory.Verify(LoadQuestionExpression);
+			Assert.Equal(expectedResult, result.Question);
+			Assert.Equal(12345, result.Seed);
+		}
+
+		/// <summary>
+		/// Ensures that GetQuestionInstanceAsync returns the generated instance
+		/// when there is no generation error.
+		/// </summary>
+		[Fact]
+		public async Task GetQuestionInstanceAsync_GenerationError_ReturnsError()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddQuestionCategory("Class1", "Category1")
+				.AddQuestion("Class1", "Category1", new GeneratedQuestionTemplate()
+				{
+					Name = "Question1"
+				})
+				.Build();
+
+			var questionId = database.Context
+				.Questions
+				.First()
+				.Id;
+
+			var loaderFactory = GetMockQuestionLoaderFactory();
+			var questionGenerator = GetMockQuestionGenerator
+			(
+				questionId,
+				seed: 12345,
+				error: true,
+				result: "Error"
+			);
+
+			var questionService = CreateQuestionService
+			(
+				database.Context,
+				questionLoaderFactory: loaderFactory.Object,
+				questionGenerator: questionGenerator.Object
+			);
+
+			var result = await questionService.GetQuestionInstanceAsync
+			(
+				"Class1",
+				id: 1,
+				seed: 12345
+			);
+
+			Assert.Null(result.Question);
+			Assert.Equal(12345, result.Seed);
+			Assert.Equal("Error", result.Error);
+		}
+
+		/// <summary>
+		/// Ensures that CreateQuestionAsync does not create the given question
+		/// when the question is invalid.
+		/// </summary>
+		[Theory]
+		[InlineData(true, false)]
+		[InlineData(false, true)]
+		public async Task CreateQuestionAsync_InvalidQuestion_QuestionNotCreated(
+			bool validatorIsValid,
+			bool updaterIsValid)
 		{
 			var database = new TestDatabaseBuilder()
 				.AddClassroom("Class1")
@@ -136,11 +363,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 
 			var questionCategoryId = database.Context.QuestionCategories.First().Id;
 			var modelErrors = new MockErrorCollection();
-			var updaterFactory = GetMockQuestionUpdaterFactory();
+			var validator = GetMockQuestionValidator(validatorIsValid);
+			var updaterFactory = GetMockQuestionUpdaterFactory(updaterIsValid);
 
 			var questionService = CreateQuestionService
 			(
 				database.Context,
+				questionValidator: validator.Object,
 				questionUpdaterFactory: updaterFactory.Object
 			);
 
@@ -155,6 +384,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 				modelErrors
 			);
 
+			Assert.False(result);
+			Assert.True(modelErrors.VerifyErrors("Error"));
+
 			database.Reload();
 
 			var numQuestions = database.Context.Questions.Count();
@@ -166,10 +398,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		}
 
 		/// <summary>
-		/// Ensures that CreateQuestionAsync actually creates the question.
+		/// Ensures that CreateQuestionAsync actually creates the question
+		/// when the question is valid.
 		/// </summary>
 		[Fact]
-		public async Task CreateQuestionAsync_NoNameCollision_QuestionCreated()
+		public async Task CreateQuestionAsync_ValidQuestion_QuestionCreated()
 		{
 			var database = new TestDatabaseBuilder()
 				.AddClassroom("Class1")
@@ -177,12 +410,14 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 				.Build();
 
 			var questionCategoryId = database.Context.QuestionCategories.First().Id;
-			var modelErrors = new Mock<IModelErrorCollection>();
-			var updaterFactory = GetMockQuestionUpdaterFactory();
+			var modelErrors = new MockErrorCollection();
+			var validator = GetMockQuestionValidator(isValid: true);
+			var updaterFactory = GetMockQuestionUpdaterFactory(isValid: true);
 
 			var questionService = CreateQuestionService
 			(
 				database.Context, 
+				questionValidator: validator.Object,
 				questionUpdaterFactory: updaterFactory.Object
 			);
 
@@ -194,8 +429,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 					Name = "Question1",
 					QuestionCategoryId = questionCategoryId
 				}, 
-				modelErrors.Object
+				modelErrors
 			);
+
+			Assert.True(result);
+			Assert.False(modelErrors.HasErrors);
 
 			database.Reload();
 
@@ -207,15 +445,18 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			Assert.Equal("Class1", question.QuestionCategory.Classroom.Name);
 			Assert.Equal("Category1", question.QuestionCategory.Name);
 			Assert.Equal("Question1", question.Name);
-			updaterFactory.Verify(UpdateQuestionExpression);
 		}
 
 		/// <summary>
 		/// Ensures that UpdateQuestionAsync does not update the question,
-		/// when there is another question with the same name as the updated name.
+		/// when the question is invalid.
 		/// </summary>
-		[Fact]
-		public async Task UpdateQuestionCategoryAsync_NameCollision_QuestionNotUpdated()
+		[Theory]
+		[InlineData(true, false)]
+		[InlineData(false, true)]
+		public async Task UpdateQuestionCategoryAsync_InvalidQuestion_QuestionNotUpdated(
+			bool validatorIsValid,
+			bool updaterIsValid)
 		{
 			var database = new TestDatabaseBuilder()
 				.AddClassroom("Class1")
@@ -224,28 +465,31 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 				.AddQuestion("Class1", "Category1", new MethodQuestion() { Name = "Question2" })
 				.Build();
 
-			var modelErrors = new Mock<IModelErrorCollection>();
-			var updaterFactory = GetMockQuestionUpdaterFactory();
+			var modelErrors = new MockErrorCollection();
+			var validator = GetMockQuestionValidator(validatorIsValid);
+			var updaterFactory = GetMockQuestionUpdaterFactory(updaterIsValid);
 			var question = database.Context.Questions
 				.Single(q => q.Name == "Question2");
+
+			database.Context.Entry(question).State = EntityState.Detached;
+			question.AllowPartialCredit = true;
 
 			var questionService = CreateQuestionService
 			(
 				database.Context,
-				questionUpdaterFactory: updaterFactory.Object
+				questionUpdaterFactory: updaterFactory.Object,
+				questionValidator: validator.Object
 			);
-
-			// Update the category
-			database.Context.Entry(question).State = EntityState.Detached;
-			question.Name = "Question1";
-
-			// Apply the update
-			await questionService.UpdateQuestionAsync
+			
+			var result = await questionService.UpdateQuestionAsync
 			(
 				"Class1",
 				question,
-				modelErrors.Object
+				modelErrors
 			);
+
+			Assert.False(result);
+			Assert.True(modelErrors.VerifyErrors("Error"));
 
 			database.Reload();
 
@@ -260,10 +504,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 
 		/// <summary>
 		/// Ensures that UpdateQuestionAsync actually updates the question,
-		/// when there is no question with the same name as the updated name.
+		/// when the question is valid.
 		/// </summary>
 		[Fact]
-		public async Task UpdateQuestionCategoryAsync_NoNameCollision_QuestionUpdated()
+		public async Task UpdateQuestionCategoryAsync_ValidQuestion_QuestionUpdated()
 		{
 			var database = new TestDatabaseBuilder()
 				.AddClassroom("Class1")
@@ -273,26 +517,29 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 				.Build();
 			
 			var question = database.Context.Questions.First();
-			var modelErrors = new Mock<IModelErrorCollection>();
-			var updaterFactory = GetMockQuestionUpdaterFactory();
+			var modelErrors = new MockErrorCollection();
+			var validator = GetMockQuestionValidator(isValid: true);
+			var updaterFactory = GetMockQuestionUpdaterFactory(isValid: true);
+
+			database.Context.Entry(question).State = EntityState.Detached;
+			question.AllowPartialCredit = true;
 
 			var questionService = CreateQuestionService
 			(
 				database.Context,
+				questionValidator: validator.Object,
 				questionUpdaterFactory: updaterFactory.Object
 			);
-
-			// Update the category
-			database.Context.Entry(question).State = EntityState.Detached;
-			question.AllowPartialCredit = true;
-
-			// Apply the update
-			await questionService.UpdateQuestionAsync
+			
+			var result = await questionService.UpdateQuestionAsync
 			(
 				"Class1",
 				question,
-				modelErrors.Object
+				modelErrors
 			);
+
+			Assert.True(result);
+			Assert.False(modelErrors.HasErrors);
 
 			database.Reload();
 
@@ -304,7 +551,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			Assert.Equal("Category1", question.QuestionCategory.Name);
 			Assert.Equal("Question1", question.Name);
 			Assert.Equal(true, question.AllowPartialCredit);
-			updaterFactory.Verify(UpdateQuestionExpression);
 		}
 
 		/// <summary>
@@ -339,349 +585,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			database.Reload();
 
 			Assert.Equal(0, database.Context.Questions.Count());
-		}
-
-		/// <summary>
-		/// Ensures that we return the correct result for a question
-		/// with no past submission.
-		/// </summary>
-		[Fact]
-		public async Task GetQuestionToSolveAsync_NormalQuestionNoPastSubmission_ReturnsQuestion()
-		{
-			var database = new TestDatabaseBuilder()
-				.AddClassroom("Class1")
-				.AddSection("Class1", "Section1")
-				.AddStudent("User1", "Last", "First", "Class1", "Section1")
-				.AddQuestionCategory("Class1", "Category1")
-				.AddQuestion("Class1", "Category1", new MethodQuestion() { Name = "Question1" })
-				.Build();
-
-			var questionId = database.Context.Questions.First().Id;
-			var userId = database.Context.Users.First().Id;
-
-			database.Reload();
-
-			var loaderFactory = GetMockQuestionLoaderFactory();
-			var questionService = CreateQuestionService
-			(
-				database.Context,
-				questionLoaderFactory: loaderFactory.Object
-			);
-
-			var questionToSolve = await questionService.GetQuestionToSolveAsync
-			(
-				"Class1",
-				userId,
-				questionId
-			);
-
-			Assert.Equal("Class1", questionToSolve.Question.QuestionCategory.Classroom.Name);
-			Assert.Equal("Category1", questionToSolve.Question.QuestionCategory.Name);
-			Assert.Equal("Question1", questionToSolve.Question.Name);
-			Assert.Null(questionToSolve.LastSubmission);
-		}
-
-		/// <summary>
-		/// Ensures that we return the correct result for a question
-		/// with a past submission.
-		/// </summary>
-		[Fact]
-		public async Task GetQuestionToSolveAsync_NormalQuestionPastSubmission_ReturnsQuestionAndSubmission()
-		{
-			var database = new TestDatabaseBuilder()
-				.AddClassroom("Class1")
-				.AddSection("Class1", "Section1")
-				.AddStudent("User1", "Last", "First", "Class1", "Section1")
-				.AddQuestionCategory("Class1", "Category1")
-				.AddQuestion("Class1", "Category1", new MethodQuestion() { Name = "Question1" })
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User1", "PastSubmission1")
-				.Build();
-
-			var questionId = database.Context.Questions.First().Id;
-			var userId = database.Context.Users.First().Id;
-
-			database.Reload();
-
-			var loaderFactory = GetMockQuestionLoaderFactory();
-
-			var serializer = new Mock<IJsonSerializer>();
-			serializer
-				.Setup(s => s.Deserialize<QuestionSubmission>("PastSubmission1"))
-				.Returns(new CodeQuestionSubmission() { Contents = "PastSubmissionContents" });
-
-			var questionService = CreateQuestionService
-			(
-				database.Context,
-				questionLoaderFactory: loaderFactory.Object,
-				jsonSerializer: serializer.Object
-			);
-
-			var questionToSolve = await questionService.GetQuestionToSolveAsync
-			(
-				"Class1",
-				userId,
-				questionId
-			);
-
-			Assert.Equal("Class1", questionToSolve.Question.QuestionCategory.Classroom.Name);
-			Assert.Equal("Category1", questionToSolve.Question.QuestionCategory.Name);
-			Assert.Equal("Question1", questionToSolve.Question.Name);
-
-			Assert.Equal
-			(
-				"PastSubmissionContents", 
-				((CodeQuestionSubmission)questionToSolve.LastSubmission).Contents
-			);
-		}
-
-		/// <summary>
-		/// Ensures that we return the correct result for a  
-		/// generated question with no past submission.
-		/// </summary>
-		[Fact]
-		public async Task GetQuestionToSolveAsync_GeneratedQuestionNoPastSubmission_ReturnsQuestion()
-		{
-			var database = new TestDatabaseBuilder()
-				.AddClassroom("Class1")
-				.AddSection("Class1", "Section1")
-				.AddStudent("User1", "Last", "First", "Class1", "Section1")
-				.AddQuestionCategory("Class1", "Category1")
-				.AddQuestion("Class1", "Category1", new GeneratedQuestionTemplate() { Name = "Question1" })
-				.Build();
-
-			var questionId = database.Context.Questions.First().Id;
-			var userId = database.Context.Users.First().Id;
-
-			database.Reload();
-
-			var loaderFactory = GetMockQuestionLoaderFactory();
-			var randomNumberProvider = GetMockRandomNumberProvider(randomNumber: 12345);
-			var questionGenerator = GetMockQuestionGenerator(questionId);
-
-			var jsonSerializer = new Mock<IJsonSerializer>();
-			jsonSerializer
-				.Setup(js => js.Deserialize<Question>("SerializedQuestion"))
-				.Returns(new MethodQuestion());
-
-			var timeProvider = new Mock<ITimeProvider>();
-			timeProvider
-				.Setup(tp => tp.UtcNow)
-				.Returns(new DateTime(2016, 1, 1));
-
-			var questionService = CreateQuestionService
-			(
-				database.Context,
-				questionLoaderFactory: loaderFactory.Object,
-				questionGenerator: questionGenerator.Object,
-				jsonSerializer: jsonSerializer.Object,
-				randomNumberProvider: randomNumberProvider.Object,
-				timeProvider: timeProvider.Object
-			);
-
-			var questionToSolve = await questionService.GetQuestionToSolveAsync
-			(
-				"Class1",
-				userId,
-				questionId
-			);
-
-			Assert.Equal("Class1", questionToSolve.Question.QuestionCategory.Classroom.Name);
-			Assert.Equal("Category1", questionToSolve.Question.QuestionCategory.Name);
-			Assert.Equal("Question1", questionToSolve.Question.Name);
-			Assert.Null(questionToSolve.LastSubmission);
-			Assert.True(questionToSolve.Question is MethodQuestion);
-
-			database.Reload();
-			var userQuestionData = database.Context.UserQuestionData.First();
-
-			Assert.Equal("SerializedQuestion", userQuestionData.CachedQuestionData);
-			Assert.Equal(new DateTime(2016, 1, 1), userQuestionData.CachedQuestionDataTime);
-		}
-
-		/// <summary>
-		/// Ensures that we return the correct result for a question
-		/// with a non-stale past submission (which does not require
-		/// regenerating the question).
-		/// </summary>
-		[Fact]
-		public async Task GetQuestionToSolveAsync_GeneratedQuestionNonStalePastSubmission_ReturnsCachedQuestionAndSubmission()
-		{
-			var database = new TestDatabaseBuilder()
-				.AddClassroom("Class1")
-				.AddSection("Class1", "Section1")
-				.AddStudent("User1", "Last", "First", "Class1", "Section1")
-				.AddQuestionCategory("Class1", "Category1")
-				.AddQuestion("Class1", "Category1", 
-					new GeneratedQuestionTemplate() { Name = "Question1", DateModified = new DateTime(2015, 12, 31)})
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User1", "PastSubmission1",
-					score: 0.0, dateSubmitted: new DateTime(2016, 1, 1), cachedQuestionData: "SerializedQuestion")
-				.Build();
-
-			var questionId = database.Context.Questions.First().Id;
-			var userId = database.Context.Users.First().Id;
-
-			database.Reload();
-
-			var loaderFactory = GetMockQuestionLoaderFactory();
-
-			var serializer = new Mock<IJsonSerializer>();
-			serializer
-				.Setup(s => s.Deserialize<QuestionSubmission>("PastSubmission1"))
-				.Returns(new CodeQuestionSubmission() { Contents = "PastSubmissionContents" });
-			serializer
-				.Setup(js => js.Deserialize<Question>("SerializedQuestion"))
-				.Returns(new MethodQuestion());
-
-			var questionService = CreateQuestionService
-			(
-				database.Context,
-				questionLoaderFactory: loaderFactory.Object,
-				jsonSerializer: serializer.Object
-			);
-
-			var questionToSolve = await questionService.GetQuestionToSolveAsync
-			(
-				"Class1",
-				userId,
-				questionId
-			);
-
-			Assert.Equal("Class1", questionToSolve.Question.QuestionCategory.Classroom.Name);
-			Assert.Equal("Category1", questionToSolve.Question.QuestionCategory.Name);
-			Assert.Equal("Question1", questionToSolve.Question.Name);
-
-			Assert.Equal
-			(
-				"PastSubmissionContents",
-				((CodeQuestionSubmission)questionToSolve.LastSubmission).Contents
-			);
-
-			database.Reload();
-			var userQuestionData = database.Context.UserQuestionData.First();
-
-			Assert.Equal("SerializedQuestion", userQuestionData.CachedQuestionData);
-			Assert.Equal(new DateTime(2016, 1, 1), userQuestionData.CachedQuestionDataTime);
-		}
-
-		/// <summary>
-		/// Ensures that we return the correct result for a 
-		/// generated question with a stale past submission 
-		/// (which requires regenerating the question).
-		/// </summary>
-		[Fact]
-		public async Task GetQuestionToSolveAsync_GeneratedQuestionStalePastSubmission_ReturnsRegeneratedQuestionAndSubmission()
-		{
-			var database = new TestDatabaseBuilder()
-				.AddClassroom("Class1")
-				.AddSection("Class1", "Section1")
-				.AddStudent("User1", "Last", "First", "Class1", "Section1")
-				.AddQuestionCategory("Class1", "Category1")
-				.AddQuestion("Class1", "Category1",
-					new GeneratedQuestionTemplate() { Name = "Question1", DateModified = new DateTime(2016, 1, 2) })
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User1", "PastSubmission1", score: 0.0, 
-					dateSubmitted: new DateTime(2016, 1, 1), cachedQuestionData: "OldSerializedQuestion", seed: 12345)
-				.Build();
-
-			var questionId = database.Context.Questions.First().Id;
-			var userId = database.Context.Users.First().Id;
-
-			database.Reload();
-
-			var loaderFactory = GetMockQuestionLoaderFactory();
-			var questionGenerator = GetMockQuestionGenerator(questionId);
-			var timeProvider = GetMockTimeProvider(new DateTime(2016, 1, 3));
-
-			var serializer = new Mock<IJsonSerializer>();
-			serializer
-				.Setup(s => s.Deserialize<QuestionSubmission>("PastSubmission1"))
-				.Returns(new CodeQuestionSubmission() { Contents = "PastSubmissionContents" });
-			serializer
-				.Setup(js => js.Deserialize<Question>("SerializedQuestion"))
-				.Returns(new MethodQuestion());
-
-			var questionService = CreateQuestionService
-			(
-				database.Context,
-				questionLoaderFactory: loaderFactory.Object,
-				questionGenerator: questionGenerator.Object,
-				jsonSerializer: serializer.Object,
-				timeProvider: timeProvider.Object
-			);
-
-			var questionToSolve = await questionService.GetQuestionToSolveAsync
-			(
-				"Class1",
-				userId,
-				questionId
-			);
-
-			Assert.Equal("Class1", questionToSolve.Question.QuestionCategory.Classroom.Name);
-			Assert.Equal("Category1", questionToSolve.Question.QuestionCategory.Name);
-			Assert.Equal("Question1", questionToSolve.Question.Name);
-			Assert.True(questionToSolve.Question is MethodQuestion);
-
-			Assert.Equal
-			(
-				"PastSubmissionContents",
-				((CodeQuestionSubmission)questionToSolve.LastSubmission).Contents
-			);
-
-			database.Reload();
-			var userQuestionData = database.Context.UserQuestionData.First();
-
-			Assert.Equal("SerializedQuestion", userQuestionData.CachedQuestionData);
-			Assert.Equal(new DateTime(2016, 1, 3), userQuestionData.CachedQuestionDataTime);
-		}
-
-		/// <summary>
-		/// Ensures that we return the question with a list of unsolved
-		/// prerequisites, if any.
-		/// </summary>
-		[Fact]
-		public async Task GetQuestionToSolveAsync_UnsolvedPrerequisites_ReturnsQuestionAndPrerequisites()
-		{
-			var database = new TestDatabaseBuilder()
-				.AddClassroom("Class1")
-				.AddSection("Class1", "Section1")
-				.AddStudent("User1", "Last", "First", "Class1", "Section1")
-				.AddQuestionCategory("Class1", "Category1")
-				.AddQuestion("Class1", "Category1", new MethodQuestion() { Name = "Question1" })
-				.AddQuestion("Class1", "Category1", new MethodQuestion() { Name = "Question2" })
-				.AddQuestion("Class1", "Category1", new MethodQuestion() { Name = "Question3" })
-				.AddQuestion("Class1", "Category1", new MethodQuestion() { Name = "Question4" })
-				.AddPrerequisiteQuestion("Class1", "Category1", "Question1", "Category1", "Question4")
-				.AddPrerequisiteQuestion("Class1", "Category1", "Question2", "Category1", "Question4")
-				.AddPrerequisiteQuestion("Class1", "Category1", "Question3", "Category1", "Question4")
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User1", "Contents", score: 1.0)
-				.AddQuestionSubmission("Class1", "Category1", "Question2", "User1", "Contents", score: 0.0)
-				.Build();
-
-			var questionId = database.Context.Questions
-				.Single(q => q.Name == "Question4")
-				.Id;
-
-			var userId = database.Context.Users.First().Id;
-
-			database.Reload();
-
-			var loaderFactory = GetMockQuestionLoaderFactory();
-			var questionService = CreateQuestionService
-			(
-				database.Context,
-				questionLoaderFactory: loaderFactory.Object
-			);
-
-			var questionToSolve = await questionService.GetQuestionToSolveAsync
-			(
-				"Class1",
-				userId,
-				questionId
-			);
-			
-			Assert.Equal("Question4", questionToSolve.Question.Name);
-			Assert.Equal(2, questionToSolve.UnsolvedPrerequisites.Count);
-			Assert.Equal("Question2", questionToSolve.UnsolvedPrerequisites[0].Name);
-			Assert.Equal("Question3", questionToSolve.UnsolvedPrerequisites[1].Name);
 		}
 
 		/// <summary>
@@ -721,6 +624,81 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			Assert.Equal("Question1 (duplicated)", question.Name);
 		}
 
+		/// <summary>
+		/// Ensures that GenerateFromExistingQuestionAsync throws if given a generated
+		/// question template.
+		/// </summary>
+		[Fact]
+		public async Task GenerateFromExistingQuestionAsync_FromGeneratedTemplate_Throws()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddQuestionCategory("Class1", "Category1")
+				.AddQuestion("Class1", "Category1", new GeneratedQuestionTemplate()
+				{
+					Name = "Question1"
+				})
+				.Build();
+
+			var originalQuestion = database.Context.Questions.First();
+
+			database.Reload();
+
+			var loaderFactory = GetMockQuestionLoaderFactory();
+
+			var questionService = CreateQuestionService
+			(
+				database.Context,
+				questionLoaderFactory: loaderFactory.Object
+			);
+
+			await Assert.ThrowsAsync<InvalidOperationException>
+			(
+				async () => await questionService.GenerateFromExistingQuestionAsync
+				(
+					"Class1",
+					originalQuestion.Id
+				)
+			);
+		}
+
+		/// <summary>
+		/// Ensures that GenerateFromExistingQuestionAsync throws if given a randomly
+		/// selected question.
+		/// </summary>
+		[Fact]
+		public async Task GenerateFromExistingQuestionAsync_FromRandomlySelectedQuestion_Throws()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddQuestionCategory("Class1", "Category1")
+				.AddQuestion("Class1", "Category1", new RandomlySelectedQuestion()
+				{
+					Name = "Question1"
+				})
+				.Build();
+
+			var originalQuestion = database.Context.Questions.First();
+
+			database.Reload();
+
+			var loaderFactory = GetMockQuestionLoaderFactory();
+
+			var questionService = CreateQuestionService
+			(
+				database.Context,
+				questionLoaderFactory: loaderFactory.Object
+			);
+
+			await Assert.ThrowsAsync<InvalidOperationException>
+			(
+				async () => await questionService.GenerateFromExistingQuestionAsync
+				(
+					"Class1",
+					originalQuestion.Id
+				)
+			);
+		}
 
 		/// <summary>
 		/// Ensures that  GenerateFromExistingQuestionAsync returns a new generated
@@ -740,7 +718,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			database.Reload();
 
 			var loaderFactory = GetMockQuestionLoaderFactory();
-			var questionGenerator = GetMockQuestionGenerator(originalQuestion.Id);
+			var questionGenerator = GetMockQuestionGenerator
+			(
+				originalQuestion.Id
+			);
+
 			var questionService = CreateQuestionService
 			(
 				database.Context,
@@ -757,7 +739,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			
 			loaderFactory.Verify(LoadQuestionExpression);
 			Assert.Equal("Question1 (generated)", generatedQuestion.Name);
-			Assert.Equal("Generated Question", generatedQuestion.Description);
+			Assert.Equal("Generated Question Template", generatedQuestion.Description);
 			Assert.Equal(originalQuestion.QuestionCategoryId, generatedQuestion.QuestionCategoryId);
 			Assert.Equal(1, generatedQuestion.ImportedClasses.Count);
 			Assert.Equal("java.util.*", generatedQuestion.ImportedClasses[0].ClassName);
@@ -775,85 +757,42 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		}
 
 		/// <summary>
-		/// Ensures that we store and return the graded result of a submission.
+		/// Returns a mock question validator.
 		/// </summary>
-		[Fact]
-		public async Task GradeSubmissionAsync_NormalQuestion_StoresAndReturnsResult()
+		private Mock<IQuestionValidator> GetMockQuestionValidator(
+			bool isValid)
 		{
-			var database = new TestDatabaseBuilder()
-				.AddClassroom("Class1")
-				.AddSection("Class1", "Section1")
-				.AddStudent("User1", "Last", "First", "Class1", "Section1")
-				.AddQuestionCategory("Class1", "Category1")
-				.AddQuestion("Class1", "Category1", new MethodQuestion() { Name = "Question1" })
-				.Build();
+			var questionValidator = new Mock<IQuestionValidator>();
 
-			var questionId = database.Context.Questions.First().Id;
-			var userId = database.Context.Users.First().Id;
+			questionValidator
+				.Setup
+				(
+					m => m.ValidateQuestionAsync
+					(
+						It.IsNotNull<Question>(),
+						It.IsNotNull<IModelErrorCollection>(),
+						It.IsNotNull<string>()
+					)
+				).Callback<Question, IModelErrorCollection, string>
+				(
+					(_unused1, errors, _unused2) =>
+					{
+						if (!isValid)
+						{
+							errors.AddError("Error", "Error Description");
+						}
+					}
+				).ReturnsAsync(isValid);
 
-			database.Reload();
-
-			var loaderFactory = GetMockQuestionLoaderFactory();
-			var graderFactory = GetMockQuestionGraderFactory();
-			var timeProvider = GetMockTimeProvider(new DateTime(2016, 1, 1));
-			var questionSubmission = new CodeQuestionSubmission()
-			{
-				Contents = "SubmissionContents"
-			};
-
-			var serializer = new Mock<IJsonSerializer>();
-			serializer
-				.Setup(s => s.Serialize<QuestionSubmission>(questionSubmission))
-				.Returns("SerializedSubmissionContents");
-
-			var questionService = CreateQuestionService
-			(
-				database.Context,
-				questionLoaderFactory: loaderFactory.Object,
-				questionGraderFactory: graderFactory.Object,
-				jsonSerializer: serializer.Object,
-				timeProvider: timeProvider.Object
-			);
-
-			var result = await questionService.GradeSubmissionAsync
-			(
-				"Class1",
-				userId,
-				questionId,
-				questionSubmission
-			);
-
-			Assert.Equal(1.0, result.Score);
-
-			database.Reload();
-
-			var submission = database.Context
-				.UserQuestionSubmissions
-				.Where(uqs => uqs.UserQuestionData.UserId == userId)
-				.Include(uqs => uqs.UserQuestionData)
-				.Single(uqs => uqs.UserQuestionData.QuestionId == questionId);
-
-			Assert.Equal(1.0, submission.Score);
-
-			Assert.Equal
-			(
-				"SerializedSubmissionContents", 
-				submission.UserQuestionData.LastQuestionSubmission
-			);
-
-			Assert.Equal
-			(
-				new DateTime(2016, 1, 1),
-				submission.DateSubmitted
-			);
+			return questionValidator;
 		}
 
 		/// <summary>
 		/// Returns a mock question loader factory.
 		/// </summary>
-		private Mock<QuestionLoaderFactory> GetMockQuestionLoaderFactory()
+		private Mock<IQuestionLoaderFactory> GetMockQuestionLoaderFactory()
 		{
-			var loaderFactory = new Mock<QuestionLoaderFactory>(null /*databaseContext*/);
+			var loaderFactory = new Mock<IQuestionLoaderFactory>();
 
 			loaderFactory
 				.Setup(LoadQuestionExpression)
@@ -865,27 +804,49 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		/// <summary>
 		/// Returns a mock question updater factory.
 		/// </summary>
-		private Mock<QuestionUpdaterFactory> GetMockQuestionUpdaterFactory()
+		private Mock<IQuestionUpdaterFactory> GetMockQuestionUpdaterFactory(
+			bool isValid)
 		{
-			var updaterFactory = new Mock<QuestionUpdaterFactory>
-			(
-				null /*databaseContext*/,
-				null /*questionGenerator*/
-			);
+			var updater = new Mock<IQuestionUpdater>();
+			IModelErrorCollection errors = null;
+
+			var updaterFactory = new Mock<IQuestionUpdaterFactory>();
 
 			updaterFactory
-				.Setup(UpdateQuestionExpression)
-				.Returns(Task.CompletedTask);
+				.Setup
+				(
+					m => m.CreateQuestionUpdater
+					(
+						It.IsNotNull<Question>(),
+						It.IsNotNull<IModelErrorCollection>()
+					)
+				).Callback<Question, IModelErrorCollection>
+				(
+					(_unused, modelErrors) => errors = modelErrors
+				).Returns(updater.Object);
+
+			updater
+				.Setup(m => m.UpdateQuestionAsync())
+				.Callback
+				(
+					() =>
+					{
+						if (!isValid)
+						{
+							errors.AddError("Error", "ErrorDescription");
+						}
+					}
+				).Returns(Task.CompletedTask);
 
 			return updaterFactory;
 		}
 
 		/// <summary>
-		/// Returns a mock question updater factory.
+		/// Returns a mock question duplicator factory.
 		/// </summary>
-		private Mock<QuestionDuplicatorFactory> GetMockQuestionDuplicatorFactory()
+		private Mock<IQuestionDuplicatorFactory> GetMockQuestionDuplicatorFactory()
 		{
-			var duplicatorFactory = new Mock<QuestionDuplicatorFactory>(null /*databaseContext*/);
+			var duplicatorFactory = new Mock<IQuestionDuplicatorFactory>();
 
 			duplicatorFactory
 				.Setup(DuplicateQuestionExpression)
@@ -894,49 +855,15 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			return duplicatorFactory;
 		}
 
-		/// <summary>
-		/// Returns a mock question grader factory.
-		/// </summary>
-		private Mock<QuestionGraderFactory> GetMockQuestionGraderFactory()
-		{
-			var scoredQuestionResult = new ScoredQuestionResult
-			(
-				new CodeQuestionResult
-				(
-					new List<CodeQuestionError>(),
-					new List<CodeQuestionTestResult>()
-				),
-				1.0
-			);
-
-			var graderFactory = new Mock<QuestionGraderFactory>(null /*databaseContext*/);
-
-			graderFactory
-				.Setup(GradeQuestionExpression)
-				.ReturnsAsync(scoredQuestionResult);
-
-			return graderFactory;
-		}
-
-		/// <summary>
-		/// Returns a mock random number provider.
-		/// </summary>
-		private static Mock<IRandomNumberProvider> GetMockRandomNumberProvider(
-			int randomNumber)
-		{
-			var randomNumberProvider = new Mock<IRandomNumberProvider>();
-
-			randomNumberProvider
-				.Setup(rnp => rnp.NextInt())
-				.Returns(randomNumber);
-
-			return randomNumberProvider;
-		}
 
 		/// <summary>
 		/// Returns a mock question generator.
 		/// </summary>
-		private static Mock<IQuestionGenerator> GetMockQuestionGenerator(int questionId)
+		private static Mock<IQuestionGenerator> GetMockQuestionGenerator(
+			int questionId,
+			int seed = 0,
+			bool error = false,
+			string result = null)
 		{
 			var questionGenerator = new Mock<IQuestionGenerator>();
 
@@ -960,59 +887,53 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 					qg => qg.GenerateQuestionAsync
 					(
 						It.Is<GeneratedQuestionTemplate>(q => q.Id == questionId),
-						12345 /*seed*/
+						seed
 					)
 				)
 				.ReturnsAsync
 				(
-					new QuestionGenerationResult
-					(
-						"SerializedQuestion",
-						fullGeneratorFileContents: null,
-						fullGeneratorFileLineOffset: 0
-					)
+					error
+						? new QuestionGenerationResult(result)
+						: new QuestionGenerationResult
+							(
+								result,
+								fullGeneratorFileContents: null,
+								fullGeneratorFileLineOffset: 0,
+								seed: seed
+							)
 				);
 
 			return questionGenerator;
 		}
 
 		/// <summary>
-		/// Returns a mock time provider.
+		/// Returns a mock JSON serializer.
 		/// </summary>
-		private static Mock<ITimeProvider> GetMockTimeProvider(DateTime now)
+		private Mock<IJsonSerializer> GetMockJsonSerializer<TObject>(
+			string serializedObject, 
+			TObject deserializedObject)
 		{
-			var timeProvider = new Mock<ITimeProvider>();
+			var serializer = new Mock<IJsonSerializer>();
 
-			timeProvider
-				.Setup(tp => tp.UtcNow)
-				.Returns(now);
+			serializer
+				.Setup(s => s.Deserialize<TObject>(serializedObject))
+				.Returns(deserializedObject);
 
-			return timeProvider;
+			return serializer;
 		}
 
 		/// <summary>
 		/// Returns the expression to load a question.
 		/// </summary>
-		private Expression<Func<QuestionLoaderFactory, Task>> LoadQuestionExpression =>
+		private Expression<Func<IQuestionLoaderFactory, Task>> LoadQuestionExpression =>
 			loaderFactory => loaderFactory
 				.CreateQuestionLoader(It.IsNotNull<Question>())
 				.LoadQuestionAsync();
 
 		/// <summary>
-		/// Returns the expression to update a question.
-		/// </summary>
-		private Expression<Func<QuestionUpdaterFactory, Task>> UpdateQuestionExpression =>
-			updaterFactory => updaterFactory
-				.CreateQuestionUpdater
-				(
-					It.IsNotNull<Question>(), 
-					It.IsNotNull<IModelErrorCollection>()
-				).UpdateQuestionAsync();
-
-		/// <summary>
 		/// Returns the expression to duplicate a question.
 		/// </summary>
-		private Expression<Func<QuestionDuplicatorFactory, Question>> DuplicateQuestionExpression =>
+		private Expression<Func<IQuestionDuplicatorFactory, Question>> DuplicateQuestionExpression =>
 			duplicatorFactory => duplicatorFactory
 				.CreateQuestionDuplicator(It.IsNotNull<Question>())
 				.DuplicateQuestion();
@@ -1020,7 +941,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		/// <summary>
 		/// Returns the expression to duplicate a question.
 		/// </summary>
-		private Expression<Func<QuestionGraderFactory, Task<ScoredQuestionResult>>> GradeQuestionExpression =>
+		private Expression<Func<IQuestionGraderFactory, Task<ScoredQuestionResult>>> GradeQuestionExpression =>
 			graderFactory => graderFactory
 				.CreateQuestionGrader(It.IsNotNull<Question>())
 				.GradeSubmissionAsync(It.IsNotNull<QuestionSubmission>());
@@ -1030,26 +951,22 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		/// </summary>
 		private QuestionService CreateQuestionService(
 			DatabaseContext dbContext,
-			QuestionLoaderFactory questionLoaderFactory = null,
-			QuestionUpdaterFactory questionUpdaterFactory = null,
-			QuestionGraderFactory questionGraderFactory = null,
-			QuestionDuplicatorFactory questionDuplicatorFactory = null,
+			IQuestionValidator questionValidator = null,
+			IQuestionLoaderFactory questionLoaderFactory = null,
+			IQuestionUpdaterFactory questionUpdaterFactory = null,
+			IQuestionDuplicatorFactory questionDuplicatorFactory = null,
 			IQuestionGenerator questionGenerator = null,
-			IJsonSerializer jsonSerializer = null,
-			IRandomNumberProvider randomNumberProvider = null,
-			ITimeProvider timeProvider = null)
+			IJsonSerializer jsonSerializer = null)
 		{
 			return new QuestionService
 			(
 				dbContext,
+				questionValidator,
 				questionLoaderFactory,
 				questionUpdaterFactory,
-				questionGraderFactory,
 				questionDuplicatorFactory,
 				questionGenerator,
-				jsonSerializer,
-				randomNumberProvider,
-				timeProvider
+				jsonSerializer
 			);
 		}
 	}

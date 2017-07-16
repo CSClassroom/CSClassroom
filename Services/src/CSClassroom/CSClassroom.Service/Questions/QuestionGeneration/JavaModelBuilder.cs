@@ -224,8 +224,8 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
 			var subTypes = type.GetTypeInfo()
 				.Assembly
 				.GetTypes()
-				.Where(t => t.GetTypeInfo().BaseType == type)
-				.Where(t => !_typesToExclude.Contains(t))
+				.Where(type.IsAssignableFrom)
+				.Where(t => !_typesToExclude.Any(et => et.IsAssignableFrom(t)))
 				.ToList();
 
 			foreach (var subType in subTypes)

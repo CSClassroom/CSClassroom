@@ -18,6 +18,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Question
 		/// <summary>
 		/// The questions in the category.
 		/// </summary>
+		[SubTable(typeof(QuestionListItem))]
 		[JsonProperty(PropertyName = "ChildTableData")]
 		public List<QuestionListItem> Questions { get; }
 

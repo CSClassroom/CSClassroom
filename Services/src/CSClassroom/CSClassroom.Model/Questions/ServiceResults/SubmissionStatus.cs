@@ -19,7 +19,7 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 	/// </summary>
 	public class SubmissionStatus
 	{
-		/// <summary>
+		/// <summary> 
 		/// The completion of the submission.
 		/// </summary>
 		public Completion Completion { get; }
@@ -36,43 +36,6 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 		{
 			Completion = completion;
 			Late = late;
-		}
-
-		/// <summary>
-		/// Returns the submission status for a question.
-		/// </summary>
-		public static SubmissionStatus ForQuestion(
-			DateTime? dateSubmitted,
-			DateTime dateDue,
-			double score)
-		{
-			var completion = score > 0
-				? Completion.Completed
-				: dateSubmitted != null
-					? Completion.InProgress
-					: Completion.NotStarted;
-
-			var late = score == 0 && DateTime.UtcNow >= dateDue
-				|| score > 0 && dateSubmitted >= dateDue;
-
-			return new SubmissionStatus(completion, late);
-		}
-
-		/// <summary>
-		/// Returns the submission status for an entire assignment.
-		/// </summary>
-		public static SubmissionStatus ForAssignment(
-			IList<SubmissionStatus> questionStatus)
-		{
-			var completion = questionStatus.All(q => q.Completion == Completion.Completed)
-				? Completion.Completed
-				: questionStatus.Any(q => q.Completion != Completion.NotStarted)
-					? Completion.InProgress
-					: Completion.NotStarted;
-
-			var late = questionStatus.Any(q => q.Late);
-
-			return new SubmissionStatus(completion, late);
 		}
 	}
 }

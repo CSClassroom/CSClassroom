@@ -1,4 +1,5 @@
-﻿using CSC.CSClassroom.Model.Questions;
+﻿using System;
+using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Repository;
 
 namespace CSC.CSClassroom.Service.Questions.QuestionDuplicators
@@ -6,7 +7,9 @@ namespace CSC.CSClassroom.Service.Questions.QuestionDuplicators
 	/// <summary>
 	/// Creates question duplicators.
 	/// </summary>
-	public class QuestionDuplicatorFactory : IQuestionResultVisitor<IQuestionDuplicator>
+	public class QuestionDuplicatorFactory :
+		IQuestionDuplicatorFactory, 
+		IQuestionResultVisitor<IQuestionDuplicator>
 	{
 		/// <summary>
 		/// The database context.
@@ -75,6 +78,14 @@ namespace CSC.CSClassroom.Service.Questions.QuestionDuplicators
 		IQuestionDuplicator IQuestionResultVisitor<IQuestionDuplicator>.Visit(GeneratedQuestionTemplate question)
 		{
 			return new GeneratedQuestionDuplicator(_dbContext, question);
+		}
+
+		/// <summary>
+		/// Creates a question duplicator for a randomly selected question.
+		/// </summary>
+		IQuestionDuplicator IQuestionResultVisitor<IQuestionDuplicator>.Visit(RandomlySelectedQuestion question)
+		{
+			throw new InvalidOperationException("Randomly selected questions cannot be duplicated.");
 		}
 	}
 }

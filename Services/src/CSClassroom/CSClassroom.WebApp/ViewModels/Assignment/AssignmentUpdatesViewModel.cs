@@ -2,6 +2,7 @@
 using System.Linq;
 using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.WebApp.Providers;
 using CSC.CSClassroom.WebApp.ViewHelpers.NestedTables;
 using Newtonsoft.Json;
 
@@ -32,6 +33,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		/// <summary>
 		/// The results for each student
 		/// </summary>
+		[SubTable(typeof(StudentAssignmentResultViewModel))]
 		[JsonProperty(PropertyName = "childTableData")]
 		public List<StudentAssignmentResultViewModel> StudentResults { get; }
 
@@ -39,14 +41,15 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		/// Constructor.
 		/// </summary>
 		public AssignmentUpdatesViewModel(
-			SectionAssignmentResults sectionAssignmentResults)
+			SectionAssignmentResults sectionAssignmentResults,
+			IAssignmentDisplayProviderFactory displayProviderFactory)
 		{
-			AssignmentName = $"{sectionAssignmentResults.AssignmentName} ({sectionAssignmentResults.Points} points)";
+			AssignmentName = $"{sectionAssignmentResults.AssignmentGroupName} ({sectionAssignmentResults.Points} points)";
 			SectionName = sectionAssignmentResults.SectionName;
-			NumStudentsUpdated = sectionAssignmentResults.AssignmentResults.Count;
-			StudentResults = sectionAssignmentResults.AssignmentResults.Select
+			NumStudentsUpdated = sectionAssignmentResults.AssignmentGroupResults.Count;
+			StudentResults = sectionAssignmentResults.AssignmentGroupResults.Select
 			(
-				result => new StudentAssignmentResultViewModel(result)
+				result => new StudentAssignmentResultViewModel(result, displayProviderFactory)
 			).ToList();
 		}
 	}

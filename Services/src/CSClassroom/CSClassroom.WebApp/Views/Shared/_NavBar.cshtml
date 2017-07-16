@@ -21,21 +21,16 @@
             <ul class="nav navbar-nav">
                 @if (ViewBag.Classroom != null)
                 {
-                    @if (ViewBag.ClassroomRole >= ClassroomRole.Admin)
+                    @if (((User)ViewBag.User).SuperUser)
                     {
                         <li><a asp-controller="Classroom" asp-action="Index">Classes</a></li>
-                        <li><a asp-controller="Section" asp-action="Index">Sections</a></li>
                     }
-                    <li><a asp-controller="Question" asp-action="Index">Questions</a></li>
-                    <li><a asp-controller="Assignment" asp-action="Index">Assignments</a></li>
                     @if (ViewBag.ClassroomRole >= ClassroomRole.Admin)
                     {
-                        <li><a asp-controller="Project" asp-action="Index">Projects</a></li>
+                        <li><a asp-controller="Section" asp-action="Index">Sections</a></li>
                     }
-                    else
-                    {
-                        <li><a asp-controller="Project" asp-action="Status">Projects</a></li>
-                    }
+                    <li><a asp-controller="Assignment" asp-action="Index">Assignments</a></li>
+                    <li><a asp-controller="Project" asp-action="Index">Projects</a></li>
                 }
             </ul>
             @await Html.PartialAsync("_LoginPartial")

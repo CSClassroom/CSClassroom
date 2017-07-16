@@ -14,19 +14,20 @@
 </div>
 
 <div class="form-group">
+
     <label asp-for="GeneratorContents" class="col-md-2 control-label"></label>
     <div class="col-md-10">
         <p asp-description-for="GeneratorContents" class="form-control-static"></p>
         <span asp-validation-for="GeneratorContents" class="text-danger" style="white-space: pre"></span>
         @Html.Partial($"_CodeEditor", new CodeEditorSettings
-        (
-            nameof(GeneratedQuestionTemplate.GeneratorContents), 
-            Model.GeneratorContents, 
+            (
+            nameof(GeneratedQuestionTemplate.GeneratorContents),
+            Model.GeneratorContents,
             revertContents: null,
-            textArea: true, 
-            minLines: 10, 
+            textArea: true,
+            minLines: 10,
             maxLines: 150
-        ))
+            ))
     </div>
 </div>
 

@@ -33,6 +33,50 @@
             </div>
         </div>
         <div class="form-group">
+            <label asp-for="IsPrivate" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="IsPrivate" class="form-control-static"></p>
+                <input asp-for="IsPrivate" class="checkbox" type="checkbox" value="true" />
+                <input type="hidden" name="IsPrivate" value="false" />
+                <span asp-validation-for="IsPrivate" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="MaxAttempts" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="MaxAttempts" class="form-control-static"></p>
+                <input asp-for="MaxAttempts" class="form-control" />
+                <span asp-validation-for="MaxAttempts" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="CombinedSubmissions" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="CombinedSubmissions" class="form-control-static"></p>
+                <input asp-for="CombinedSubmissions" class="checkbox" type="checkbox" value="true" />
+                <input type="hidden" name="CombinedSubmissions" value="false" />
+                <span asp-validation-for="CombinedSubmissions" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="OnlyShowCombinedScore" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="OnlyShowCombinedScore" class="form-control-static"></p>
+                <input asp-for="OnlyShowCombinedScore" class="checkbox" type="checkbox" value="true" />
+                <input type="hidden" name="OnlyShowCombinedScore" value="false" />
+                <span asp-validation-for="OnlyShowCombinedScore" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="AnswerInOrder" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="AnswerInOrder" class="form-control-static"></p>
+                <input asp-for="AnswerInOrder" class="checkbox" type="checkbox" value="true" />
+                <input type="hidden" name="AnswerInOrder" value="false" />
+                <span asp-validation-for="AnswerInOrder" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
             <label asp-for="Questions" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <p asp-description-for="Questions" class="form-control-static"></p>
@@ -69,6 +113,7 @@
         properties = new[]
         {
             nameof(AssignmentQuestion.QuestionId),
+            nameof(AssignmentQuestion.Name),
             nameof(AssignmentQuestion.Points)
         },
         orderByProp = nameof(AssignmentQuestion.Order),
@@ -82,7 +127,8 @@
                 ((IList<Question>)ViewBag.AvailableQuestions).Cast<object>().ToList(),
                 (Func<object, DropDownListItem>)(question => new DropDownListItem(((Question)question).Name, ((Question)question).Id)),
                 "Category",
-                (Func<object, DropDownListItem>)(question => new DropDownListItem(((Question)question).QuestionCategory.Name, ((Question)question).QuestionCategoryId))
+                (Func<object, DropDownListItem>)(question => new DropDownListItem(((Question)question).QuestionCategory.Name, ((Question)question).QuestionCategoryId)),
+                preventModificationAfterCreation: true
             )
         }
     })

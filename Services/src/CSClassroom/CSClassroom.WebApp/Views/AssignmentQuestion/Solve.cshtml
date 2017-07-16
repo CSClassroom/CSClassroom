@@ -1,0 +1,136 @@
+﻿@using System.Runtime.InteropServices.ComTypes
+@using System.Threading.Tasks
+@using CSC.CSClassroom.Model.Questions.ServiceResults
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@using CSC.CSClassroom.WebApp.ViewModels.Shared
+@using CSC.CSClassroom.Model.Users
+@inject ITimeZoneProvider TimeZoneProvider
+@model QuestionToSolve
+
+@{
+    ViewData["Title"] = "Solve";
+}
+
+@if (Model.User.Id != User.Id)
+{
+    <h2 style="color: blue">Question view for @Model.User.FirstName @Model.User.LastName</h2>
+    <br />
+}
+
+<h2>@Model.Name</h2>
+<h4>@Assignment.Name</h4>
+@if (!Model.Interactive && Assignment.MaxAttempts.HasValue && Assignment.MaxAttempts.Value > 0 && Model.AnyAttemptsRemaining)
+{
+    <h5 style="color: blue">Attempt @(Model.NumAttempts + 1) / @Assignment.MaxAttempts</h5>
+}
+
+@if (ClassroomRole >= ClassroomRole.Admin)
+{
+    @Html.Partial("_EditQuestion", Model)
+}
+<p> </p>
+@if (!Model.AnyAttemptsRemaining)
+{
+    <span>You have made the maximum number of submissions for this question.</span>
+}
+else if (Model.UnsolvedPrerequisites?.Any() ?? false)
+{
+    <span>You must solve the following questions before working on this question:</span>
+    <ul>
+        @foreach (var unsolvedPrereq in Model.UnsolvedPrerequisites)
+        {
+            <li>
+                @Html.ActionLink(unsolvedPrereq.Name, "Solve", new { id = unsolvedPrereq.Id })
+            </li>
+        }
+    </ul>
+}
+else
+{
+    @Html.Partial("_MarkdownViewer", new MarkdownViewerSettings("questionDescription", @Model.Question.Description))
+    <br/>
+    if (Model.Interactive)
+    {
+        <form action="@(Url.Action("SolveQuestion"))" method="post" id="questionForm">
+            <input type="hidden" name="@($"AssignmentQuestionId")" value="@Model.AssignmentQuestionId"/>
+            @Html.Partial($"Solve/_{Model.Question.GetType().Name}", Model)
+            
+            @if (Model.User.Id == User.Id)
+            {
+                <p> </p>
+                <div class="form-group">
+                    @if (Model.NumAttemptsRemaining.HasValue)
+                    {
+                        <span>Attempts Remaining: </span><span id="attemptsRemaining">@Model.NumAttemptsRemaining.Value</span><br />
+                    }
+                    <input id="submit" type="submit" value="Submit" class="btn btn-default"/>
+                    &nbsp;&nbsp;<input id="revert" type="button" value="Revert to default" class="btn btn-default" style="display: none"/>
+                    <div id="progress" style="display: none">
+                        <br/>
+                        <img src="~/images/ajax-loader.gif">
+                        <span>&nbsp; Waiting for results...</span>
+                    </div>
+                </div>
+            }
+        </form>
+        <script type="text/javascript">
+            var limitedAttempts = @(Model.NumAttemptsRemaining.HasValue ? "true" : "false");
+            var attemptsRemaining = @(Model.NumAttemptsRemaining.HasValue ? Model.NumAttemptsRemaining.ToString() : "null");
+
+            $("#questionForm").ajaxForm({
+                beforeSend: function(e) {
+                    $("#submit").prop("disabled", true);
+                    $("#progress").show();
+                },
+                success: function(obj) {
+                    if (limitedAttempts) {
+                        attemptsRemaining--;
+                        $("#attemptsRemaining")[0].innerText = attemptsRemaining;
+                    }
+                    displayResult(obj);
+                    if (!limitedAttempts || attemptsRemaining > 0) {
+                        $("#submit").prop("disabled", false);
+                    }
+                    $("#progress").hide();
+                },
+                error: function(obj) {
+                    alert("An error occured.");
+                    $("#submit").prop("disabled", false);
+                    $("#progress").hide();
+                }
+            });
+
+            keepAuthenticatedSessionAlive();
+        </script>
+    }
+    else
+    {
+        <form action="@(Url.Action("SolveQuestion"))" method="post" id="questionForm">
+            <input type="hidden" name="@($"AssignmentQuestionId")" value="@Model.AssignmentQuestionId" />
+            @Html.Partial($"Solve/_{Model.Question.GetType().Name}", Model)
+            
+            @if (Model.User.Id == User.Id)
+            {
+                <p> </p>
+                <div class="form-group">
+                    <input id="submit" type="submit" value="Submit" class="btn btn-default" />
+                </div>
+            }
+        </form>
+    }
+}
+<br />
+@if (Model.PastSubmissions.Any())
+{
+    @Html.Partial("_PastSubmissions", Model.PastSubmissions)
+}
+
+@section Scripts {
+    <environment names="Development">
+        <script src="~/js/markdownBundle.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/js/markdownBundle.min.js" asp-append-version="true"></script>
+    </environment>
+}

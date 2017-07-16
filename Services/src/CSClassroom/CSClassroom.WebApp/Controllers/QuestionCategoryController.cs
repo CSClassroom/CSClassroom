@@ -61,6 +61,8 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[Route("CreateQuestionCategory")]
 		public async Task<IActionResult> Create(QuestionCategory questionCategory)
 		{
+			questionCategory.RandomlySelectedQuestionId = null;
+
 			if (ModelState.IsValid)
 			{
 				await QuestionCategoryService.CreateQuestionCategoryAsync
@@ -94,7 +96,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				id.Value
 			);
 
-			if (questionCategory == null)
+			if (questionCategory == null || questionCategory.RandomlySelectedQuestionId != null)
 			{
 				return NotFound();
 			}

@@ -13,6 +13,12 @@ namespace CSC.CSClassroom.Model.Questions
 		public int Id { get; set; }
 
 		/// <summary>
+		/// The name of the question.
+		/// </summary>
+		[Display(Name = "Name in Assignment")]
+		public string Name { get; set; }
+
+		/// <summary>
 		/// The assignment for this question.
 		/// </summary>
 		public int AssignmentId { get; set; }
@@ -43,5 +49,20 @@ namespace CSC.CSClassroom.Model.Questions
 		/// The order the question appears in the assignment.
 		/// </summary>
 		public int Order { get; set; }
+
+		/// <summary>
+		/// Whether or not the question is interactive (allowing multiple submissions
+		/// from the same page).
+		/// </summary>
+		public bool IsInteractive() =>
+			   !Assignment.CombinedSubmissions
+			&& Question.SupportedSolver(QuestionSolverType.Interactive);
+
+		/// <summary>
+		/// Whether or not the question has a limited number of attempts.
+		/// </summary>
+		public bool LimitedAttempts() => 
+			   Assignment.MaxAttempts.HasValue
+			&& Assignment.MaxAttempts > 0;
 	}
 }

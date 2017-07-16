@@ -11,6 +11,15 @@
 </div>
 
 <div class="form-group">
+    <label asp-for="Explanation" class="col-md-2 control-label"></label>
+    <div class="col-md-10">
+        <p asp-description-for="Explanation" class="form-control-static"></p>
+        <textarea asp-for="Explanation" class="form-control"></textarea>
+        <span asp-validation-for="Explanation" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="form-group">
     <label asp-for="AllowPartialCredit" class="col-md-2 control-label"></label>
     <div class="col-md-10">
         <p asp-description-for="AllowPartialCredit" class="form-control-static"></p>
@@ -29,7 +38,8 @@
         properties = new[]
         {
             nameof(ShortAnswerQuestionBlank.Name),
-            nameof(ShortAnswerQuestionBlank.Answer)
+            nameof(ShortAnswerQuestionBlank.Answer),
+            nameof(ShortAnswerQuestionBlank.Regex)
         },
         orderByProp = nameof(ShortAnswerQuestionBlank.Order),
         startMinRows = 1,

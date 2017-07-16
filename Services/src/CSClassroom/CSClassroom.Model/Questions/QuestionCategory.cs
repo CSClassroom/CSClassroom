@@ -25,24 +25,13 @@ namespace CSC.CSClassroom.Model.Questions
 		/// The name of the category.
 		/// </summary>
 		[Required]
-		[MaxLength(50)]
+		[MaxLength(100)]
 		[Display
 		(
 			Name = "Name",
 			Description = "Enter the name of the category."
 		)]
 		public string Name { get; set; }
-
-		/// <summary>
-		/// Whether or not the question is public.
-		/// </summary>
-		[Required]
-		[Display
-		(
-			Name = "Private",
-			Description = "Select whether or not the category should be hidden from view."
-		)]
-		public bool IsPrivate { get; set; }
 
 		/// <summary>
 		/// The classroom that contains this category.
@@ -53,5 +42,17 @@ namespace CSC.CSClassroom.Model.Questions
 		/// The exercises in this category.
 		/// </summary>
 		public virtual ICollection<Question> Questions { get; set; }
+
+		/// <summary>
+		/// The randomly generated question that this category contains
+		/// choices for (if any).
+		/// </summary>
+		public int? RandomlySelectedQuestionId { get; set; }
+
+		/// <summary>
+		/// The randomly generated question that this category contains
+		/// choices for (if any).
+		/// </summary>
+		public RandomlySelectedQuestion RandomlySelectedQuestion { get; set; }
 	}
 }

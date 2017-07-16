@@ -68,12 +68,12 @@ namespace CSC.CSClassroom.WebApp.Controllers
 					new UserAction
 					(
 						"Assignments",
-						user => Url.Action("StudentReport", "Assignment", new {userId = user.Id})
+						user => Url.Action("Index", "Assignment", new {userId = user.Id})
 					),
 					new UserAction
 					(
 						"Projects",
-						user => Url.Action("Status", "Project", new {userId = user.Id})
+						user => Url.Action("Index", "Project", new {userId = user.Id})
 					),
 					new UserAction
 					(

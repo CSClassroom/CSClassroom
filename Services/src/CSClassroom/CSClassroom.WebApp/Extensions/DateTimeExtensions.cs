@@ -43,5 +43,23 @@ namespace CSC.CSClassroom.WebApp.Extensions
 
 			return userTime.ToString("M/d");
 		}
+
+		/// <summary>
+		/// Converts a DateTime to epoch time (the number of seconds since 1/1/1970)
+		/// </summary>
+		public static long ToEpoch(this DateTime dateTimeUtc)
+		{
+			var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+			return Convert.ToInt64((dateTimeUtc - epoch).TotalMilliseconds);
+		}
+
+		/// <summary>
+		/// Converts a DateTime to epoch time (the number of seconds since 1/1/1970)
+		/// </summary>
+		public static DateTime FromEpoch(this long dateTimeEpoch)
+		{
+			var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+			return epoch.AddMilliseconds(dateTimeEpoch);
+		}
 	}
 }

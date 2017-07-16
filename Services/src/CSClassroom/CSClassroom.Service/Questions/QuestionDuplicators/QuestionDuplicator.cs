@@ -53,15 +53,6 @@ namespace CSC.CSClassroom.Service.Questions.QuestionDuplicators
 		private void PopulateQuestion(TQuestion duplicate)
 		{
 			duplicate.QuestionCategory = Question.QuestionCategory;
-			duplicate.PrerequisiteQuestions = DuplicateList
-			(
-				Question.PrerequisiteQuestions,
-				pq =>
-				{
-					pq.Id = 0;
-					pq.SecondQuestionId = 0;
-				}
-			);
 
 			PopulateQuestionImpl(duplicate);
 		}

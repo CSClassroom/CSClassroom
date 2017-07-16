@@ -1,4 +1,4 @@
-﻿@using CSC.CSClassroom.WebApp.Utilities
+﻿@using CSC.Common.Infrastructure.Utilities;
 @model DynamicTableConfig
 
 <script type="text/javascript">
@@ -77,20 +77,43 @@
                         }
                         @if (Model.DropDownLists != null)
                         {
-                            foreach(var dropDownList in Model.DropDownLists.Where(d => d.GroupFilter != null))
+                            foreach(var dropDownList in Model.DropDownLists)
                             {
-                                @:if (record.@(dropDownList.GroupColumnName) > 0) {
-                                    @:var groupCol = $("#@Model.TableElementId").appendGrid('getCellCtrl', '@dropDownList.GroupColumnName', rowIndex);
-                                    @:$(groupCol).trigger('change');
-                                    @:var itemCol = $("#@Model.TableElementId").appendGrid('getCellCtrl', '@dropDownList.PropertyName', rowIndex);
-                                    @:if (record.@(dropDownList.PropertyName) > 0) {
-                                        @:$(itemCol).val(record.@(dropDownList.PropertyName));
-                                    @:}
-                                @:}
+                                if (dropDownList.GroupFilter != null)
+                                {
+                                    @:(function() {
+                                        @:if (record.@(dropDownList.GroupColumnName) > 0) {
+                                            @:var groupCol = $("#@Model.TableElementId").appendGrid('getCellCtrl', '@dropDownList.GroupColumnName', rowIndex);
+                                            @:$(groupCol).trigger('change');
+                                            @:var itemCol = $("#@Model.TableElementId").appendGrid('getCellCtrl', '@dropDownList.PropertyName', rowIndex);
+                                            @:if (record.@(dropDownList.PropertyName) > 0) {
+                                                @:$(itemCol).val(record.@(dropDownList.PropertyName));
+                                            @:}
+                                        @:}
+                                    @:})();
+
+                                }
+
+                                if (dropDownList.PreventModificationAfterCreation)
+                                {
+                                    @:(function() {
+                                        @:var itemCol = $("#@Model.TableElementId").appendGrid('getCellCtrl', '@dropDownList.PropertyName', rowIndex);
+                                        @:$(itemCol).prop("disabled", true).css("color", "graytext");
+                                        @:var itemId = itemCol.id;
+                                        @:itemCol.Id = "disabled_" + itemId;
+                                        @:$('<input/>', { id: itemId, type: 'hidden', name: $(itemCol).prop("name"), value: $(itemCol).val() }).insertAfter($(itemCol));
+
+                                        if (dropDownList.GroupFilter != null)
+                                        {
+                                            @:var groupCol = $("#@Model.TableElementId").appendGrid('getCellCtrl', '@dropDownList.GroupColumnName', rowIndex);
+                                            @:$(groupCol).prop("disabled", true).css("color", "graytext");
+                                        }
+                                    @:})();
+                                }
                             }
                         }
-                    @:}
-                }
+                        @:}
+                    }
             });
     });
 </script>

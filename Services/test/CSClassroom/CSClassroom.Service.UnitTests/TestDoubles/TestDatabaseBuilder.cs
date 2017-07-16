@@ -84,8 +84,7 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 		/// </summary>
 		public TestDatabaseBuilder AddQuestionCategory(
 			string classroomName,
-			string categoryName,
-			bool privateCategory = false)
+			string categoryName)
 		{
 			var classroom = _buildContext.Classrooms
 				.Single(c => c.Name == classroomName);
@@ -93,8 +92,7 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 			var questionCategory = new QuestionCategory()
 			{
 				Name = categoryName,
-				ClassroomId = classroom.Id,
-				IsPrivate = privateCategory
+				ClassroomId = classroom.Id
 			};
 
 			_buildContext.QuestionCategories.Add(questionCategory);
@@ -116,6 +114,15 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 				.Single(qc => qc.Name == questionCategoryName);
 
 			question.QuestionCategoryId = questionCategory.Id;
+
+			var randomlySelectedQuestion = question as RandomlySelectedQuestion;
+			if (randomlySelectedQuestion?.ChoicesCategory != null)
+			{
+				var classroom = _buildContext.Classrooms
+					.Single(c => c.Name == classroomName);
+
+				randomlySelectedQuestion.ChoicesCategory.Classroom = classroom;
+			}
 
 			_buildContext.Questions.Add(question);
 			_buildContext.SaveChanges();
@@ -213,9 +220,12 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 			string gitHubLogin = null,
 			bool inGitHubOrg = false)
 		{
-			var section = _buildContext.Sections
-				.Where(s => s.Classroom.Name == classroomName)
-				.Single(s => s.Name == sectionName);
+			var classroom = _buildContext.Classrooms
+				.Include(c => c.Sections)
+				.Single(c => c.Name == classroomName);
+
+			var section = classroom.Sections
+				.SingleOrDefault(s => s.Name == sectionName);
 
 			var user = new User()
 			{
@@ -230,18 +240,21 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 				{
 					new ClassroomMembership()
 					{
-						ClassroomId = section.ClassroomId,
+						ClassroomId = classroom.Id,
 						GitHubTeam = $"{lastName}{firstName}",
 						InGitHubOrganization = inGitHubOrg,
 						Role = ClassroomRole.General,
-						SectionMemberships = new List<SectionMembership>()
-						{
-							new SectionMembership()
-							{
-								SectionId = section.Id,
-								Role = SectionRole.Student
-							}
-						}
+						SectionMemberships = 
+							section != null
+								? new List<SectionMembership>()
+									{
+										new SectionMembership()
+										{
+											SectionId = section.Id,
+											Role = SectionRole.Student
+										}
+									}
+								: null
 					}
 				}
 			};
@@ -260,30 +273,32 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 			string questionCategoryName,
 			string questionName,
 			string userName,
+			string assignmentName,
 			string submissionContents,
 			double score = 0.0,
 			DateTime? dateSubmitted = null,
 			int? seed = null,
 			string cachedQuestionData = null)
 		{
-			var question = _buildContext.Questions
-				.Where(q => q.QuestionCategory.Classroom.Name == classroomName)
-				.Where(q => q.QuestionCategory.Name == questionCategoryName)
-				.Single(q => q.Name == questionName);
+			var assignmentQuestion = _buildContext.AssignmentQuestions
+				.Where(aq => aq.Assignment.Name == assignmentName)
+				.Where(aq => aq.Question.QuestionCategory.Classroom.Name == classroomName)
+				.Where(aq => aq.Question.QuestionCategory.Name == questionCategoryName)
+				.Single(aq => aq.Question.Name == questionName);
 
 			var user = _buildContext.Users
 				.Single(u => u.UserName == userName);
 
 			var userQuestionData = _buildContext.UserQuestionData
 				.Where(uqd => uqd.User == user)
-				.SingleOrDefault(uqd => uqd.Question == question);
+				.SingleOrDefault(uqd => uqd.AssignmentQuestion == assignmentQuestion);
 
 			if (userQuestionData == null)
 			{
 				userQuestionData = new UserQuestionData()
 				{
 					UserId = user.Id,
-					QuestionId = question.Id,
+					AssignmentQuestionId = assignmentQuestion.Id,
 					LastQuestionSubmission = submissionContents,
 					CachedQuestionData = cachedQuestionData,
 					CachedQuestionDataTime = dateSubmitted,
@@ -323,7 +338,10 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 			string assignmentGroupName,
 			string assignmentName,
 			IDictionary<string, DateTime> sectionDueDates,
-			IDictionary<string, string[]> questionsByCategory)
+			IDictionary<string, string[]> questionsByCategory,
+			bool isPrivate = false,
+			bool combinedSubmissions = false,
+			bool answerInOrder = false)
 		{
 			var classroom = _buildContext.Classrooms
 				.Include(c => c.Sections)
@@ -343,26 +361,95 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 				ClassroomId = classroom.Id,
 				Name = assignmentName,
 				GroupName = assignmentGroupName,
-				DueDates = sectionDueDates.Select
+				IsPrivate = isPrivate,
+				CombinedSubmissions = combinedSubmissions,
+				AnswerInOrder = answerInOrder,
+				DueDates = sectionDueDates?.Select
 				(
 					kvp => new AssignmentDueDate()
 					{
 						SectionId = sections[kvp.Key],
 						DueDate = kvp.Value
 					}
-				).ToList(),
-				Questions = questionsByCategory.SelectMany
-				(
-					qs => qs.Value,
-					(kvp, questionName) => new AssignmentQuestion()
-					{
-						QuestionId = allQuestions[kvp.Key][questionName],
-						Points = 1.0
-					}
-				).ToList()
+				)?.ToList(),
+				Questions = questionsByCategory
+					.SelectMany
+					(
+						qs => qs.Value,
+						(kvp, questionName) => new
+						{
+							Category = kvp.Key,
+							Name = questionName
+						}
+					)
+					.Select
+					( 
+						(q, index) => new AssignmentQuestion()
+						{
+							QuestionId = allQuestions[q.Category][q.Name],
+							Points = 1.0,
+							Name = q.Name,
+							Order = index
+						}
+					).ToList()
 			};
 
 			_buildContext.Assignments.Add(assignment);
+			_buildContext.SaveChanges();
+
+			return this;
+		}
+
+		/// <summary>
+		/// Adds a classroom gradebook to the database.
+		/// </summary>
+		public TestDatabaseBuilder AddClassroomGradebook(
+			string classroomName,
+			string gradebookName)
+		{
+			var classroom = _buildContext.Classrooms
+				.Single(c => c.Name == classroomName);
+
+			var classroomGradebook = new ClassroomGradebook()
+			{
+				Name = gradebookName,
+				ClassroomId = classroom.Id
+			};
+
+			_buildContext.ClassroomGradebooks.Add(classroomGradebook);
+			_buildContext.SaveChanges();
+
+			return this;
+		}
+
+		/// <summary>
+		/// Adds a classroom gradebook to the database.
+		/// </summary>
+		public TestDatabaseBuilder AddSectionGradebook(
+			string classroomName,
+			string gradebookName,
+			string sectionName,
+			DateTime lastTransferDate)
+		{
+			var classroom = _buildContext.Classrooms
+				.Include(c => c.Sections)
+				.Include(c => c.ClassroomGradebooks)
+				.Single(c => c.Name == classroomName);
+
+			var section = classroom.Sections
+				.Single(s => s.Name == sectionName);
+
+			var classroomGradebook = classroom.ClassroomGradebooks
+				.Single(cg => cg.Name == gradebookName);
+
+			var sectionGradebook = new SectionGradebook()
+			{
+				ClassroomGradebookId = classroomGradebook.Id,
+				SectionId = section.Id,
+				LastTransferDate = lastTransferDate
+			};
+
+			_buildContext.SectionGradebooks.Add(sectionGradebook);
 			_buildContext.SaveChanges();
 
 			return this;

@@ -1,4 +1,6 @@
-﻿namespace CSC.CSClassroom.Service
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace CSC.CSClassroom.Repository
 {
 	/// <summary>
 	/// An entrypoint.

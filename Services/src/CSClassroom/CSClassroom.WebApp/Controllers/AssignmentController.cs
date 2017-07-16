@@ -66,16 +66,12 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// <summary>
 		/// Shows all assignments.
 		/// </summary>
-		[Route("Assignments")]
-		[ClassroomAuthorization(ClassroomRole.General)]
-		public async Task<IActionResult> Index()
+		[Route("AssignmentsAdmin")]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
+		public async Task<IActionResult> Admin()
 		{
-			if (ClassroomRole < ClassroomRole.Admin)
-			{
-				return RedirectToAction("StudentReport");
-			}
-
 			var assignments = await AssignmentService.GetAssignmentsAsync(ClassroomName);
+
 			return View(assignments);
 		}
 
@@ -103,7 +99,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			if (ModelState.IsValid
 				&& await AssignmentService.CreateAssignmentAsync(ClassroomName, assignment, ModelErrors))
 			{
-				return RedirectToAction("Index");
+				return RedirectToAction("Admin");
 			}
 			else
 			{
@@ -143,7 +139,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			if (ModelState.IsValid
 				&& await AssignmentService.UpdateAssignmentAsync(ClassroomName, assignment, ModelErrors))
 			{
-				return RedirectToAction("Index");
+				return RedirectToAction("Admin");
 			}
 			else
 			{
@@ -180,9 +176,9 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		{
 			await AssignmentService.DeleteAssignmentAsync(ClassroomName, id);
 
-			return RedirectToAction("Index");
+			return RedirectToAction("Admin");
 		}
-		
+
 		/// <summary>
 		/// Asks the user to select an assignment report to show.
 		/// </summary>
@@ -197,7 +193,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				(
 					g => g.Max
 					(
-						a => a.DueDates.Max(d => d.DueDate)
+						a => a.DueDates.Count > 0 ? a.DueDates.Max(d => d.DueDate) : DateTime.MinValue
 					)
 				)
 				.Select(g => g.Key)
@@ -205,7 +201,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			ViewBag.SectionNames = new List<SelectListItem>
 			(
-				Classroom.Sections.Select
+				Classroom.Sections.OrderBy(s => s.Name).Select
 				(
 					section => new SelectListItem()
 					{
@@ -277,9 +273,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			if (selectAssignmentReport.AssignmentGroupName == AllRecentlyUpdated)
 			{
-				var dateRetrieved = DateTime.UtcNow;
-				dateRetrieved = dateRetrieved.AddSeconds(-dateRetrieved.Second);
-
 				var updatedResults = await AssignmentService.GetUpdatedAssignmentResultsAsync
 				(
 					ClassroomName,
@@ -290,15 +283,15 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				var report = new UpdatedSectionAssignmentsViewModel
 				(
 					updatedResults,
-					dateRetrieved,
 					new SelectAssignmentReport()
 					{
 						SectionName = selectAssignmentReport.SectionName,
 						AssignmentGroupName = AllRecentlyUpdated,
 						GradebookName = selectAssignmentReport.GradebookName,
-						LastTransferDate = dateRetrieved
+						LastTransferDate = updatedResults.ResultsRetrievedDate
 					},
-					TimeZoneProvider
+					TimeZoneProvider,
+					GetAssignmentDisplayProviderFactory()
 				);
 
 				return View("UpdatedAssignmentsReport", report);
@@ -312,7 +305,11 @@ namespace CSC.CSClassroom.WebApp.Controllers
 					selectAssignmentReport.AssignmentGroupName
 				);
 
-				var report = new AssignmentViewModel(sectionResults);
+				var report = new SectionAssignmentGroupViewModel
+				(
+					sectionResults,
+					GetAssignmentDisplayProviderFactory()
+				);
 
 				return View("SingleAssignmentReport", report);
 			}
@@ -321,17 +318,12 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// <summary>
 		/// Returns an assignment report.
 		/// </summary>
-		[Route("StudentAssignmentReport")]
+		[Route("Assignments")]
 		[ClassroomAuthorization(ClassroomRole.General)]
-		public async Task<IActionResult> StudentReport(int? userId)
+		public async Task<IActionResult> Index(int? userId)
 		{
 			if (userId == null)
 			{
-				if (ClassroomRole == ClassroomRole.Admin)
-				{
-					return RedirectToAction("Index", "Section");
-				}
-
 				userId = User.Id;
 			}
 
@@ -343,17 +335,41 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			var results = await AssignmentService.GetStudentAssignmentResultsAsync
 			(
 				ClassroomName, 
-				userId.Value
+				userId.Value,
+				ClassroomRole == ClassroomRole.Admin
 			);
 
 			var viewModel = new StudentAssignmentsViewModel
 			(
 				results,
-				questionId => Url.Action("Solve", "Question", new { id = questionId }),
-				TimeZoneProvider
+				GetAssignmentDisplayProviderFactory()
 			);
 
 			return View(viewModel);
+		}
+
+		/// <summary>
+		/// Returns an assignment display provider factory.
+		/// </summary>
+		private IAssignmentDisplayProviderFactory GetAssignmentDisplayProviderFactory()
+		{
+			return new AssignmentDisplayProviderFactory
+			(
+				TimeZoneProvider,
+				GetAssignmentUrlProvider()
+			);
+		}
+
+		/// <summary>
+		/// Returns a question result display provider.
+		/// </summary>
+		private IAssignmentUrlProvider GetAssignmentUrlProvider()
+		{
+			return new AssignmentUrlProvider
+			(
+				Url,
+				ClassroomRole >= ClassroomRole.Admin
+			);
 		}
 
 		/// <summary>

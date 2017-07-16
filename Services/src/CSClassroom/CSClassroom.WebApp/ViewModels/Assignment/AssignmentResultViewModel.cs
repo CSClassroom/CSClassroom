@@ -18,7 +18,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		/// <summary>
 		/// The name of the homework assignment.
 		/// </summary>
-		[TableColumn("Assignment Name")]
+		[TableColumn("Assignment")]
 		public string AssignmentName { get; }
 
 		/// <summary>
@@ -42,20 +42,39 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		/// <summary>
 		/// The results for each question.
 		/// </summary>
+		[SubTable(typeof(StudentQuestionResultViewModel), typeof(AssignmentSubmissionViewModel))]
 		[JsonProperty(PropertyName = "childTableData")]
-		public List<StudentQuestionResultViewModel> QuestionResults { get; }
+		public List<object> ChildTableData { get; }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public AssignmentResultViewModel(
-			StudentAssignmentResult result,
-			Func<int, string> getQuestionUrl,
-			ITimeZoneProvider timeZoneProvider)
+			AssignmentResult result,
+			IAssignmentDisplayProvider displayProvider)
 		{
-			AssignmentName = result.AssignmentName;
-			DueDate = result.AssignmentDueDate.FormatLongDateTime(timeZoneProvider);
-			Score = $"{result.Score} / {result.QuestionResults.Sum(qr => qr.QuestionPoints)}";
+			var assignmentUrl = displayProvider.GetAssignmentUrl();
+
+			AssignmentName = assignmentUrl != null
+				? GetLink(assignmentUrl, result.AssignmentName, preventWrapping: true)
+				: GetColoredText("black", result.AssignmentName, bold: false, preventWrapping: true);
+
+			DueDate = GetColoredText
+			(
+				"black",
+				displayProvider.GetAssignmentDueDate(),
+				bold: false,
+				preventWrapping: true
+			);
+
+			Score = GetColoredText
+			(
+				"black",
+				$"{result.Score} / {result.TotalPoints}",
+				bold: false,
+				preventWrapping: true
+			);
+
 			Status = GetColoredText
 			(
 				result.Status.GetColor(), 
@@ -64,15 +83,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 				preventWrapping: true
 			);
 
-			QuestionResults = result.QuestionResults
-				.Select
-				(
-					qr => new StudentQuestionResultViewModel
-					(
-						qr,
-						getQuestionUrl
-					)
-				).ToList();
+			ChildTableData = displayProvider.GetChildTableData();
 		}
 	}
 }

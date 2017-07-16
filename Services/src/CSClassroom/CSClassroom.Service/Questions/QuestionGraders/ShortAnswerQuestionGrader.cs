@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Extensions;
 using CSC.CSClassroom.Model.Questions;
@@ -48,7 +49,7 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGraders
 				results.Add
 				(
 					   submissionBlank.Answer != null 
-					&& foundBlank.Answer.TrimEveryLine() == submissionBlank.Answer.TrimEveryLine()
+					&& AnswerMatches(submissionBlank.Answer, foundBlank)
 				);
 
 				blanks.Remove(foundBlank);
@@ -66,6 +67,21 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGraders
 					? (results.Count(c => c)*1.0)/results.Count
 					: results.All(c => c) ? 1.0 : 0.0
 			);
+		}
+
+		/// <summary>
+		/// Returns whether or not the submitted answer is correct.
+		/// </summary>
+		private bool AnswerMatches(string submittedAnswer, ShortAnswerQuestionBlank blank)
+		{
+			if (blank.Regex)
+			{
+				return new Regex($"^{blank.Answer}$").IsMatch(submittedAnswer);
+			}
+			else
+			{
+				return blank.Answer.TrimEveryLine() == submittedAnswer.TrimEveryLine();
+			}
 		}
 	}
 }

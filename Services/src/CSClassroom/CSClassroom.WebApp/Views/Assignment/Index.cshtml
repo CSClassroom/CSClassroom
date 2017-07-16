@@ -1,42 +1,35 @@
-@model IEnumerable<Assignment>
-
-@{
-    ViewData["Title"] = "Assignments";
+﻿@{
+    ViewData["Title"] = "Student Homework Assignments";
 }
+@using CSC.CSClassroom.Model.Users;
 
-<h2>Class Assignments</h2>
+@model StudentAssignmentsViewModel
 
-<p>
-    <a asp-action="Create">Create Assignment</a><br />
-    <a asp-action="SectionReport">View Recently Updated Scores</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GroupName)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GroupName)
-            </td>
-            <td>
-                <a asp-action="SectionReport" asp-route-assignment="@item.GroupName">Scores</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+<h2>Homework Assignments</h2>
+<h4 style="color: blue">Student: @Model.FirstName @Model.LastName</h4>
+@if (ClassroomRole >= ClassroomRole.Admin)
+{
+    @Html.ActionLink("Edit Assignments", "Admin")
+    <p></p>
 }
-    </tbody>
-</table>
+@if (Model.SectionName != null)
+{
+    <h4>Section: @Model.SectionName</h4>
+}
+<div id="assignmentReport"></div>
+
+@Html.Partial(
+    "_NestedTable",
+    new NestedTableConfig
+    (
+        "assignmentReport",
+        typeof(AssignmentGroupResultViewModel),
+        Model.AssignmentGroupResults,
+        "No assignment results."
+    ))
+
+@if (Model.SectionName == null)
+{
+    <p></p>
+    <span>Note: For admins, each assignment due date is the latest due date for all sections.</span>
+}

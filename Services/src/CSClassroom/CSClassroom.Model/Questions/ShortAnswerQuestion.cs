@@ -19,9 +19,40 @@ namespace CSC.CSClassroom.Model.Questions
 		public List<ShortAnswerQuestionBlank> Blanks { get; set; }
 
 		/// <summary>
-		/// Returns whether or not this question is a template for another question.
+		/// An explanation for the answer.
+		/// </summary>
+		[Display
+		(
+			Name = "Explanation",
+			Description = "Enter an explanation for the answer."
+		)]
+		public string Explanation { get; set; }
+
+		/// <summary>
+		/// The type of solver(s) supported for this question.
+		/// </summary>
+		protected override QuestionSolverType SolverTypes
+			=> QuestionSolverType.Interactive | QuestionSolverType.NonInteractive;
+
+		/// <summary>
+		/// Returns whether or not the question is a randomly selected question.
+		/// </summary>
+		public override bool HasChoices => false;
+
+		/// <summary>
+		/// Returns whether or not the question is a generated question template.
 		/// </summary>
 		public override bool IsQuestionTemplate => false;
+
+		/// <summary>
+		/// Returns whether or not this question can be duplicated.
+		/// </summary>
+		public override bool CanDuplicate => true;
+
+		/// <summary>
+		/// Returns whether or not this question can be turned into a generated question template.
+		/// </summary>
+		public override bool CanRandomize => true;
 
 		/// <summary>
 		/// The string displayed for the type of question

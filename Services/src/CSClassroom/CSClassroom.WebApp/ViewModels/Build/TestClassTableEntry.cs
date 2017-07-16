@@ -40,6 +40,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 		/// The test results.
 		/// </summary>
 		[TableOptions(ShowHeader = true)]
+		[SubTable(typeof(TestResultTableEntry))]
 		[JsonProperty(PropertyName = "childTableData")]
 		public List<TestResultTableEntry> TestResults { get; set; }
 

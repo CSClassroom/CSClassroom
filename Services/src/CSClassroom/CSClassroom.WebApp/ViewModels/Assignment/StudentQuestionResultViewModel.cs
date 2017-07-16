@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Model.Questions.ServiceResults;
 using CSC.CSClassroom.WebApp.Extensions;
+using CSC.CSClassroom.WebApp.Providers;
 using CSC.CSClassroom.WebApp.ViewHelpers.NestedTables;
+using Newtonsoft.Json;
 
 namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 {
@@ -30,42 +34,54 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		public string Status { get; }
 
 		/// <summary>
+		/// The results for each question.
+		/// </summary>
+		[SubTable(typeof(QuestionSubmissionViewModel))]
+		[JsonProperty(PropertyName = "childTableData")]
+		public List<QuestionSubmissionViewModel> Submissions { get; }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public StudentQuestionResultViewModel(
-			StudentQuestionResult result,
-			Func<int, string> getQuestionUrl)
+			StudentQuestionResult questionResult,
+			IAssignmentUrlProvider urlProvider,
+			ITimeZoneProvider timeZoneProvider)
 		{
-			QuestionName = getQuestionUrl != null 
-				? GetLink
-					(
-						getQuestionUrl(result.QuestionId), 
-						result.QuestionName, 
-						preventWrapping: true
-					)
-				: GetColoredText
-					(
-						"black", 
-						result.QuestionName, 
-						bold: false,
-						preventWrapping: true
-					);
+			var url = urlProvider.GetQuestionUrl(questionResult);
+			var name = questionResult.QuestionName;
+
+			QuestionName = url != null 
+				? GetLink(url, name, preventWrapping: true)
+				: GetColoredText("black", name, bold: false, preventWrapping: true);
 			
 			ScoreText = GetColoredText
 			(
 				"black",
-				$"{result.Score} / {result.QuestionPoints}",
+				$"{questionResult.Score} / {questionResult.QuestionPoints}",
 				bold: false,
 				preventWrapping: true
 			);
 
 			Status = GetColoredText
 			(
-				result.Status.GetColor(), 
-				result.Status.GetText(), 
-				result.Status.GetBold(),
+				questionResult.Status.GetColor(),
+				questionResult.Status.GetText(),
+				questionResult.Status.GetBold(),
 				preventWrapping: true
-			); 
+			);
+
+			Submissions = questionResult
+				.SubmissionResults
+				?.Select
+				(
+					qsr => new QuestionSubmissionViewModel
+					(
+						qsr,
+						urlProvider,
+						timeZoneProvider
+					)
+				).ToList();
 		}
 	}
 }

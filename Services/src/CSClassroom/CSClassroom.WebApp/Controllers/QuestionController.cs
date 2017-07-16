@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Classrooms;
 using CSC.CSClassroom.Service.Questions;
 using CSC.CSClassroom.WebApp.Filters;
-using CSC.CSClassroom.WebApp.Utilities;
 using CSC.CSClassroom.WebApp.ViewModels.Question;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -33,24 +33,43 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// <summary>
 		/// A list of supported question types.
 		/// </summary>
-		private static readonly IReadOnlyList<QuestionType> s_questionTypes;
+		private static readonly IReadOnlyList<QuestionType> s_createQuestionTypes;
+
+		/// <summary>
+		/// A list of supported question types for randomly-selected question choices.
+		/// </summary>
+		private static readonly IReadOnlyList<QuestionType> s_randomlySelectedQuestionTypes;
 
 		/// <summary>
 		/// Caches the list of supported question types.
 		/// </summary>
 		static QuestionController()
 		{
-			s_questionTypes = new[]
-			{
+			s_createQuestionTypes = CreateQuestionTypes
+			(
 				typeof(MultipleChoiceQuestion),
 				typeof(ShortAnswerQuestion),
 				typeof(MethodQuestion),
 				typeof(ClassQuestion),
-				typeof(ProgramQuestion)
-			}.Select
+				typeof(ProgramQuestion),
+				typeof(RandomlySelectedQuestion)
+			);
+
+			s_randomlySelectedQuestionTypes = CreateQuestionTypes
 			(
-				type => new QuestionType(type)
-			).ToList();
+				typeof(MultipleChoiceQuestion),
+				typeof(ShortAnswerQuestion)
+			);
+		}
+
+		/// <summary>
+		/// Creates a set of QuestionType objects for the given set of types.
+		/// </summary>
+		private static IReadOnlyList<QuestionType> CreateQuestionTypes(params Type[] types)
+		{
+			return types
+				.Select(type => new QuestionType(type))
+				.ToList();
 		}
 
 		/// <summary>
@@ -71,7 +90,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// Shows all questions.
 		/// </summary>
 		[Route("Questions")]
-		[ClassroomAuthorization(ClassroomRole.General)]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> Index()
 		{
 			var questions = await QuestionService.GetQuestionsAsync(ClassroomName);
@@ -84,7 +103,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			}
 			else
 			{
-				return View(sortedQuestions.Where(q => !q.IsPrivate).ToList());
+				return View(sortedQuestions.ToList());
 			}
 		}
 
@@ -93,18 +112,41 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// </summary>
 		[Route("CreateQuestion")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public async Task<IActionResult> Create(string questionType)
+		public async Task<IActionResult> Create(string questionType, int? questionCategoryId)
 		{
-			var questionTypeObj = s_questionTypes.FirstOrDefault(type => type.Type.Name == questionType);
+			QuestionCategory category = null;
+			if (questionCategoryId.HasValue)
+			{
+				category = await QuestionCategoryService.GetQuestionCategoryAsync
+				(
+					ClassroomName,
+					questionCategoryId.Value
+				);
+			}
+
+			var questionTypes = category?.RandomlySelectedQuestionId != null
+				? s_randomlySelectedQuestionTypes
+				: s_createQuestionTypes;
+			
+			var questionTypeObj = questionTypes.FirstOrDefault(type => type.Type.Name == questionType);
+				
 			if (questionTypeObj == null)
 			{
-				return View("CreateEdit/SelectType", s_questionTypes);
+				return View
+				(
+					"CreateEdit/SelectType", 
+					new SelectTypeViewModel(questionTypes, questionCategoryId)
+				);
 			}
 			else
 			{
 				await PopulateDropDownsAsync();
 
-				return View("CreateEdit", Activator.CreateInstance(questionTypeObj.Type));
+				var newQuestion = (Question) Activator.CreateInstance(questionTypeObj.Type);
+				newQuestion.QuestionCategory = category;
+				newQuestion.QuestionCategoryId = category?.Id ?? 0;
+
+				return View("CreateEdit", newQuestion);
 			}
 		}
 
@@ -117,10 +159,27 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> Create(Question question)
 		{
+			var category = await QuestionCategoryService.GetQuestionCategoryAsync
+			(
+				ClassroomName,
+				question.QuestionCategoryId
+			);
+
 			if (ModelState.IsValid && 
 				await QuestionService.CreateQuestionAsync(ClassroomName, question, ModelErrors))
 			{
-				return RedirectToAction("Index");
+				if (question.HasChoices)
+				{
+					return RedirectToAction("QuestionChoices", new { id = question.Id });
+				}
+				else if (category.RandomlySelectedQuestionId.HasValue)
+				{
+					return RedirectToAction("QuestionChoices", new { id = category.RandomlySelectedQuestionId });
+				}
+				else
+				{
+					return RedirectToAction("Index");
+				}
 			}
 			else
 			{
@@ -151,22 +210,47 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// </summary>
 		[Route("Questions/{id}/Edit")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public async Task<IActionResult> Edit(int? id)
+		public async Task<IActionResult> Edit(int? id, int? seed)
 		{
 			if (id == null)
 			{
 				return NotFound();
 			}
 
-			var question = await QuestionService.GetQuestionAsync(ClassroomName, id.Value);
-			if (question == null)
-			{
-				return NotFound();
-			}
-			
 			await PopulateDropDownsAsync();
 
-			return View("CreateEdit", question);
+			if (seed != null)
+			{
+				var questionInstance = await QuestionService.GetQuestionInstanceAsync
+				(
+					ClassroomName,
+					id.Value,
+					seed.Value
+				);
+
+				if (questionInstance == null)
+				{
+					return NotFound();
+				}
+
+				if (questionInstance.Question == null)
+				{
+					return View("CreateEdit/QuestionGenerationError", questionInstance);
+				}
+
+				ViewBag.Seed = seed;
+				return View("CreateEdit", questionInstance.Question);
+			}
+			else
+			{
+				var question = await QuestionService.GetQuestionAsync(ClassroomName, id.Value);
+				if (question == null)
+				{
+					return NotFound();
+				}
+
+				return View("CreateEdit", question);
+			}
 		}
 
 		/// <summary>
@@ -183,10 +267,23 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				return NotFound();
 			}
 
+			var category = await QuestionCategoryService.GetQuestionCategoryAsync
+			(
+				ClassroomName,
+				question.QuestionCategoryId
+			);
+
 			if (ModelState.IsValid 
 				&& await QuestionService.UpdateQuestionAsync(ClassroomName, question, ModelErrors))
 			{
-				return RedirectToAction("Index");
+				if (category.RandomlySelectedQuestionId.HasValue)
+				{
+					return RedirectToAction("QuestionChoices", new { id = category.RandomlySelectedQuestionId });
+				}
+				else
+				{
+					return RedirectToAction("Index");
+				}
 			}
 			else
 			{
@@ -218,52 +315,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		}
 
 		/// <summary>
-		/// Shows a page allowing the submission of a solution to a question.
-		/// </summary>
-		[Route("Questions/{id}/Solve")]
-		[ClassroomAuthorization(ClassroomRole.General)]
-		public async Task<IActionResult> Solve(int id)
-		{
-			var questionToSolve = await QuestionService.GetQuestionToSolveAsync
-			(
-				ClassroomName, 
-				User.Id,
-				id
-			);
-
-			if (questionToSolve == null)
-			{
-				return NotFound();
-			}
-
-			return View(questionToSolve);
-		}
-
-		/// <summary>
-		/// Shows a page allowing the submission of a solution to a question.
-		/// </summary>
-		[Route("Questions/{id}/Solve")]
-		[HttpPost]
-		[ClassroomAuthorization(ClassroomRole.General)]
-		public async Task<IActionResult> Solve(int id, [FromBody] QuestionSubmission submission)
-		{
-			var result = await QuestionService.GradeSubmissionAsync
-			(
-				ClassroomName, 
-				User.Id,
-				id, 
-				submission
-			);
-
-			if (result == null)
-			{
-				return NotFound();
-			}
-
-			return Ok(result);
-		}
-
-		/// <summary>
 		/// Deletes a question.
 		/// </summary>
 		[Route("Questions/{id}/Delete")]
@@ -288,9 +339,31 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> DeleteConfirmed(int id)
 		{
-			await QuestionService.DeleteQuestionAsync(ClassroomName, id);
+			var category = await QuestionService.DeleteQuestionAsync(ClassroomName, id);
+			if (category.RandomlySelectedQuestionId.HasValue)
+			{
+				return RedirectToAction("QuestionChoices", new { id = category.RandomlySelectedQuestionId.Value });
+			}
+			else
+			{
+				return RedirectToAction("Index");
+			}
+		}
 
-			return RedirectToAction("Index");
+		/// <summary>
+		/// Shows all questions.
+		/// </summary>
+		[Route("Question/{id}/Choices")]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
+		public async Task<IActionResult> QuestionChoices(int id)
+		{
+			var choicesCategory = await QuestionService.GetQuestionChoicesAsync(ClassroomName, id);
+			if (choicesCategory == null)
+			{
+				return NotFound();
+			}
+
+			return View(choicesCategory);
 		}
 
 		/// <summary>

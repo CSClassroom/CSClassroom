@@ -122,8 +122,9 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
 			return new QuestionGenerationResult
 			(
 				classJobResult.TestResults[0].ReturnValue,
-				fullGeneratorFileContents: classJob.FileContents,
-				fullGeneratorFileLineOffset: classJob.LineNumberOffset
+				classJob.FileContents,
+				classJob.LineNumberOffset,
+				seed
 			);
 		}
 
@@ -144,7 +145,7 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
 				ClassName = "QuestionGenerator",
 				FileContents = !string.IsNullOrEmpty(question.FullGeneratorFileContents)
 					? question.FullGeneratorFileContents
-					: GetGeneratorFile(classesToImport.Count, question.GeneratorContents, out lineOffset),
+					: GetGeneratorFile(question.GeneratorContents, out lineOffset),
 				LineNumberOffset = lineOffset,
 				Tests = new List<ClassTest>()
 				{
@@ -156,14 +157,7 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
 							new List<string>()
 							{
 								"ObjectMapper mapper = new ObjectMapper();",
-								$"try",
-								"{{",
-								$"\treturn mapper.writeValueAsString(QuestionGenerator.generateQuestion({seed}));",
-								"}}",
-								"catch (Exception ex)",
-								"{{",
-								"\tthrow new RuntimeException(ex);",
-								"}}"
+								$"return mapper.writeValueAsString(QuestionGenerator.generateQuestion({seed}));"
 							}),
 						ReturnType = "String"
 					}
@@ -192,7 +186,7 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
 		/// <summary>
 		/// Returns the contents of the file used to generate the question.
 		/// </summary>
-		private string GetGeneratorFile(int numImports, string generatorContents, out int lineOffset)
+		private string GetGeneratorFile(string generatorContents, out int lineOffset)
 		{
 			var fileBuilder = new JavaFileBuilder();
 			var javaModel = _questionModelFactory.GetQuestionModel();
@@ -206,7 +200,7 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
 				fileBuilder.AddBlankLine();
 			}
 
-			lineOffset = -fileBuilder.LinesAdded - numImports;
+			lineOffset = -fileBuilder.LinesAdded;
 			fileBuilder.AddLines(generatorContents);
 
 			return fileBuilder.GetFileContents().Replace("%", "%%");

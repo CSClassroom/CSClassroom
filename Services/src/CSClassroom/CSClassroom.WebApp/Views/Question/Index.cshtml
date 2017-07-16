@@ -1,5 +1,5 @@
+@using CSC.Common.Infrastructure.Utilities;
 @using CSC.CSClassroom.Model.Users
-@using CSC.CSClassroom.WebApp.Utilities
 @model IEnumerable<Question>
 
 @{
@@ -7,7 +7,7 @@
 }
 
 <h2>Questions</h2>
-<div id="accordion" class="panel-group" style="max-width: @(ClassroomRole >= ClassroomRole.Admin ? "700px" : "400px")">
+<div id="accordion" class="panel-group" style="max-width: 700px">
     @foreach (var category in Model
         .GroupBy(question => question.QuestionCategory)
         .OrderBy(group => group.Key.Name, new NaturalComparer()))
@@ -20,41 +20,38 @@
             </div>
             <div id="collapse@(category.Key.Id)" class="panel-collapse collapse">
                 <div class="panel-body" style="line-height: 175%">
-                    @if (ClassroomRole >= ClassroomRole.Admin)
-                    {
-                        <table class="table">
-                            <tbody>
-                            @foreach (var question in category)
-                            {
-                                <tr>
-                                    <td style="text-align: left">
-                                        @question.Name @(question.IsPrivate ? " (private)" : "")
-                                    </td>
-                                    <td style="text-align: right">
-                                        @if (!question.IsQuestionTemplate)
-                                        {
-                                            @Html.ActionLink("Randomize", "GenerateFromExisting", new {id = question.Id})
-                                            @:|
-                                        }
-                                        @Html.ActionLink("Duplicate", "DuplicateExisting", new {id = question.Id}) |
-                                        @Html.ActionLink("Solve", "Solve", new {id = question.Id}, new { target = "_blank" }) |
-                                        @Html.ActionLink("Edit", "Edit", new {id = question.Id}) |
-                                        @Html.ActionLink("Delete", "Delete", new {id = question.Id})
-                                    </td>
-                                </tr>
-                            }
-                            <tr></tr>
-                            </tbody>
-                        </table>
-                    }
-                    else
-                    {
+                    <table class="table">
+                        <tbody>
                         @foreach (var question in category)
-                         {
-                             @Html.ActionLink(question.Name, "Solve", new { id = question.Id }, new { target = "_blank" })
-                             <br/>
-                         }
-                    }
+                        {
+                            <tr>
+                                <td style="text-align: left">
+                                    @question.Name
+                                </td>
+                                <td style="text-align: right">
+                                    @if (question.HasChoices)
+                                    {
+                                        @Html.ActionLink("Question Choices", "QuestionChoices", new { id = question.Id })
+                                        @:|
+                                    }
+                                    @if (question.CanRandomize)
+                                    {
+                                        @Html.ActionLink("Randomize", "GenerateFromExisting", new {id = question.Id})
+                                        @:|
+                                    }
+                                    @if (question.CanDuplicate)
+                                    {
+                                        @Html.ActionLink("Duplicate", "DuplicateExisting", new {id = question.Id})
+                                        @:|
+                                    }
+                                    @Html.ActionLink("Edit", "Edit", new {id = question.Id}) |
+                                    @Html.ActionLink("Delete", "Delete", new {id = question.Id})
+                                </td>
+                            </tr>
+                        }
+                        <tr></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

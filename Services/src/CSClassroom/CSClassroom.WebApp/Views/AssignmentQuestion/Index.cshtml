@@ -1,0 +1,49 @@
+﻿@using CSC.Common.Infrastructure.Utilities;
+@using CSC.CSClassroom.Model.Questions
+@model IEnumerable<CSC.CSClassroom.Model.Questions.AssignmentQuestion>
+
+@{
+    ViewData["Title"] = "Assignment Questions";
+}
+
+<h2>@Assignment.Name Questions</h2>
+
+<p>
+    <a asp-action="Edit" asp-controller="Assignment" asp-route-id="@Assignment.Id">Choose Questions</a><br />
+    @if (Assignment.CombinedSubmissions)
+    {
+        <a asp-action="SolveAll" asp-controller="AssignmentQuestion" asp-route-assignmentId="@Assignment.Id">Solve Questions</a><br />
+    }
+</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Question.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.OrderBy(aq => aq.Name, new NaturalComparer())) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Question.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @if (!Assignment.CombinedSubmissions)
+                {
+                    <a asp-action="Solve" asp-route-id="@item.Id">Solve</a> @:|
+                }
+                <a asp-action="Edit" asp-controller="Question" asp-route-id="@item.Question.Id">Edit</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

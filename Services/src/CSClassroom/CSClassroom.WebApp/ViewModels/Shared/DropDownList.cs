@@ -87,6 +87,11 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Shared
 		public Func<object, DropDownListItem> GroupFilter { get; }
 
 		/// <summary>
+		/// Prevent the modification of the drop-down list value after creation.
+		/// </summary>
+		public bool PreventModificationAfterCreation { get; }
+
+		/// <summary>
 		/// Returns a valid javascript name for a column with the given display name.
 		/// </summary>
 		public string GroupColumnName => new string
@@ -101,11 +106,13 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Shared
 		public DropDownList(
 			string propertyName,
 			IList<object> choices, 
-			Func<object, DropDownListItem> itemAccessor)
+			Func<object, DropDownListItem> itemAccessor,
+			bool preventModificationAfterCreation = false)
 		{
 			PropertyName = propertyName;
 			Choices = choices;
 			ItemAccessor = itemAccessor;
+			PreventModificationAfterCreation = preventModificationAfterCreation;
 		}
 
 		/// <summary>
@@ -116,8 +123,9 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Shared
 			IList<object> choices,
 			Func<object, DropDownListItem> itemAccessor,
 			string groupColumnName,
-			Func<object, DropDownListItem> groupFilter) 
-				: this(propertyName, choices, itemAccessor)
+			Func<object, DropDownListItem> groupFilter,
+			bool preventModificationAfterCreation) 
+				: this(propertyName, choices, itemAccessor, preventModificationAfterCreation)
 		{
 			GroupColumnDisplayName = groupColumnName;
 			GroupFilter = groupFilter;

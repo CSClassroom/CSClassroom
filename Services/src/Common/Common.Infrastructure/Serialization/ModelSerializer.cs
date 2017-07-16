@@ -37,7 +37,26 @@ namespace CSC.Common.Infrastructure.Serialization
 		/// </summary>
 		public string Serialize<TObject>(TObject obj)
 		{
-			return JsonConvert.SerializeObject(obj, _jsonSerializerSettings);
+			return Serialize(obj, writeTypesForAllSubclasses: false);
+		}
+
+		/// <summary>
+		/// Serializes a Json object.
+		/// </summary>
+		public string Serialize<TObject>(TObject obj, bool writeTypesForAllSubclasses)
+		{
+			if (writeTypesForAllSubclasses)
+			{
+				var settings = new JsonSerializerSettings();
+				_jsonSettingsProvider.PopulateSettings(settings);
+				settings.TypeNameHandling = TypeNameHandling.Auto;
+
+				return JsonConvert.SerializeObject(obj, settings);
+			}
+			else
+			{
+				return JsonConvert.SerializeObject(obj, _jsonSerializerSettings);
+			}
 		}
 
 		/// <summary>

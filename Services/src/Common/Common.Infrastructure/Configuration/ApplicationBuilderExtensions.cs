@@ -27,7 +27,6 @@ namespace CSC.Common.Infrastructure.Configuration
 			IConfigurationRoot configurationRoot,
 			Func<LogEvent, bool> includeLogEvent)
 		{
-			appBuilder.UseApplicationInsightsRequestTelemetry();
 			loggerFactory.AddDebug();
 			loggerFactory.AddSerilog(CreateLogger(configurationRoot, includeLogEvent));
 		}
@@ -38,7 +37,7 @@ namespace CSC.Common.Infrastructure.Configuration
 		private static Logger CreateLogger(IConfigurationRoot configurationRoot, Func<LogEvent, bool> includeLogEvent)
 		{
 			var loggerConfiguration = new LoggerConfiguration()
-				.MinimumLevel.Debug()
+				.MinimumLevel.Information()
 				.Enrich.FromLogContext()
 				.Enrich.With(new AsyncFriendlyStackTraceEnricher());
 

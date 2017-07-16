@@ -25,7 +25,7 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 		/// <summary>
 		/// The results for each question.
 		/// </summary>
-		public IList<StudentAssignmentResult> AssignmentResults { get; }
+		public IList<AssignmentGroupResult> AssignmentGroupResults { get; }
 
 		/// <summary>
 		/// Constructor.
@@ -34,12 +34,12 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 			string lastName, 
 			string firstName, 
 			string sectionName,
-			IList<StudentAssignmentResult> assignmentResults)
+			IList<AssignmentGroupResult> assignmentGroupResultses)
 		{
 			LastName = lastName;
 			FirstName = firstName;
 			SectionName = sectionName;
-			AssignmentResults = assignmentResults;
+			AssignmentGroupResults = assignmentGroupResultses;
 		}
 	}
 }

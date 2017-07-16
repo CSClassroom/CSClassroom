@@ -1,0 +1,85 @@
+﻿@using System.Runtime.InteropServices.ComTypes
+@using System.Threading.Tasks
+@using CSC.CSClassroom.Model.Questions.ServiceResults
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@using CSC.CSClassroom.WebApp.ViewModels.Shared
+@using CSC.CSClassroom.Model.Users
+@inject ITimeZoneProvider TimeZoneProvider
+@model IList<QuestionToSolve>
+
+@{
+    ViewData["Title"] = "Solve";
+}
+
+@if (Model.Count > 0 && Model[0].User.Id != User.Id)
+{
+    <h2 style="color: blue">Assignment view for @Model[0].User.FirstName @Model[0].User.LastName</h2>
+    <br />
+}
+
+<h2>@Assignment.Name</h2>
+
+<hr/>
+@if (!Model.Any())
+{
+    <span>You have made the maximum number of submissions.</span>
+}
+else
+{
+    <form action="@($"{Context.Request.Path}{Context.Request.QueryString}")" method="post" id="questionForm">
+
+        @for (int index = 0; index < Model.Count; index++)
+        {
+            var question = Model[index];
+            ViewBag.Prefix = $"submissions[{index}].";
+
+            <input type="hidden" name="@($"{ViewBag.Prefix}AssignmentQuestionId")" value="@question.AssignmentQuestionId"/>
+        
+            <h3>@question.Name</h3>
+            if (ClassroomRole >= ClassroomRole.Admin)
+            {
+                @Html.Partial("_EditQuestion", question)
+                <p> </p>
+            }
+            @Html.Partial("_MarkdownViewer", new MarkdownViewerSettings($"questionDescription-{index}", @question.Question.Description))
+            <br />
+            @Html.Partial($"Solve/_{question.Question.GetType().Name}", question)
+            <hr/>
+        }
+        
+        @if (Model[0].User.Id == User.Id)
+        {
+            <div class="form-group">
+                <input id="submit" type="submit" value="Submit" class="btn btn-default"/>
+            </div>
+        }
+    </form>
+    <script>
+        keepAuthenticatedSessionAlive();
+    </script>
+    <br />
+    
+}
+
+@{
+    var pastSubmissions = Model
+        .SelectMany(result => result.PastSubmissions)
+        .Distinct()
+        .OrderBy(d => d)
+        .ToList();
+
+    if (pastSubmissions.Any())
+    {
+        @Html.Partial("_PastSubmissions", pastSubmissions)
+    }
+}
+
+@section Scripts {
+    <environment names="Development">
+        <script src="~/js/markdownBundle.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/js/markdownBundle.min.js" asp-append-version="true"></script>
+    </environment>
+}

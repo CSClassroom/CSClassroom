@@ -1,0 +1,45 @@
+@using CSC.Common.Infrastructure.Utilities;
+@model IEnumerable<Assignment>
+
+@{
+    ViewData["Title"] = "Assignments";
+}
+
+<h2>Class Assignments</h2>
+
+<p>
+    <a asp-action="Index" asp-controller="Question">Question Library</a><br />
+    <a asp-action="Create">Create Assignment</a><br />
+    <a asp-action="SectionReport">View Recently Updated Scores</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GroupName)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.OrderBy(a => a.Name, new NaturalComparer())) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GroupName)
+            </td>
+            <td>
+                <a asp-action="Index" asp-controller="AssignmentQuestion" asp-route-assignmentId="@item.Id">Questions</a> |
+                <a asp-action="SectionReport" asp-route-assignment="@item.GroupName">Scores</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

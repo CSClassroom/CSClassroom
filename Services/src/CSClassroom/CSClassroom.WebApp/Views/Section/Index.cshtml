@@ -25,7 +25,7 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.OrderBy(s => s.Name)) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)

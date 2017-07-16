@@ -10,6 +10,7 @@ using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Questions;
 using CSC.CSClassroom.Service.Questions.AssignmentScoring;
+using CSC.CSClassroom.Service.Questions.Validators;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -31,14 +32,16 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		{
 			var database = GetDatabaseWithAssignments().Build();
 
-			var assignmentService = new AssignmentService(database.Context, null /*resultGenerator*/);
+			var assignmentService = GetAssignmentService(database.Context);
 			var assignments = await assignmentService.GetAssignmentsAsync("Class1");
 
-			Assert.Equal(2, assignments.Count);
+			Assert.Equal(3, assignments.Count);
 			Assert.Equal("Class1", assignments[0].Classroom.Name);
 			Assert.Equal("Unit 1a", assignments[0].Name);
-			Assert.Equal("Class1", assignments[0].Classroom.Name);
+			Assert.Equal("Class1", assignments[1].Classroom.Name);
 			Assert.Equal("Unit 1b", assignments[1].Name);
+			Assert.Equal("Class1", assignments[2].Classroom.Name);
+			Assert.Equal("Unit 1c", assignments[2].Name);
 		}
 
 		/// <summary>
@@ -93,21 +96,38 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			var database = GetDatabase().Build();
 
 			var sectionId = database.Context.Sections.First().Id;
-			var questionId = database.Context.Questions.First().Id;
+			var questionIds = database.Context
+				.Questions
+				.Take(2)
+				.Select(q => q.Id)
+				.ToList();
 
 			database.Reload();
-			
-			var assignmentService = GetAssignmentService(database.Context);
-			var modelErrors = new Mock<IModelErrorCollection>();
+
+			var newAssignment = CreateNewAssignment(sectionId, questionIds);
+			var modelErrors = new MockErrorCollection();
+			var assignmentValidator = CreateMockAssignmentValidator
+			(
+				newAssignment,
+				modelErrors,
+				validAssignment: true
+			);
+
+			var assignmentService = GetAssignmentService
+			(
+				database.Context,
+				assignmentValidator
+			);
+
 			var result = await assignmentService.CreateAssignmentAsync
 			(
 				"Class1",
-				CreateNewAssignment(sectionId, questionId, duplicateDueDates: false),
-				modelErrors.Object
+				newAssignment,
+				modelErrors
 			);
 
 			Assert.True(result);
-			modelErrors.Verify(e => e.AddError(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+			Assert.False(modelErrors.HasErrors);
 
 			database.Reload();
 
@@ -123,36 +143,56 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			Assert.Equal(1, assignment.DueDates.Count);
 			Assert.Equal(sectionId, assignment.DueDates.First().SectionId);
 			Assert.Equal(DateTime.MaxValue, assignment.DueDates.First().DueDate);
-			Assert.Equal(1, assignment.Questions.Count);
-			Assert.Equal(questionId, assignment.Questions.First().QuestionId);
+			Assert.Equal(2, assignment.Questions.Count);
+			Assert.Equal(questionIds[0], assignment.Questions[0].QuestionId);
+			Assert.Equal(0, assignment.Questions[0].Order);
+			Assert.Equal(questionIds[1], assignment.Questions[1].QuestionId);
+			Assert.Equal(1, assignment.Questions[1].Order);
 			Assert.Equal(1.0, assignment.Questions.First().Points);
 		}
 
 		/// <summary>
 		/// Ensures that CreateAssignmentAsync does not create an assignment
-		/// when there are errors.
+		/// when there are two due dates for the same section.
 		/// </summary>
 		[Fact]
-		public async Task CreateAssignmentAsync_DuplicateDueDates_AssignmentNotCreated()
+		public async Task CreateAssignmentAsync_HasErrors_AssignmentNotCreated()
 		{
 			var database = GetDatabase().Build();
 
 			var sectionId = database.Context.Sections.First().Id;
-			var questionId = database.Context.Questions.First().Id;
+			var questionIds = database.Context
+				.Questions
+				.Take(2)
+				.Select(q => q.Id)
+				.ToList();
 
 			database.Reload();
 
-			var assignmentService = GetAssignmentService(database.Context);
-			var modelErrors = new Mock<IModelErrorCollection>();
+			var newAssignment = CreateNewAssignment(sectionId, questionIds);
+			var modelErrors = new MockErrorCollection();
+			var assignmentValidator = CreateMockAssignmentValidator
+			(
+				newAssignment,
+				modelErrors,
+				validAssignment: false
+			);
+
+			var assignmentService = GetAssignmentService
+			(
+				database.Context,
+				assignmentValidator
+			);
+
 			var result = await assignmentService.CreateAssignmentAsync
 			(
 				"Class1",
-				CreateNewAssignment(sectionId, questionId, duplicateDueDates: true),
-				modelErrors.Object
+				newAssignment,
+				modelErrors
 			);
 
 			Assert.False(result);
-			modelErrors.Verify(e => e.AddError("DueDates", It.IsAny<string>()), Times.Once);
+			Assert.True(modelErrors.VerifyErrors("Error"));
 
 			database.Reload();
 
@@ -162,7 +202,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		}
 
 		/// <summary>
-		/// Ensures that UpdateAssignmentAsync actually updates the assignment.
+		/// Ensures that UpdateAssignmentAsync actually updates the assignment,
+		/// when there are no errors with the changes to the assignment.
 		/// </summary>
 		[Fact]
 		public async Task UpdateAssignmentAsync_NoErrors_AssignmentUpdated()
@@ -185,26 +226,37 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			assignment.Questions.Remove(assignment.Questions.First());
 			assignment.Questions = assignment.Questions.Reverse().ToList();
 
-			var assignmentService = GetAssignmentService(database.Context);
-			var modelErrors = new Mock<IModelErrorCollection>();
+			var modelErrors = new MockErrorCollection();
+			var assignmentValidator = CreateMockAssignmentValidator
+			(
+				assignment,
+				modelErrors,
+				validAssignment: true
+			);
+
+			var assignmentService = GetAssignmentService
+			(
+				database.Context,
+				assignmentValidator
+			);
+
 			var result = await assignmentService.UpdateAssignmentAsync
 			(
 				"Class1",
 				assignment,
-				modelErrors.Object
+				modelErrors
 			);
 
 			Assert.True(result);
-			modelErrors.Verify(e => e.AddError(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-
+			Assert.False(modelErrors.HasErrors);
+			
 			database.Reload();
 
 			assignment = database.Context.Assignments
 				.Include(a => a.Classroom)
 				.Include(a => a.Questions)
 				.Include(a => a.DueDates)
-				.Where(a => a.Id == assignment.Id)
-				.Single();
+				.Single(a => a.Id == assignment.Id);
 
 			Assert.Equal("Class1", assignment.Classroom.Name);
 			Assert.Equal("Unit 1a", assignment.Name);
@@ -219,10 +271,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 
 		/// <summary>
 		/// Ensures that UpdateAssignmentAsync does not update the assignment,
-		/// when there are duplicate due dates for a single section.
+		/// when there are errors with the changes to the assignment.
 		/// </summary>
 		[Fact]
-		public async Task UpdateAssignmentAsync_DuplicateDueDates_AssignmentNotUpdated()
+		public async Task UpdateAssignmentAsync_HasErrors_AssignmentNotUpdated()
 		{
 			var database = GetDatabaseWithAssignments().Build();
 
@@ -232,31 +284,33 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 				.Include(a => a.DueDates)
 				.First();
 
-			var sectionId = assignment.DueDates.First().SectionId;
-
 			database.Reload();
 
 			assignment.GroupName = "Updated Group Name";
-			assignment.DueDates.Add
+
+			var modelErrors = new MockErrorCollection();
+			var assignmentValidator = CreateMockAssignmentValidator
 			(
-				new AssignmentDueDate()
-				{
-					SectionId = sectionId,
-					DueDate = DateTime.MinValue
-				}
+				assignment,
+				modelErrors,
+				validAssignment: false
 			);
 
-			var assignmentService = GetAssignmentService(database.Context);
-			var modelErrors = new Mock<IModelErrorCollection>();
+			var assignmentService = GetAssignmentService
+			(
+				database.Context,
+				assignmentValidator
+			);
+
 			var result = await assignmentService.UpdateAssignmentAsync
 			(
 				"Class1",
 				assignment,
-				modelErrors.Object
+				modelErrors
 			);
 
 			Assert.False(result);
-			modelErrors.Verify(e => e.AddError("DueDates", It.IsAny<string>()), Times.Once);
+			Assert.True(modelErrors.VerifyErrors("Error"));
 
 			database.Reload();
 
@@ -264,14 +318,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 				.Include(a => a.Classroom)
 				.Include(a => a.Questions)
 				.Include(a => a.DueDates)
-				.Where(a => a.Id == assignment.Id)
-				.Single();
-
-			Assert.Equal("Class1", assignment.Classroom.Name);
-			Assert.Equal("Unit 1a", assignment.Name);
+				.Single(a => a.Id == assignment.Id);
+			
 			Assert.Equal("Unit 1", assignment.GroupName);
-			Assert.Equal(2, assignment.DueDates.Count);
-			Assert.Equal(3, assignment.Questions.Count);
 		}
 
 		/// <summary>
@@ -295,7 +344,30 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 
 			database.Reload();
 
-			Assert.Equal(1, database.Context.Assignments.Count());
+			Assert.Equal(2, database.Context.Assignments.Count());
+		}
+
+		/// <summary>
+		/// Ensures that GetSectionAssignmentResultsAsync returns null when the section
+		/// is not found.
+		/// </summary>
+		[Fact]
+		public async Task GetSectionAssignmentResultsAsync_SectionNotFound_ReturnsNull()
+		{
+			var database = GetDatabaseWithSubmissions().Build();
+
+			database.Reload();
+
+			var assignmentService = GetAssignmentService(database.Context);
+
+			var actualResults = await assignmentService.GetSectionAssignmentResultsAsync
+			(
+				"Class1",
+				"Period10",
+				"Unit 1"
+			);
+
+			Assert.Null(actualResults);
 		}
 
 		/// <summary>
@@ -309,24 +381,34 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			database.Reload();
 
 			var expectedResults = new SectionAssignmentResults(null, null, 0.0, null);
-			var assignmentScoreCalculator = new Mock<IAssignmentScoreCalculator>();
-			assignmentScoreCalculator
+			var sectionAssignmentReportGenerator = new Mock<ISectionAssignmentReportGenerator>();
+			sectionAssignmentReportGenerator
 				.Setup
 				(
-					asc => asc.GetSectionAssignmentResults
+					asc => asc.GetSectionAssignmentGroupResults
 					(
 						"Unit 1",
-						It.Is<IList<Assignment>>(assignments => ValidateAssignments(assignments)),
+						It.Is<IList<Assignment>>
+						(
+							assignments => ValidateAssignments
+							(
+								assignments, 
+								true /*includePrivate*/
+							)
+						),
 						It.Is<Section>(section => section.Name == "Period1"),
 						It.Is<IList<User>>(users => ValidateSectionUsers(users)),
-						It.Is<IList<UserQuestionSubmission>>(submissions => ValidateSectionSubmissions(submissions))
+						It.Is<IList<UserQuestionSubmission>>
+						(
+							submissions => ValidateSectionSubmissions(submissions)
+						)
 					)
 				).Returns(expectedResults);
 
 			var assignmentService = GetAssignmentService
 			(
 				database.Context, 
-				assignmentScoreCalculator.Object
+				sectionAssignmentReportGenerator: sectionAssignmentReportGenerator.Object
 			);
 
 			var actualResults = await assignmentService.GetSectionAssignmentResultsAsync
@@ -338,12 +420,43 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 
 			Assert.Equal(expectedResults, actualResults);
 		}
-		
+
+		/// <summary>
+		/// Ensures that GetStudentAssignmentResultsAsync returns null for a student user
+		/// that does not belong to a section.
+		/// </summary>
+		[Fact]
+		public async Task GetStudentAssignmentResultsAsync_StudentNotInSection_ReturnsNull()
+		{
+			var database = GetDatabaseWithSubmissions().Build();
+
+			var userId = database.Context
+				.Users
+				.SingleOrDefault(u => u.UserName == "User4")
+				.Id;
+
+			database.Reload();
+
+			var assignmentService = GetAssignmentService(database.Context);
+
+			var results = await assignmentService.GetStudentAssignmentResultsAsync
+			(
+				"Class1",
+				userId,
+				admin: false
+			);
+
+			Assert.Null(results);
+		}
+
 		/// <summary>
 		/// Ensures that GetStudentAssignmentResultsAsync returns the correct results.
 		/// </summary>
-		[Fact]
-		public async Task GetStudentAssignmentResultsAsync_ReturnsResults()
+		[Theory]
+		[InlineData(false)]
+		[InlineData(true)]
+		public async Task GetStudentAssignmentResultsAsync_ReturnsResults(
+			bool admin)
 		{
 			var database = GetDatabaseWithSubmissions().Build();
 
@@ -352,32 +465,72 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			database.Reload();
 
 			var expectedResults = new StudentAssignmentResults(null, null, null, null);
-			var assignmentScoreCalculator = new Mock<IAssignmentScoreCalculator>();
-			assignmentScoreCalculator
+			var studentAssignmentReportGenerator = new Mock<IStudentAssignmentReportGenerator>();
+			studentAssignmentReportGenerator
 				.Setup
 				(
-					asc => asc.GetStudentAssignmentResults
+					asc => asc.GetStudentAssignmentGroupResults
 					(
 						It.Is<User>(user => user.UserName == "User1"),
-						It.Is<Section>(section => section.Name == "Period1"),
-						It.Is<IList<Assignment>>(assignments => ValidateAssignments(assignments)),
-						It.Is<IList<UserQuestionSubmission>>(submissions => ValidateStudentSubmissions(submissions))
+						It.Is<Section>
+						(
+							section => admin
+								? section == null
+								: section.Name == "Period1"
+						),
+						It.Is<IList<Assignment>>
+						(
+							assignments => ValidateAssignments
+							(
+								assignments,
+								admin /*includePrivate*/
+							)
+						),
+						It.Is<IList<UserQuestionSubmission>>
+						(
+							submissions => ValidateStudentSubmissions(submissions)
+						),
+						admin
 					)
 				).Returns(expectedResults);
 
 			var assignmentService = GetAssignmentService
 			(
 				database.Context,
-				assignmentScoreCalculator.Object
+				studentAssignmentReportGenerator: studentAssignmentReportGenerator.Object
 			);
-			
+
 			var actualResults = await assignmentService.GetStudentAssignmentResultsAsync
 			(
 				"Class1",
-				userId
+				userId,
+				admin
 			);
 
 			Assert.Equal(expectedResults, actualResults);
+		}
+
+		/// <summary>
+		/// Ensures that GetUpdatedAssignmentResultsAsync returns null if the section
+		/// is not found.
+		/// </summary>
+		[Fact]
+		public async Task GetUpdatedAssignmentResultsAsync_SectionNotFound_ReturnsNull()
+		{
+			var database = GetDatabaseWithSubmissions().Build();
+
+			database.Reload();
+
+			var assignmentService = GetAssignmentService(database.Context);
+
+			var results = await assignmentService.GetUpdatedAssignmentResultsAsync
+			(
+				"Class1",
+				"Period10",
+				"Gradebook1"
+			);
+
+			Assert.Null(results);
 		}
 
 		/// <summary>
@@ -386,18 +539,35 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		[Fact]
 		public async Task GetUpdatedAssignmentResultsAsync_ReturnsResults()
 		{
-			var database = GetDatabaseWithSubmissions().Build();
+			var database = GetDatabaseWithSubmissions()
+				.AddSectionGradebook("Class1", "Gradebook1", "Period1", AssignmentDueDate)
+				.Build();
 
 			database.Reload();
 
-			var expectedResults = new UpdatedSectionAssignmentResults(null, null, DateTime.MinValue, null);
-			var assignmentScoreCalculator = new Mock<IAssignmentScoreCalculator>();
-			assignmentScoreCalculator
+			var expectedResults = new UpdatedSectionAssignmentResults
+			(
+				null, 
+				null, 
+				DateTime.MinValue, 
+				DateTime.MinValue, 
+				null
+			);
+
+			var updatedAssignmentReportGenerator = new Mock<IUpdatedAssignmentReportGenerator>();
+			updatedAssignmentReportGenerator
 				.Setup
 				(
-					asc => asc.GetUpdatedAssignmentResults
+					asc => asc.GetUpdatedAssignmentGroupResults
 					(
-						It.Is<IList<Assignment>>(assignments => ValidateAssignments(assignments)),
+						It.Is<IList<Assignment>>
+						(
+							assignments => ValidateAssignments
+							(
+								assignments, 
+								true /*includePrivate*/
+							)
+						),
 						It.Is<IList<User>>(users => ValidateSectionUsers(users)),
 						It.Is<Section>(section => section.Name == "Period1"),
 						"Gradebook1",
@@ -409,7 +579,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			var assignmentService = GetAssignmentService
 			(
 				database.Context,
-				assignmentScoreCalculator.Object
+				updatedAssignmentReportGenerator: updatedAssignmentReportGenerator.Object
 			);
 
 			var actualResults = await assignmentService.GetUpdatedAssignmentResultsAsync
@@ -423,15 +593,52 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		}
 
 		/// <summary>
+		/// Ensures that MarkAssignmentsAsGradedAsync throws when given an 
+		/// invalid section.
+		/// </summary>
+		[Fact]
+		public async Task MarkAssignmentsAsGradedAsync_InvalidSection_Throws()
+		{
+			var databaseBuilder = GetDatabaseWithSubmissions();
+			var database = databaseBuilder.Build();
+			var assignmentService = GetAssignmentService(database.Context);
+
+			await Assert.ThrowsAsync<InvalidOperationException>
+			(
+				async () => await assignmentService.MarkAssignmentsGradedAsync
+				(
+					"Class1",
+					"InvalidSection",
+					"Gradebook1",
+					AssignmentDueDate + TimeSpan.FromDays(1)
+				)
+			);
+		}
+
+		/// <summary>
 		/// Ensures that MarkAssignmentsAsGradedAsync updates the last transfer date
 		/// for the given section.
 		/// </summary>
-		[Fact]
-		public async Task MarkAssignmentsAsGradedAsync_UpdatesLastTransferDate()
+		[Theory]
+		[InlineData(true)]
+		[InlineData(false)]
+		public async Task MarkAssignmentsAsGradedAsync_ValidSection_UpdatesLastTransferDate(
+			bool gradebookAlreadyExists)
 		{
-			var database = GetDatabaseWithSubmissions().Build();
+			var databaseBuilder = GetDatabaseWithSubmissions();
 
-			database.Reload();
+			if (gradebookAlreadyExists)
+			{
+				databaseBuilder.AddSectionGradebook
+				(
+					"Class1", 
+					"Gradebook1",
+					"Period1",
+					AssignmentDueDate
+				);
+			}
+
+			var database = databaseBuilder.Build();
 
 			var assignmentService = GetAssignmentService(database.Context);
 
@@ -451,19 +658,19 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		}
 
 		/// <summary>
-		/// Builds a database with assignments.
+		/// Returns a database builder with pre-added questions.
 		/// </summary>
-		/// <returns></returns>
 		private static TestDatabaseBuilder GetDatabase()
 		{
 			return new TestDatabaseBuilder()
 				.AddClassroom("Class1")
 				.AddSection("Class1", "Period1")
 				.AddSection("Class1", "Period2")
-				.AddGradebook("Class1", "Gradebook1", "Period1", AssignmentDueDate)
+				.AddClassroomGradebook("Class1", "Gradebook1")
 				.AddStudent("User1", "Last1", "First1", "Class1", "Period1")
 				.AddStudent("User2", "Last2", "First2", "Class1", "Period1")
 				.AddStudent("User3", "Last3", "First3", "Class1", "Period2")
+				.AddStudent("User4", "Last4", "First4", "Class1", sectionName: null)
 				.AddQuestionCategory("Class1", "Category1")
 				.AddQuestion("Class1", "Category1", new MethodQuestion() { Name = "Question1" })
 				.AddQuestion("Class1", "Category1", new MethodQuestion() { Name = "Question2" })
@@ -477,7 +684,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		private static TestDatabaseBuilder GetDatabaseWithAssignments()
 		{
 			return GetDatabase()
-				.AddAssignment(
+				.AddAssignment
+				(
 					"Class1",
 					"Unit 1",
 					"Unit 1a",
@@ -494,8 +702,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 							"Question2",
 							"Question3"
 						}
-					})
-				.AddAssignment(
+					}
+				)
+				.AddAssignment
+				(
 					"Class1",
 					"Unit 1",
 					"Unit 1b",
@@ -507,7 +717,24 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 					new Dictionary<string, string[]>()
 					{
 						["Category1"] = new[] { "Question4" }
-					});
+					}
+				)
+				.AddAssignment
+				(
+					"Class1",
+					"Unit 1",
+					"Unit 1c",
+					new Dictionary<string, DateTime>()
+					{
+						["Period1"] = AssignmentDueDate,
+						["Period2"] = AssignmentDueDate
+					},
+					new Dictionary<string, string[]>()
+					{
+						["Category1"] = new[] { "Question4" }
+					},
+					isPrivate: true
+				);
 		}
 
 		/// <summary>
@@ -516,17 +743,49 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		private static TestDatabaseBuilder GetDatabaseWithSubmissions()
 		{
 			return GetDatabaseWithAssignments()
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User1", "PS", 0.0, AssignmentDueDate - TimeSpan.FromDays(1))
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User1", "PS", 1.0, AssignmentDueDate - TimeSpan.FromDays(1))
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User1", "PS", 1.0, AssignmentDueDate + TimeSpan.FromHours(1))
-				.AddQuestionSubmission("Class1", "Category1", "Question2", "User1", "PS", 1.0, AssignmentDueDate + TimeSpan.FromHours(50))
-				.AddQuestionSubmission("Class1", "Category1", "Question3", "User1", "PS", 1.0, AssignmentDueDate - TimeSpan.FromHours(50))
-				.AddQuestionSubmission("Class1", "Category1", "Question4", "User1", "PS", 1.0, AssignmentDueDate + TimeSpan.FromHours(50))
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User2", "PS", 0.0, AssignmentDueDate - TimeSpan.FromDays(1))
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User2", "PS", 1.0, AssignmentDueDate - TimeSpan.FromDays(1))
-				.AddQuestionSubmission("Class1", "Category1", "Question3", "User2", "PS", 0.0, AssignmentDueDate + TimeSpan.FromDays(1))
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User3", "PS", 0.0, AssignmentDueDate - TimeSpan.FromDays(1))
-				.AddQuestionSubmission("Class1", "Category1", "Question1", "User3", "PS", 1.0, AssignmentDueDate - TimeSpan.FromDays(1));
+				.AddQuestionSubmission("Class1", "Category1", "Question1", "User1", "Unit 1a", "PS", 0.0, AssignmentDueDate - TimeSpan.FromDays(1))
+				.AddQuestionSubmission("Class1", "Category1", "Question1", "User1", "Unit 1a", "PS", 1.0, AssignmentDueDate - TimeSpan.FromDays(1))
+				.AddQuestionSubmission("Class1", "Category1", "Question1", "User1", "Unit 1a", "PS", 1.0, AssignmentDueDate + TimeSpan.FromHours(1))
+				.AddQuestionSubmission("Class1", "Category1", "Question2", "User1", "Unit 1a", "PS", 1.0, AssignmentDueDate + TimeSpan.FromHours(50))
+				.AddQuestionSubmission("Class1", "Category1", "Question3", "User1", "Unit 1a", "PS", 1.0, AssignmentDueDate - TimeSpan.FromHours(50))
+				.AddQuestionSubmission("Class1", "Category1", "Question4", "User1", "Unit 1b", "PS", 1.0, AssignmentDueDate + TimeSpan.FromHours(50))
+				.AddQuestionSubmission("Class1", "Category1", "Question1", "User2", "Unit 1a", "PS", 0.0, AssignmentDueDate - TimeSpan.FromDays(1))
+				.AddQuestionSubmission("Class1", "Category1", "Question1", "User2", "Unit 1a", "PS", 1.0, AssignmentDueDate - TimeSpan.FromDays(1))
+				.AddQuestionSubmission("Class1", "Category1", "Question3", "User2", "Unit 1a", "PS", 0.0, AssignmentDueDate + TimeSpan.FromDays(1))
+				.AddQuestionSubmission("Class1", "Category1", "Question1", "User3", "Unit 1a", "PS", 0.0, AssignmentDueDate - TimeSpan.FromDays(1))
+				.AddQuestionSubmission("Class1", "Category1", "Question1", "User3", "Unit 1a", "PS", 1.0, AssignmentDueDate - TimeSpan.FromDays(1));
+		}
+
+		/// <summary>
+		/// Returns a new assignment validator.
+		/// </summary>
+		private static IAssignmentValidator CreateMockAssignmentValidator(
+			Assignment assignmentToValidate,
+			IModelErrorCollection modelErrors,
+			bool validAssignment)
+		{
+			var assignmentValidator = new Mock<IAssignmentValidator>();
+			assignmentValidator
+				.Setup
+				(
+					m => m.ValidateAssignmentAsync
+					(
+						assignmentToValidate, 
+						modelErrors
+					)
+				)
+				.Callback
+				(
+					(Assignment assignment, IModelErrorCollection errors) =>
+					{
+						if (!validAssignment)
+						{
+							errors.AddError("Error", "Error Description");
+						}
+					} 
+				).ReturnsAsync(validAssignment);
+
+			return assignmentValidator.Object;
 		}
 
 		/// <summary>
@@ -534,9 +793,19 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		/// </summary>
 		private static AssignmentService GetAssignmentService(
 			DatabaseContext context,
-			IAssignmentScoreCalculator assignmentScoreCalculator = null)
+			IAssignmentValidator assignmentValidator = null,
+			ISectionAssignmentReportGenerator sectionAssignmentReportGenerator = null,
+			IStudentAssignmentReportGenerator studentAssignmentReportGenerator = null,
+			IUpdatedAssignmentReportGenerator updatedAssignmentReportGenerator = null)
 		{
-			return new AssignmentService(context, assignmentScoreCalculator);
+			return new AssignmentService
+			(
+				context,
+				assignmentValidator,
+				sectionAssignmentReportGenerator,
+				studentAssignmentReportGenerator,
+				updatedAssignmentReportGenerator
+			);
 		}
 
 		/// <summary>
@@ -544,42 +813,28 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		/// </summary>
 		private static Assignment CreateNewAssignment(
 			int sectionId, 
-			int questionId, 
-			bool duplicateDueDates)
+			IList<int> questionIds)
 		{
-			var dueDates = new List<AssignmentDueDate>();
-			dueDates.Add
-			(
-				new AssignmentDueDate()
-				{
-					SectionId = sectionId,
-					DueDate = DateTime.MaxValue
-				}
-			);
-
-			if (duplicateDueDates)
-			{
-				dueDates.Add
-				(
-					new AssignmentDueDate()
-					{
-						SectionId = sectionId,
-						DueDate = DateTime.MinValue
-					}
-				);
-			}
-
 			return new Assignment()
 			{
 				GroupName = "Unit 1",
 				Name = "Unit 1a",
-				DueDates = dueDates,
-				Questions = new List<AssignmentQuestion>()
+				Questions = questionIds
+					.Select
+					(
+						(questionId, index) => new AssignmentQuestion()
+						{
+							QuestionId = questionId,
+							Points = 1.0,
+							Name = $"Question {index}"
+						}
+					).ToList(),
+				DueDates = new List<AssignmentDueDate>()
 				{
-					new AssignmentQuestion()
+					new AssignmentDueDate()
 					{
-						QuestionId = questionId,
-						Points = 1.0,
+						SectionId = sectionId,
+						DueDate = DateTime.MaxValue
 					}
 				}
 			};
@@ -625,9 +880,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			DateTime dateSubmitted)
 		{
 			return submission.UserQuestionData != null
-				&& submission.UserQuestionData.Question != null
+				&& submission.UserQuestionData.AssignmentQuestion != null
 				&& submission.UserQuestionData.User != null
-				&& submission.UserQuestionData.Question.Name == questionName
+				&& submission.UserQuestionData.AssignmentQuestion.Name == questionName
 				&& submission.UserQuestionData.User.UserName == userName
 				&& submission.Score == score
 				&& submission.DateSubmitted == dateSubmitted;
@@ -653,10 +908,12 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		/// <summary>
 		/// Validates that the retrieved assignments match our expectations.
 		/// </summary>
-		private bool ValidateAssignments(IList<Assignment> assignments)
+		private bool ValidateAssignments(IList<Assignment> assignments, bool includePrivate)
 		{
-			return ValidateAssignment(assignments[0], "Unit 1a", "Unit 1")
-				&& ValidateAssignment(assignments[1], "Unit 1b", "Unit 1");
+			return assignments.Count == (includePrivate ? 3 : 2)
+				&& ValidateAssignment(assignments[0], "Unit 1a", "Unit 1")
+				&& ValidateAssignment(assignments[1], "Unit 1b", "Unit 1")
+				&& (!includePrivate || ValidateAssignment(assignments[2], "Unit 1c", "Unit 1"));
 		}
 
 		/// <summary>

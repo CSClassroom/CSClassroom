@@ -10,6 +10,14 @@ namespace CSC.CSClassroom.Model.Questions
 	public class GeneratedQuestionTemplate : CodeQuestion
 	{
 		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public GeneratedQuestionTemplate()
+		{
+			Description = "Generated Question Template";
+		}
+
+		/// <summary>
 		/// A java class called QuestionGenerator, which must contain a static generateQuestion method.
 		/// This method accepts an integer seed, and returns a question.
 		/// </summary>
@@ -43,9 +51,14 @@ namespace CSC.CSClassroom.Model.Questions
 		public DateTime DateModified { get; set; }
 
 		/// <summary>
-		/// Returns whether or not this question is a template for another question.
+		/// The number of seeds.
 		/// </summary>
-		public override bool IsQuestionTemplate => true;
+		[Display
+		(
+			Name = "Number of seeds",
+			Description = "The number of seeds for the question (or 0 for all integers)."
+		)]
+		public int? NumSeeds { get; set; }
 
 		/// <summary>
 		/// The string displayed for the type of question
@@ -63,6 +76,17 @@ namespace CSC.CSClassroom.Model.Questions
 		/// The HTML string displayed when solving each type of question.
 		/// </summary>
 		public override string SubmissionTypeDescription => string.Empty;
+
+		/// <summary>
+		/// Returns whether or not the question is a generated question template.
+		/// </summary>
+		public override bool IsQuestionTemplate => true;
+
+		/// <summary>
+		/// The type of solver(s) supported for this question.
+		/// </summary>
+		protected override QuestionSolverType SolverTypes
+			=> QuestionSolverType.NonInteractive;
 
 		/// <summary>
 		/// Returns a list of tests for this code question.

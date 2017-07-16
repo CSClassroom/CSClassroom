@@ -16,7 +16,6 @@ namespace CSC.CSClassroom.Model.Questions
 		/// <summary>
 		/// The ID of the category that contains this exercise.
 		/// </summary>
-		[Required]
 		[Display
 		(
 			Name = "Category",
@@ -31,7 +30,7 @@ namespace CSC.CSClassroom.Model.Questions
 		[MaxLength(50)]
 		[Display
 		(
-			Name = "Name",
+			Name = "Question Name",
 			Description = "Enter the name of the question."
 		)]
 		public string Name { get; set; }
@@ -46,17 +45,6 @@ namespace CSC.CSClassroom.Model.Questions
 			Description = "Enter the description for the question, using the Markdown language."
 		)]
 		public string Description { get; set; }
-
-		/// <summary>
-		/// Whether or not the category is public.
-		/// </summary>
-		[Required]
-		[Display
-		(
-			Name = "Private",
-			Description = "Select whether or not the question should be hidden from view."
-		)]
-		public bool IsPrivate { get; set; }
 		
 		/// <summary>
 		/// Allows partial credit.
@@ -79,24 +67,46 @@ namespace CSC.CSClassroom.Model.Questions
 		public virtual ICollection<AssignmentQuestion> AssignmentQuestions { get; set; }
 
 		/// <summary>
-		/// All questions that must be answered before this question is answered.
+		/// Returns whether or not the question is a randomly selected question.
 		/// </summary>
-		[Display
-		(
-			Name = "Prerequisites",
-			Description = "Select which questions (if any) must be answered correctly before this question can be seen."
-		)]
-		public IList<PrerequisiteQuestion> PrerequisiteQuestions { get; set; }
+		public abstract bool HasChoices { get; }
 
 		/// <summary>
-		/// All questions that may be answered only after this question is answered.
-		/// </summary>
-		public IList<PrerequisiteQuestion> SubsequentQuestions { get; set; }
-
-		/// <summary>
-		/// Returns whether or not this question is a template for another question.
+		/// Returns whether or not the question is a generated question template.
 		/// </summary>
 		public abstract bool IsQuestionTemplate { get; }
+
+		/// <summary>
+		/// Returns whether or not this question can be duplicated.
+		/// </summary>
+		public abstract bool CanDuplicate { get; }
+
+		/// <summary>
+		/// Returns whether or not this question can be turned into a generated question template.
+		/// </summary>
+		public abstract bool CanRandomize { get; }
+
+		/// <summary>
+		/// The type of solver(s) supported for this question.
+		/// </summary>
+		protected abstract QuestionSolverType SolverTypes { get; }
+
+		/// <summary>
+		/// Returns whether or not the question supports the given solver type.
+		/// </summary>
+		public bool SupportedSolver(QuestionSolverType solverType)
+			=> (SolverTypes & solverType) == solverType;
+
+		/// <summary>
+		/// Returns whether or not the question does not support the given solver type.
+		/// </summary>
+		public bool UnsupportedSolver(QuestionSolverType solverType)
+			=> (SolverTypes & solverType) == 0;
+
+		/// <summary>
+		/// Returns whether or not the description should be hidden from the edit page.
+		/// </summary>
+		public bool HideDescription => IsQuestionTemplate || HasChoices;
 
 		/// <summary>
 		/// The string displayed for the type of question

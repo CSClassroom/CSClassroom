@@ -1,0 +1,10 @@
+﻿<SolutionConfiguration>
+  <Settings>
+    <AllowParallelTestExecution>True</AllowParallelTestExecution>
+    <MetricsExclusionList>
+      <Value>src\CSClassroom\CSClassroom.Repository\CSClassroom.Repository.csproj</Value>
+      <Value>src\CSClassroom\CSClassroom.Service\CSClassroom.Service.csproj\Configuration</Value>
+    </MetricsExclusionList>
+    <SolutionConfigured>True</SolutionConfigured>
+  </Settings>
+</SolutionConfiguration>

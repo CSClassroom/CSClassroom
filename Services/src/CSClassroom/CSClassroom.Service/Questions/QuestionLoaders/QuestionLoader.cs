@@ -38,7 +38,6 @@ namespace CSC.CSClassroom.Service.Questions.QuestionLoaders
 		public async Task LoadQuestionAsync()
 		{
 			await LoadReferenceAsync(q => q.QuestionCategory);
-			await LoadCollectionAsync(q => q.PrerequisiteQuestions);
 
 			await LoadQuestionImplAsync();
 		}

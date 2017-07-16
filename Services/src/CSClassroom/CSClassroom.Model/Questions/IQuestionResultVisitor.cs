@@ -34,6 +34,11 @@
 		/// Visits a generated question.
 		/// </summary>
 		TResult Visit(GeneratedQuestionTemplate question);
+
+		/// <summary>
+		/// Visits a randomly selected question.
+		/// </summary>
+		TResult Visit(RandomlySelectedQuestion question);
 	}
 
 	/// <summary>
@@ -70,5 +75,10 @@
 		/// Visits a generated question.
 		/// </summary>
 		TResult Visit(GeneratedQuestionTemplate question, TParam1 param1);
+
+		/// <summary>
+		/// Visits a randomly selected question.
+		/// </summary>
+		TResult Visit(RandomlySelectedQuestion question, TParam1 param1);
 	}
 }

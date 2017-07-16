@@ -7,6 +7,7 @@ using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Users;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace CSC.CSClassroom.Repository
 {
@@ -69,6 +70,11 @@ namespace CSC.CSClassroom.Repository
 		/// Short answer question blanks.
 		/// </summary>
 		public DbSet<ShortAnswerQuestionBlank> ShortAnswerQuestionBlanks { get; set; }
+
+		/// <summary>
+		/// Set of randomly selected questions in the questions table.
+		/// </summary>
+		public DbSet<RandomlySelectedQuestion> RandomlySelectedQuestions { get; set; }
 
 		/// <summary>
 		/// Set of generated questions in the questions table.
@@ -262,16 +268,16 @@ namespace CSC.CSClassroom.Repository
 			SetupIndex<Section>(builder, s => new {s.ClassroomId, s.Name});
 			SetupIndex<ClassroomMembership>(builder, cm => new {cm.UserId, cm.ClassroomId});
 			SetupIndex<SectionMembership>(builder, sm => new {sm.ClassroomMembershipId, sm.SectionId});
-			SetupIndex<QuestionCategory>(builder, qc => new {qc.ClassroomId, qc.Name});
+			SetupIndex<QuestionCategory>(builder, qc => new {qc.ClassroomId, qc.Name, qc.RandomlySelectedQuestionId});
 			SetupIndex<Question>(builder, q => new {q.QuestionCategoryId, q.Name});
-			SetupIndex<UserQuestionData>(builder, uqd => new {uqd.QuestionId, uqd.UserId});
+			SetupIndex<UserQuestionData>(builder, uqd => new {uqd.AssignmentQuestionId, uqd.UserId});
 			SetupIndex<Project>(builder, p => new {p.ClassroomId, p.Name});
 			SetupIndex<Checkpoint>(builder, c => new {c.ProjectId, c.Name});
 			SetupIndex<Commit>(builder, c => new {c.ProjectId, c.UserId, c.Sha});
 			SetupIndex<Build>(builder, b => new {b.CommitId});
 			SetupIndex<TestResult>(builder, tr => new {tr.BuildId, tr.ClassName, tr.TestName});
 			SetupIndex<Assignment>(builder, a => new {a.ClassroomId, a.Name});
-			SetupIndex<AssignmentQuestion>(builder, aq => new {aq.AssignmentId, aq.QuestionId});
+			SetupIndex<AssignmentQuestion>(builder, aq => new {aq.AssignmentId, aq.Name});
 			SetupIndex<AssignmentDueDate>(builder, aq => new {aq.AssignmentId, aq.SectionId});
 			SetupIndex<Submission>(builder, s => new {s.CheckpointId, s.CommitId, s.DateSubmitted});
 			SetupIndex<CheckpointDates>(builder, cd => new {cd.CheckpointId, cd.SectionId});
@@ -300,15 +306,12 @@ namespace CSC.CSClassroom.Repository
 				.WithOne(b => b.Commit)
 				.HasForeignKey<Build>(b => b.CommitId);
 
-			modelBuilder.Entity<PrerequisiteQuestion>()
-				.HasOne(pq => pq.FirstQuestion)
-				.WithMany(q => q.SubsequentQuestions)
-				.HasForeignKey(pq => pq.FirstQuestionId);
-
-			modelBuilder.Entity<PrerequisiteQuestion>()
-				.HasOne(pq => pq.SecondQuestion)
-				.WithMany(q => q.PrerequisiteQuestions)
-				.HasForeignKey(pq => pq.SecondQuestionId);
+			modelBuilder.Entity<RandomlySelectedQuestion>()
+				.HasOne(rsq => rsq.ChoicesCategory)
+				.WithOne(qc => qc.RandomlySelectedQuestion)
+				.HasForeignKey<QuestionCategory>(qc => qc.RandomlySelectedQuestionId)
+				.IsRequired(false)
+				.OnDelete(DeleteBehavior.Cascade);
 		}
 
 		/// <summary>

@@ -6,7 +6,9 @@ namespace CSC.CSClassroom.Service.Questions.QuestionLoaders
 	/// <summary>
 	/// Creates question loaders.
 	/// </summary>
-	public class QuestionLoaderFactory : IQuestionResultVisitor<IQuestionLoader>
+	public class QuestionLoaderFactory : 
+		IQuestionLoaderFactory, 
+		IQuestionResultVisitor<IQuestionLoader>
 	{
 		/// <summary>
 		/// The database context.
@@ -75,6 +77,14 @@ namespace CSC.CSClassroom.Service.Questions.QuestionLoaders
 		IQuestionLoader IQuestionResultVisitor<IQuestionLoader>.Visit(GeneratedQuestionTemplate question)
 		{
 			return new GeneratedQuestionLoader(_dbContext, question);
+		}
+
+		/// <summary>
+		/// Creates a question loader for a randomly selected question.
+		/// </summary>
+		IQuestionLoader IQuestionResultVisitor<IQuestionLoader>.Visit(RandomlySelectedQuestion question)
+		{
+			return new RandomlySelectedQuestionLoader(_dbContext, question);
 		}
 	}
 }

@@ -10,7 +10,6 @@
   "profiles": {
     "Kestrel": {
       "commandName": "Project",
-      "launchBrowser": true,
       "launchUrl": "http://localhost:10000",
       "environmentVariables": {
         "ASPNETCORE_URLS": "http://0.0.0.0:10000",

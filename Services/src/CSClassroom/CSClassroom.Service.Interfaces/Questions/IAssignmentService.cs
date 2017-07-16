@@ -18,15 +18,6 @@ namespace CSC.CSClassroom.Service.Questions
 		Task<IList<Assignment>> GetAssignmentsAsync(string classroomName);
 
 		/// <summary>
-		/// Returns the list of assignments with the given group name, in the given section.
-		/// If groupName is null, returns all assignments for the given section.
-		/// </summary>
-		Task<IList<Assignment>> GetAssignmentsAsync(
-			string classroomName, 
-			string sectionName, 
-			string groupName);
-
-		/// <summary>
 		/// Returns the assignment with the given name.
 		/// </summary>
 		Task<Assignment> GetAssignmentAsync(string classroomName, int id);
@@ -74,7 +65,8 @@ namespace CSC.CSClassroom.Service.Questions
 		/// </summary>
 		Task<StudentAssignmentResults> GetStudentAssignmentResultsAsync(
 			string classroomName,
-			int userId);
+			int userId,
+			bool admin);
 
 		/// <summary>
 		/// Marks assignments in the given section as graded.

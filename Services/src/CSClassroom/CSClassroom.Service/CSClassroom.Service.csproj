@@ -4,11 +4,12 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <AssemblyName>CSClassroom.Service</AssemblyName>
     <PackageId>CSClassroom.Service</PackageId>
-    <RuntimeFrameworkVersion>1.1.0</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>1.1.2</RuntimeFrameworkVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net451+win8</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <RootNamespace>CSC.CSClassroom.Service</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,7 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.0.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.1.0" />
+    <PackageReference Include="morelinq" Version="2.6.0" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
 

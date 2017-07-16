@@ -25,14 +25,14 @@ namespace CSC.CSClassroom.Model.Questions
 		public User User { get; set; }
 
 		/// <summary>
-		/// The question this is a submission for.
+		/// The assignment question.
 		/// </summary>
-		public int QuestionId { get; set; }
+		public int AssignmentQuestionId { get; set; }
 
 		/// <summary>
-		/// The question.
+		/// The assignment question.
 		/// </summary>
-		public Question Question { get; set; }
+		public AssignmentQuestion AssignmentQuestion { get; set; }
 
 		/// <summary>
 		/// The number of attempts.
@@ -62,6 +62,20 @@ namespace CSC.CSClassroom.Model.Questions
 		/// <summary>
 		/// The scores of each attempted submission.
 		/// </summary>
-		public ICollection<UserQuestionSubmission> Submissions { get; set; }
+		public IList<UserQuestionSubmission> Submissions { get; set; }
+
+		/// <summary>
+		/// Returns whether the given question has any attempts remaining.
+		/// </summary>
+		public int? NumAttemptsRemaining => AssignmentQuestion.LimitedAttempts()
+			? AssignmentQuestion.Assignment.MaxAttempts - NumAttempts
+			: null;
+
+		/// <summary>
+		/// Returns whether or not any attempts are remaining.
+		/// </summary>
+		public bool AnyAttemptsRemaining => 
+			   !NumAttemptsRemaining.HasValue 
+			|| NumAttemptsRemaining > 0;
 	}
 }

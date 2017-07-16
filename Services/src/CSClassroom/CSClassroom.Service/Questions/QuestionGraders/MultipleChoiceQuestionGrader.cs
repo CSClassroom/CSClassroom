@@ -36,15 +36,23 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGraders
 			if (multSubmission == null)
 				throw new ArgumentException("Invalid submission type", nameof(submission));
 
-			var result = new MultipleChoiceQuestionResult
+			int numCorrectAnswers = Question.Choices.Count
 			(
-				Question.Choices.All
-				(
-					choice => choice.Correct == multSubmission.SelectedChoices.Contains(choice.Value)
-				)
+				choice => choice.Correct == (multSubmission.SelectedChoices?.Contains(choice.Value) ?? false)
 			);
 
-			return new ScoredQuestionResult(result, result.Correct ? 1.0 : 0.0);
+			var result = new MultipleChoiceQuestionResult
+			(
+				numCorrectAnswers == Question.Choices.Count
+			);
+
+			return new ScoredQuestionResult
+			(
+				result,
+				Question.AllowPartialCredit
+					? (numCorrectAnswers * 1.0) / Question.Choices.Count
+					: (numCorrectAnswers == Question.Choices.Count) ? 1.0 : 0.0
+			);
 		}
 	}
 }

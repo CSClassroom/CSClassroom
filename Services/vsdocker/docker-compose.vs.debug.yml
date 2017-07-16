@@ -13,7 +13,7 @@ services:
       - ../src/CSClassroom/CSClassroom.WebApp:/app
       - ~/.nuget/packages:/root/.nuget/packages:ro
       - ~/clrdbg:/clrdbg:ro
-    entrypoint: tail -f /dev/null
+    entrypoint: /bin/bash ./entrypoint-vs.sh
     labels:
       - "com.microsoft.visualstudio.targetoperatingsystem=linux"
       
@@ -28,6 +28,6 @@ services:
       - ../src/BuildService/BuildService.Endpoint:/app
       - ~/.nuget/packages:/root/.nuget/packages:ro
       - ~/clrdbg:/clrdbg:ro
-    entrypoint: tail -f /dev/null
+    entrypoint: /bin/bash ./entrypoint-vs.sh
     labels:
       - "com.microsoft.visualstudio.targetoperatingsystem=linux"

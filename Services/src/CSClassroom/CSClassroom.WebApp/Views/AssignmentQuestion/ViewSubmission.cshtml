@@ -1,0 +1,72 @@
+﻿@using System.Runtime.InteropServices.ComTypes
+@using System.Threading.Tasks
+@using CSC.Common.Infrastructure.Serialization
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@using CSC.CSClassroom.WebApp.ViewModels.Shared
+@using CSC.CSClassroom.Model.Users
+@inject IJsonSerializer Json;
+@inject ITimeZoneProvider TimeZoneProvider;
+@model CSC.CSClassroom.Model.Questions.ServiceResults.SubmissionResult
+
+<style>
+    thead {
+        border: lightgray 1px solid;
+    }
+
+    tbody {
+        border: lightgray 1px solid;
+    }
+
+    td {
+        border: lightgray 1px solid;
+    }
+</style>
+
+@{
+    ViewData["Title"] = "View Submission";
+}
+
+@if (Model.QuestionSubmitted.User.Id != User.Id)
+{
+    <h2 style="color: blue">Submission from @Model.QuestionSubmitted.User.FirstName @Model.QuestionSubmitted.User.LastName</h2>
+    <br />
+}
+
+<h2>@Model.QuestionSubmitted.Name</h2>
+<h4>@Assignment.Name</h4>
+<h5 style="color: blue">Submitted on @Model.SubmissionDate.FormatLongDateTime(TimeZoneProvider)</h5>
+
+@if (ClassroomRole >= ClassroomRole.Admin)
+{
+    @Html.Partial("_EditQuestion", Model.QuestionSubmitted)
+}
+
+<p> </p>
+@Html.Partial("_MarkdownViewer", new MarkdownViewerSettings("questionDescription", @Model.QuestionSubmitted.Question.Description))
+<br />
+<form>
+    @Html.Partial($"ViewSubmission/_{Model.QuestionSubmitted.Question.GetType().Name}", Model)
+</form>
+@Html.Partial($"_QuestionScore", Model)
+
+@if (Model.QuestionSubmitted.AnyAttemptsRemaining && Model.ScoreWithoutLateness < Model.QuestionPoints)
+{
+    <h4>@Html.ActionLink("Try Again", "Solve", new { id = Model.QuestionSubmitted.AssignmentQuestionId })</h4>
+}
+
+<br/>
+
+@if (Model.QuestionSubmitted.PastSubmissions.Any())
+{
+    @Html.Partial("_PastSubmissions", Model.QuestionSubmitted.PastSubmissions)
+}
+
+@section Scripts {
+    <environment names="Development">
+        <script src="~/js/markdownBundle.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/js/markdownBundle.min.js" asp-append-version="true"></script>
+    </environment>
+}

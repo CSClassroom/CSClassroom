@@ -35,6 +35,12 @@ namespace CSC.CSClassroom.Model.Questions
 		public bool Correct { get; set; }
 
 		/// <summary>
+		/// An explanation for the choice.
+		/// </summary>
+		[Display(Name = "Explanation")]
+		public string Explanation { get; set; }
+
+		/// <summary>
 		/// The order.
 		/// </summary>
 		public int Order { get; set; }

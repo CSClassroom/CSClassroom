@@ -10,7 +10,7 @@ function createMarkdownEditor(editorName) {
     var editor = new MarkdownAceEditor(markdown.Converter, "-" + editorName, { } /*options*/);
 
     var highlightCodeBlocks = function (editor) {
-        var codeBlocks = Array.prototype.slice.call(editor.panels.preview.querySelectorAll('pre code'));
+        var codeBlocks = Array.prototype.slice.call(editor.panels.preview.querySelectorAll('code.java, code.html'));
         codeBlocks.forEach(function (code) {
             hljs.highlightBlock(code);
         });
@@ -30,7 +30,7 @@ function createMarkdownViewer(viewerName, initialContents) {
     var div = document.getElementById('wmd-viewer-' + viewerName);
     div.innerHTML = markdown.Converter.makeHtml(initialContents);
 
-    var codeBlocks = Array.prototype.slice.call(div.querySelectorAll('pre code'));
+    var codeBlocks = Array.prototype.slice.call(div.querySelectorAll('code.java, code.html'));
     codeBlocks.forEach(function (code) {
         hljs.highlightBlock(code);
     });

@@ -7,7 +7,9 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGraders
 	/// <summary>
 	/// Creates question graders.
 	/// </summary>
-	public class QuestionGraderFactory : IQuestionResultVisitor<IQuestionGrader>
+	public class QuestionGraderFactory :
+		IQuestionGraderFactory,
+		IQuestionResultVisitor<IQuestionGrader>
 	{
 		/// <summary>
 		/// The code runner service.
@@ -76,6 +78,14 @@ namespace CSC.CSClassroom.Service.Questions.QuestionGraders
 		IQuestionGrader IQuestionResultVisitor<IQuestionGrader>.Visit(GeneratedQuestionTemplate question)
 		{
 			throw new InvalidOperationException("Generated questions cannot be graded directly. Instead, grade the question with a particular seed.");
+		}
+
+		/// <summary>
+		/// Creates a question loader for a randomly selected question.
+		/// </summary>
+		IQuestionGrader IQuestionResultVisitor<IQuestionGrader>.Visit(RandomlySelectedQuestion question)
+		{
+			throw new InvalidOperationException("Randomly-selected questions cannot be graded directly. Instead, grade actual question selected.");
 		}
 	}
 }

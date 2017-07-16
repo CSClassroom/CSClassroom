@@ -13,6 +13,11 @@ namespace CSC.Common.Infrastructure.Serialization
 		string Serialize<TObject>(TObject obj);
 
 		/// <summary>
+		/// Serializes a Json object.
+		/// </summary>
+		string Serialize<TObject>(TObject obj, bool writeTypesForAllSubclasses);
+
+		/// <summary>
 		/// Serializes an object to a JObject.
 		/// </summary>
 		JObject SerializeToJObject<TObject>(TObject obj);

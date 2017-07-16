@@ -203,7 +203,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionGeneration
 				(
 					It.Is<ClassJob>
 					(
-						job => job.LineNumberOffset == -7
+						job => job.LineNumberOffset == -4
 					)
 				),
 				Times.Once
@@ -583,7 +583,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionGeneration
 			Assert.True(result.FullGeneratorFileContents.Contains("GeneratorContents"));
 			Assert.True(result.FullGeneratorFileContents.Contains("MethodQuestion"));
 			Assert.True(result.FullGeneratorFileContents.Contains("ClassQuestion"));
-			Assert.Equal(-7, result.FullGeneratorFileLineOffset);
+			Assert.Equal(-4, result.FullGeneratorFileLineOffset);
 		}
 
 		/// <summary>

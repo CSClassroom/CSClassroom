@@ -116,6 +116,8 @@ namespace CSC.CSClassroom.Service.Classrooms
 		/// </summary>
 		public async Task CreateClassroomAsync(Classroom classroom)
 		{
+			UpdateClassroom(classroom);
+
 			_dbContext.Add(classroom);
 
 			await _dbContext.SaveChangesAsync();

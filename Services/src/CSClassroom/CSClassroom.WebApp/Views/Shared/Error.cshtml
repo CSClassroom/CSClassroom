@@ -1,4 +1,6 @@
-﻿@using CSC.Common.Infrastructure.Logging
+﻿@using AsyncFriendlyStackTrace
+@using CSC.Common.Infrastructure.Logging
+@model Exception
 @inject IOperationIdProvider OperationIdProvider
 @{
     ViewData["Title"] = "Error";
@@ -9,3 +11,11 @@
 
 <span>When reporting this error, please include the operation ID.</span>
 
+@if (Model != null)
+{
+    <br />
+    <br />
+    <pre>
+    @Model.ToAsyncString();
+    </pre>
+}

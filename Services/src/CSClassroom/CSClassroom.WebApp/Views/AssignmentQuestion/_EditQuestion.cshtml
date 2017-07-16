@@ -1,0 +1,11 @@
+﻿@model CSC.CSClassroom.Model.Questions.ServiceResults.QuestionToSolve
+
+@{
+    string seedText = "";
+}
+@if (Model.Seed != null)
+{
+    seedText = $"  (seed: {Model.Seed})";
+}
+
+@Html.ActionLink("Question Settings", "Edit", "Question", new { id = Model.Question.Id, seed = Model.Seed })<span>@seedText</span>

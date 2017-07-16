@@ -1,0 +1,43 @@
+@model IEnumerable<Project>
+
+@{
+    ViewData["Title"] = "Projects";
+}
+
+<h2>Class Projects</h2>
+
+<p>
+    <a asp-action="Create">Create Project</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ExplicitSubmissionRequired)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ExplicitSubmissionRequired, "YesNo")
+            </td>
+            <td>
+                <a asp-action="CreateStudentRepositories" asp-route-projectName="@item.Name">Create Student Repositories</a> |
+                <a asp-action="SectionReport" asp-route-projectName="@item.Name">Student Build Status</a> |
+                <a asp-action="Index" asp-controller="Checkpoint" asp-route-projectName="@item.Name">Checkpoints and Grading</a> |
+                <a asp-action="Edit" asp-route-projectName="@item.Name">Edit</a> |
+                <a asp-action="Delete" asp-route-projectName="@item.Name">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

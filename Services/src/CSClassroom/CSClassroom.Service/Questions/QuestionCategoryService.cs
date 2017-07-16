@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CSC.CSClassroom.Model.Classrooms;
@@ -36,6 +37,7 @@ namespace CSC.CSClassroom.Service.Questions
 
 			return await _dbContext.QuestionCategories
 				.Where(questionCategory => questionCategory.Classroom.Name == classroomName)
+				.Where(questionCategory => questionCategory.RandomlySelectedQuestionId == null)
 				.ToListAsync();
 		}
 
@@ -75,9 +77,23 @@ namespace CSC.CSClassroom.Service.Questions
 			string classroomName,
 			QuestionCategory questionCategory)
 		{
-			var classroom = await LoadClassroomAsync(classroomName);
+			var currentQuestionCategory = await GetQuestionCategoryAsync
+			(
+				classroomName, 
+				questionCategory.Id
+			);
 
-			questionCategory.ClassroomId = classroom.Id;
+			_dbContext.Entry(currentQuestionCategory).State = EntityState.Detached;
+
+			if (currentQuestionCategory.RandomlySelectedQuestionId != null)
+			{
+				throw new InvalidOperationException
+				(
+					"Cannot update category containing choices for a randomly selected question."
+				);
+			}
+
+			questionCategory.ClassroomId = currentQuestionCategory.ClassroomId;
 			_dbContext.Update(questionCategory);
 
 			await _dbContext.SaveChangesAsync();

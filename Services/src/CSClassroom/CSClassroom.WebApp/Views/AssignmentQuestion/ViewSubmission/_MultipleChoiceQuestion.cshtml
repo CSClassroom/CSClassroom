@@ -1,0 +1,61 @@
+﻿@using CSC.CSClassroom.Model.Questions.ServiceResults
+@model CSC.CSClassroom.Model.Questions.ServiceResults.SubmissionResult
+@{
+    var question = Model.QuestionSubmitted.Question as MultipleChoiceQuestion;
+    var inputType = (question.AllowMultipleCorrectAnswers ? "checkbox" : "radio");
+}
+
+<input type="hidden" name="QuestionSubmissionType" value="MultipleChoiceQuestionSubmission" />
+<table class="table" style="width: auto">
+    @{ var submission = (MultipleChoiceQuestionSubmission) (Model.QuestionSubmitted.LastSubmission); }
+    @{ var explanations = (question.Choices.Any(q => !string.IsNullOrWhiteSpace(q.Explanation)));}
+    <thead>
+    <tr>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            Chosen
+        </td>
+        <td>
+            Correct
+        </td>
+        @if (explanations)
+        {
+            <td>
+                Explanation
+            </td>
+        }
+    </tr>
+    </thead>
+    <tbody>
+    @{ var orderedChoices = question.Choices.OrderBy(c => c.Order).ToList(); }
+    @foreach (var choice in orderedChoices)
+    {
+        var chosenChecked = (submission.SelectedChoices?.Contains(choice.Value) ?? false) ? "checked" : "";
+        var correctChecked = question.Choices.First(c => c.Value == choice.Value).Correct ? "checked" : "";
+        <tr>
+            <td>
+                <span style="white-space: pre-wrap; vertical-align: top">@(char.ConvertFromUtf32('A' + orderedChoices.IndexOf(choice)).ToString()))</span>
+            </td>
+            <td>
+                <div style="white-space: pre-wrap">@choice.Value</div>
+            </td>
+            <td style="text-align: center">
+                <input type="@inputType" disabled @chosenChecked/>
+            </td>
+            <td style="text-align: center">
+                <input type="@inputType" disabled @correctChecked/>
+            </td>
+            @if (explanations)
+            {
+                <td>
+                    <div style="white-space: pre-wrap">@choice.Explanation</div>
+                </td>
+            }
+        </tr>
+    }
+    </tbody>
+   
+</table>

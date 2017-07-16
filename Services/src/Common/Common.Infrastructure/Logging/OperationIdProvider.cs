@@ -1,4 +1,5 @@
 ﻿using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.AspNetCore.Http;
 
 namespace CSC.Common.Infrastructure.Logging
 {
@@ -8,21 +9,25 @@ namespace CSC.Common.Infrastructure.Logging
 	public class OperationIdProvider : IOperationIdProvider
 	{
 		/// <summary>
-		/// The telemetry of the current request.
+		/// The HTTP context accessor.
 		/// </summary>
-		private readonly RequestTelemetry _requestTelemetry;
+		private readonly IHttpContextAccessor _httpContextAccessor;
 
 		/// <summary>
 		/// The operation ID of the current request.
 		/// </summary>
-		public string OperationId => _requestTelemetry.Id;
+		public string OperationId => _httpContextAccessor
+			.HttpContext
+			.Features
+			.Get<RequestTelemetry>()
+			.Id;
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public OperationIdProvider(RequestTelemetry requestTelemetry)
+		public OperationIdProvider(IHttpContextAccessor httpContextAccessor)
 		{
-			_requestTelemetry = requestTelemetry;
+			_httpContextAccessor = httpContextAccessor;
 		}
 	}
 }

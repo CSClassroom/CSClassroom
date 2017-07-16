@@ -12,14 +12,19 @@ namespace CSC.CSClassroom.WebApp.ViewHelpers.NestedTables
 	public class TableInfo
 	{
 		/// <summary>
+		/// The type of the content in the table.
+		/// </summary>
+		public string Type { get; set; }
+
+		/// <summary>
 		/// This table's column info.
 		/// </summary>
 		public List<TableColumnInfo> Columns { get; set; }
 
 		/// <summary>
-		/// The child table's info (if any).
+		/// The child table's info (if more than one potential type).
 		/// </summary>
-		public TableInfo ChildTableInfo { get; set; }
+		public List<TableInfo> ChildTableInfos { get; set; }
 
 		/// <summary>
 		/// Whether or not to show the header, with the column names.
@@ -29,10 +34,10 @@ namespace CSC.CSClassroom.WebApp.ViewHelpers.NestedTables
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public TableInfo(List<TableColumnInfo> columns, TableInfo childTableInfo, bool showHeader)
+		public TableInfo(List<TableColumnInfo> columns, List<TableInfo> childTableInfos, bool showHeader)
 		{
 			Columns = columns;
-			ChildTableInfo = childTableInfo;
+			ChildTableInfos = childTableInfos;
 			ShowHeader = showHeader;
 		}
 
@@ -41,8 +46,9 @@ namespace CSC.CSClassroom.WebApp.ViewHelpers.NestedTables
 		/// </summary>
 		public TableInfo(Type type, bool showHeader)
 		{
+			Type = type.FullName;
 			Columns = GetColumns(type);
-			ChildTableInfo = GetChildTable(type);
+			ChildTableInfos = GetChildTableInfos(type);
 			ShowHeader = showHeader;
 		}
 
@@ -69,14 +75,13 @@ namespace CSC.CSClassroom.WebApp.ViewHelpers.NestedTables
 		/// <summary>
 		/// Returns the child table info, if any.
 		/// </summary>
-		private TableInfo GetChildTable(Type type)
+		private List<TableInfo> GetChildTableInfos(Type type)
 		{
 			var childTableProperties = type
 				.GetTypeInfo()
 				.DeclaredProperties.Where
 				(
-					prop => prop.PropertyType.GetTypeInfo().IsGenericType 
-						&& prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>)
+					prop => prop.GetCustomAttribute<SubTableAttribute>() != null
 				).ToList();
 
 			if (!childTableProperties.Any())
@@ -84,18 +89,23 @@ namespace CSC.CSClassroom.WebApp.ViewHelpers.NestedTables
 
 			if (childTableProperties.Count > 1)
 				throw new InvalidOperationException("There can only be one child table for any given table.");
-
+			
 			var childTableProperty = childTableProperties[0];
 			var jsonPropertyAttribute = childTableProperty.GetCustomAttribute<JsonPropertyAttribute>();
 			if (jsonPropertyAttribute == null || jsonPropertyAttribute.PropertyName != "childTableData")
-				throw new InvalidOperationException("The child table data must have a JsonProperty attribute with name ChildTableData.");
+				throw new InvalidOperationException("The child table data must have a JsonProperty attribute with name childTableData.");
+			var subTableAttribute = childTableProperty.GetCustomAttribute<SubTableAttribute>();
 			var tableOptionsAttribute = childTableProperty.GetCustomAttribute<TableOptionsAttribute>();
 
-			return new TableInfo
-			(
-				childTableProperty.PropertyType.GetGenericArguments()[0],
-				tableOptionsAttribute?.ShowHeader ?? true
-			);
+			return subTableAttribute.SubTableTypes
+				.Select
+				(
+					subTableType => new TableInfo
+					(
+						subTableType,
+						tableOptionsAttribute?.ShowHeader ?? true
+					)
+				).ToList();
 		}
 	}
 }

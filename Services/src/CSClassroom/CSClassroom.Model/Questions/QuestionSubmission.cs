@@ -5,5 +5,6 @@
 	/// </summary>
 	public abstract class QuestionSubmission
 	{
+		public int AssignmentQuestionId { get; set; }
 	}
 }

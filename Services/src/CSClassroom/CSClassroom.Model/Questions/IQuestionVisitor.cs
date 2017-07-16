@@ -34,5 +34,10 @@
 		/// Visits a generated question.
 		/// </summary>
 		void Visit(GeneratedQuestionTemplate question);
+
+		/// <summary>
+		/// Visits a randomly selected question.
+		/// </summary>
+		void Visit(RandomlySelectedQuestion question);
 	}
 }

@@ -1,0 +1,64 @@
+﻿@using CSC.CSClassroom.Model.Questions.ServiceResults
+@model CSC.CSClassroom.Model.Questions.ServiceResults.SubmissionResult
+@{
+    var question = Model.QuestionSubmitted.Question as ShortAnswerQuestion;
+    var lastSubmission = Model.QuestionSubmitted.LastSubmission as ShortAnswerQuestionSubmission;
+    var result = Model.QuestionResult as ShortAnswerQuestionResult;
+}
+
+<input type="hidden" name="QuestionSubmissionType" value="ShortAnswerQuestionSubmission" />
+<table class="table" style="width: auto">
+    <thead>
+    <tr>
+        <td>
+        </td>
+        <td style="font-weight: bold;">
+            Submitted
+        </td>
+        <td style="font-weight: bold;">
+            Answer
+        </td>
+        <td>
+        </td>
+    </tr>
+    </thead>
+    <tbody style="border: lightgray 1px solid;">
+    @{ var orderedBlanks = question.Blanks.OrderBy(c => c.Order).ToList(); }
+    @foreach (var blank in orderedBlanks)
+    {
+        var blankIndex = orderedBlanks.IndexOf(blank);
+        var submittedValue = lastSubmission?.Blanks?.SingleOrDefault(b => b.Name == blank.Name)?.Answer ?? "";
+        var correctValue = blank.Answer;
+        var isCorrect = result.Correct[blankIndex];
+
+        <tr>
+            <td>
+                <div style="white-space: pre-wrap">@blank.Name</div>
+            </td>
+            <td>
+                <div style="white-space: pre-wrap; margin-bottom: 9px">@(submittedValue)</div>
+            </td>
+            <td>
+                <div style="white-space: pre-wrap; margin-bottom: 9px">@(correctValue)</div>
+            </td>
+            <td>
+            @if (isCorrect)
+            {
+                <span id="result@(blankIndex)" style="color: green; font-weight: bold">Correct!</span>
+            }
+            else
+            {
+                <span id="result@(blankIndex)" style="color: red; font-weight: bold">Incorrect.</span>
+            }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@if (!string.IsNullOrEmpty(question.Explanation))
+{
+    <br />
+    <h4>Explanation</h4>
+    <pre style="white-space: pre-wrap">@question.Explanation</pre>
+}

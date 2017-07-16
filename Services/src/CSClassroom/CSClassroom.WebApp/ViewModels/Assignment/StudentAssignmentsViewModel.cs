@@ -30,26 +30,24 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		/// <summary>
 		/// The results for each student
 		/// </summary>
-		public List<AssignmentResultViewModel> AssignmentResults { get; }
+		public List<AssignmentGroupResultViewModel> AssignmentGroupResults { get; }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public StudentAssignmentsViewModel(
 			StudentAssignmentResults results,
-			Func<int, string> getQuestionUrl,
-			ITimeZoneProvider timeZoneProvider)
+			IAssignmentDisplayProviderFactory displayProviderFactory)
 		{
 			LastName = results.LastName;
 			FirstName = results.FirstName;
 			SectionName = results.SectionName;
-			AssignmentResults = results.AssignmentResults.Select
+			AssignmentGroupResults = results.AssignmentGroupResults.Select
 			(
-				result => new AssignmentResultViewModel
+				result => new AssignmentGroupResultViewModel
 				(
 					result,
-					getQuestionUrl,
-					timeZoneProvider
+					displayProviderFactory
 				)
 			).ToList();
 		}

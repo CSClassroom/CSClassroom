@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Service.Questions;
@@ -117,6 +118,53 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		}
 
 		/// <summary>
+		/// Ensures that UpdateQuestionCategoryAsync throws if the choices
+		/// category is changed.
+		/// </summary>
+		[Fact]
+		public async Task UpdateQuestionCategoryAsync_IsChoicesCategory_Throws()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddQuestionCategory("Class1", "Category1")
+				.AddQuestion
+				(
+					"Class1",
+					"Category1", 
+					new RandomlySelectedQuestion()
+					{
+						ChoicesCategory = new QuestionCategory()
+						{
+							Name = "Randomly Selected Question Category"
+						}
+					}
+				).Build();
+
+			var questionCategory = database.Context.QuestionCategories
+				.Include(qc => qc.Classroom)
+				.Single(qc => qc.RandomlySelectedQuestionId.HasValue);
+
+			questionCategory.Classroom = database.Context.Classrooms.First();
+			database.Context.SaveChanges();
+
+			// Update the category
+			database.Context.Entry(questionCategory).State = EntityState.Detached;
+			questionCategory.Name = "New Category Name";
+
+			// Apply the update
+			var questionCategoryService = new QuestionCategoryService(database.Context);
+
+			await Assert.ThrowsAsync<InvalidOperationException>
+			(			
+				async () => await questionCategoryService.UpdateQuestionCategoryAsync
+				(
+					"Class1",
+					questionCategory
+				)
+			);
+		}
+
+		/// <summary>
 		/// Ensures that UpdateQuestionCategoryAsync actually updates the category.
 		/// </summary>
 		[Fact]
@@ -124,7 +172,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		{
 			var database = new TestDatabaseBuilder()
 				.AddClassroom("Class1")
-				.AddQuestionCategory("Class1", "Category1", privateCategory: true)
+				.AddQuestionCategory("Class1", "Category1")
 				.Build();
 			
 			var questionCategory = database.Context.QuestionCategories
@@ -133,7 +181,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 
 			// Update the category
 			database.Context.Entry(questionCategory).State = EntityState.Detached;
-			questionCategory.IsPrivate = false;
+			questionCategory.Name = "Category1Updated";
 
 			// Apply the update
 			var questionCategoryService = new QuestionCategoryService(database.Context);
@@ -150,8 +198,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 				.Single();
 
 			Assert.Equal("Class1", questionCategory.Classroom.Name);
-			Assert.Equal("Category1", questionCategory.Name);
-			Assert.Equal(false, questionCategory.IsPrivate);
+			Assert.Equal("Category1Updated", questionCategory.Name);
 		}
 
 		/// <summary>

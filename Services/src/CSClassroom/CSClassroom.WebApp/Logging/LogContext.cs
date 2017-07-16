@@ -17,7 +17,7 @@ namespace CSC.CSClassroom.WebApp.Logging
 		/// </summary>
 		public IDisposable CreateLogScope(IList<KeyValuePair<string, string>> properties)
 		{
-			return Serilog.Context.LogContext.PushProperties
+			return Serilog.Context.LogContext.Push
 			(
 				properties.Select
 				(

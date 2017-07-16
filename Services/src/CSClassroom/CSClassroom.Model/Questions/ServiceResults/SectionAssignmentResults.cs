@@ -10,7 +10,7 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 		/// <summary>
 		/// The name of the homework assignment.
 		/// </summary>
-		public string AssignmentName { get; }
+		public string AssignmentGroupName { get; }
 
 		/// <summary>
 		/// The section name.
@@ -25,21 +25,21 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 		/// <summary>
 		/// The results for each student.
 		/// </summary>
-		public IList<SectionAssignmentResult> AssignmentResults { get; }
+		public IList<AssignmentGroupResult> AssignmentGroupResults { get; }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public SectionAssignmentResults(
-			string assignmentName, 
+			string assignmentGroupName, 
 			string sectionName, 
 			double points,
-			IList<SectionAssignmentResult> assignmentResults)
+			IList<AssignmentGroupResult> assignmentGroupResults)
 		{
-			AssignmentName = assignmentName;
+			AssignmentGroupName = assignmentGroupName;
 			SectionName = sectionName;
 			Points = points;
-			AssignmentResults = assignmentResults;
+			AssignmentGroupResults = assignmentGroupResults;
 		}
 	}
 }

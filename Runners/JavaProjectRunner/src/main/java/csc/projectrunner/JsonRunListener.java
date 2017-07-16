@@ -20,7 +20,7 @@ public class JsonRunListener extends RunListener
 	private PrintStream oldSystemOut;
 	private PrintStream oldSystemErr;
 	private NoInterruptionOutputStream utos;
-	private final int c_maxOutputLength = 10000;
+	private final int c_maxOutputLength = 50000;
 	
 	public JsonRunListener(OutputStream stream) throws IOException
 	{
@@ -129,7 +129,7 @@ public class JsonRunListener extends RunListener
 	
 	private String getFailureMessage(Failure failure)
 	{
-		String message = failure.getMessage();
+		String message = failure.getException().getClass().getName() + ": " + failure.getMessage();
 		if (message != null && message.length() > c_maxOutputLength)
 		{
 			message = message.substring(0, c_maxOutputLength)

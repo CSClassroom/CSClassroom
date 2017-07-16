@@ -5,7 +5,7 @@
     ViewBag.Title = "Unread Feedback";
 }
 
-@Html.Partial("../Build/_UnreadFeedback", Model)
+@Html.Partial("~/Views/Build/_UnreadFeedback.cshtml", Model)
 <br /><br />
 
 @if (ClassroomRole < ClassroomRole.Admin)

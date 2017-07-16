@@ -42,6 +42,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// The feedback for the submission.
 		/// </summary>
 		[TableOptions(ShowHeader = false)]
+		[SubTable(typeof(PastSubmissionFeedback))]
 		[JsonProperty(PropertyName = "childTableData")]
 		public List<PastSubmissionFeedback> PastSubmissionFeedback { get; set; }
 

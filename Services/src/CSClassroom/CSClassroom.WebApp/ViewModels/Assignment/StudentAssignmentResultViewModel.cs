@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.WebApp.Extensions;
+using CSC.CSClassroom.WebApp.Providers;
 using CSC.CSClassroom.WebApp.ViewHelpers.NestedTables;
 using Newtonsoft.Json;
 
@@ -9,7 +11,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 	/// <summary>
 	/// The result for a single student's assignment.
 	/// </summary>
-	public class StudentAssignmentResultViewModel
+	public class StudentAssignmentResultViewModel : TableEntry
 	{
 		/// <summary>
 		/// The student's last name.
@@ -30,28 +32,59 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		public double Score { get; }
 
 		/// <summary>
+		/// The assignment status.
+		/// </summary>
+		[TableColumn("Status")]
+		public string Status { get; }
+
+		/// <summary>
 		/// The results for each question.
 		/// </summary>
+		[SubTable(typeof(StudentQuestionResultViewModel), typeof(AssignmentResultViewModel), typeof(AssignmentSubmissionViewModel))]
 		[JsonProperty(PropertyName = "childTableData")]
-		public List<StudentQuestionResultViewModel> QuestionResults { get; }
+		public List<object> ChildTableData { get; }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public StudentAssignmentResultViewModel(
-			SectionAssignmentResult assignmentResult)
+			AssignmentGroupResult assignmentGroupResult,
+			IAssignmentDisplayProviderFactory displayProviderFactory)
 		{
-			LastName = assignmentResult.LastName;
-			FirstName = assignmentResult.FirstName;
-			Score = assignmentResult.Score;
-			QuestionResults = assignmentResult.QuestionResults.Select
+			LastName = assignmentGroupResult.LastName;
+			FirstName = assignmentGroupResult.FirstName;
+			Score = assignmentGroupResult.Score;
+
+			Status = GetColoredText
 			(
-				questionResult => new StudentQuestionResultViewModel
+				assignmentGroupResult.Status.GetColor(),
+				assignmentGroupResult.Status.GetText(),
+				assignmentGroupResult.Status.GetBold(),
+				preventWrapping: true
+			);
+
+			if (assignmentGroupResult.AssignmentResults.Count == 1)
+			{
+				var assignmentResult = assignmentGroupResult.AssignmentResults[0];
+				var displayProvider = displayProviderFactory.CreateDisplayProvider
 				(
-					questionResult, 
-					getQuestionUrl: null
-				)
-			).ToList();
+					assignmentResult
+				);
+
+				ChildTableData = displayProvider.GetChildTableData();
+			}
+			else
+			{
+				ChildTableData = assignmentGroupResult.AssignmentResults
+					.Select
+					(
+						assignmentResult => new AssignmentResultViewModel
+						(
+							assignmentResult,
+							displayProviderFactory.CreateDisplayProvider(assignmentResult)
+						)
+					).Cast<object>().ToList();
+			}
 		}
 	}
 }

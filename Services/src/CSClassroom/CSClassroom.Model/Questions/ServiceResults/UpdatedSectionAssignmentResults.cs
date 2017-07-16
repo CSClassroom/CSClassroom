@@ -25,6 +25,11 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 		public DateTime AssignmentsLastGradedDate { get; }
 
 		/// <summary>
+		/// The date results were retrieved.
+		/// </summary>
+		public DateTime ResultsRetrievedDate { get; }
+
+		/// <summary>
 		/// The results for each student.
 		/// </summary>
 		public IList<SectionAssignmentResults> AssignmentResults { get; }
@@ -36,11 +41,13 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 			string sectionName, 
 			string gradebookName,
 			DateTime assignmentsLastGradedDate,
+			DateTime resultsRetrievedDate,
 			IList<SectionAssignmentResults> assignmentResults)
 		{
 			SectionName = sectionName;
 			GradebookName = gradebookName;
 			AssignmentsLastGradedDate = assignmentsLastGradedDate;
+			ResultsRetrievedDate = resultsRetrievedDate;
 			AssignmentResults = assignmentResults;
 		}
 	}

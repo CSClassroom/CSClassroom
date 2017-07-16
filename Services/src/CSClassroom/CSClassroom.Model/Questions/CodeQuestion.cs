@@ -52,5 +52,20 @@ namespace CSC.CSClassroom.Model.Questions
 		/// The HTML string displayed when solving each type of question.
 		/// </summary>
 		public abstract string SubmissionTypeDescription { get; }
+
+		/// <summary>
+		/// Returns whether or not the question is a randomly selected question.
+		/// </summary>
+		public override bool HasChoices => false;
+
+		/// <summary>
+		/// Returns whether or not this question can be duplicated.
+		/// </summary>
+		public override bool CanDuplicate => true;
+
+		/// <summary>
+		/// Returns whether or not this question can be turned into a generated question template.
+		/// </summary>
+		public override bool CanRandomize => false;
 	}
 }

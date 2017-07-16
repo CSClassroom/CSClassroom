@@ -1,0 +1,44 @@
+﻿@using CSC.Common.Infrastructure.Utilities;
+@using CSC.CSClassroom.Model.Users
+@model QuestionCategory
+
+@{
+    ViewData["Title"] = "Randomly Selected Question Choices";
+}
+
+<h2>Randomly Selected Question Choices</h2>
+<div id="accordion" class="panel-group" style="max-width: 700px">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                @Model.Name
+            </h4>
+        </div>
+        <div class="panel-body" style="line-height: 175%">
+            <table class="table">
+                <tbody>
+                @foreach (var question in Model.Questions.OrderBy(q => q.Name, new NaturalComparer()))
+                {
+                    <tr>
+                        <td style="text-align: left">
+                            @question.Name
+                        </td>
+                        <td style="text-align: right">
+                            @if (question.CanDuplicate)
+                            {
+                                @Html.ActionLink("Duplicate", "DuplicateExisting", new {id = question.Id})
+                                @:|
+                            }
+                            @Html.ActionLink("Edit", "Edit", new { id = question.Id }) |
+                            @Html.ActionLink("Delete", "Delete", new { id = question.Id })
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td><a asp-action="Create" asp-route-questionCategoryId="@Model.Id">Create New Question Choice</a></td><td></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -6,7 +6,7 @@
     (function ()
     {
         var allColumns = @Html.Raw(Json.Serialize(Model.TableInfo))
-        var allData = @Html.Raw(Json.Serialize(Model.OuterTableEntries));
+        var allData = @Html.Raw(Json.Serialize(Model.OuterTableEntries, writeTypesForAllSubclasses: true));
 
         createNestedTable($("#@Model.TableElementId"), allColumns, allData, '@Model.EmptyTableText');
     })();

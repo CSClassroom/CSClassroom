@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Model.Questions.ServiceResults;
@@ -8,519 +9,277 @@ using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Questions.AssignmentScoring;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
+using Moq;
 using Xunit;
 
 namespace CSC.CSClassroom.Service.UnitTests.Questions.AssignmentScoring
 {
 	/// <summary>
-	/// Unit tests for the AssignmentResultGenerator class.
+	/// Unit tests for the AssignmentScoreCalculator class.
 	/// </summary>
 	public class AssignmentScoreCalculator_UnitTests
 	{
 		/// <summary>
-		/// An example question due date.
-		/// </summary>
-		private static readonly DateTime DueDate = new DateTime(2016, 1, 1, 12, 0, 0);
-
-		/// <summary>
-		/// Ensures that GetSectionAssignmentResults returns the correct results.
+		/// Ensures GetAssignmentScore correctly sums up the scores
+		/// for each question in the assignment.
 		/// </summary>
 		[Fact]
-		public void GetSectionAssignmentResults_CorrectResults()
+		public void GetAssignmentScore_GivenQuestionResults_ReturnsSum()
 		{
-			var users = GetUsers();
-			var questions = GetQuestions();
-			var sections = GetSections();
-			var assignments = GetAssignments(sections, questions);
-			var submissions = GetSubmissions(users, questions);
-
-			var scoreCalculator = new AssignmentScoreCalculator();
-			var expectedResults = GetExpectedSectionAssignmentResults();
-			var actualResults = scoreCalculator.GetSectionAssignmentResults
+			var questionResults = Collections.CreateList
 			(
-				"Unit 1",
-				assignments,
-				sections[0],
-				users,
-				submissions
+				CreateQuestionResult(score: 1.0),
+				CreateQuestionResult(score: 2.0),
+				CreateQuestionResult(score: 2.954)
 			);
 
-			VerifySectionAssignmentResults(expectedResults, actualResults);
+			var assignmentScoreCalculator = CreateAssignmentScoreCalculator();
+			var result = assignmentScoreCalculator.GetAssignmentScore
+			(
+				questionResults,
+				roundDigits: 2
+			);
+
+			Assert.Equal(5.95, result);
 		}
 
 		/// <summary>
-		/// Ensures that GetStudentAssignmentResults returns the correct results.
+		/// Ensures GetAssignmentScore correctly returns the maximum submission score
+		/// when given a list of submission results.
 		/// </summary>
 		[Fact]
-		public void GetStudentAssignmentResults_CorrectResults()
+		public void GetAssignmentScore_GivenAssignmentSubmissionResults_ReturnsMaxScore()
 		{
-			var users = GetUsers();
-			var questions = GetQuestions();
-			var sections = GetSections();
-			var assignments = GetAssignments(sections, questions);
-			var submissions = GetSubmissions(users, questions);
-
-			var scoreCalculator = new AssignmentScoreCalculator();
-			var expectedResults = GetExpectedStudentAssignmentResults();
-			var actualResults = scoreCalculator.GetStudentAssignmentResults
+			var assignmentSubmissionResults = Collections.CreateList
 			(
-				users[0],
-				sections[0],
-				assignments,
-				submissions
+				CreateAssignmentSubmissionResult(score: 1.0),
+				CreateAssignmentSubmissionResult(score: 2.0),
+				CreateAssignmentSubmissionResult(score: 2.954)
 			);
 
-			VerifyStudentAssignmentResults(expectedResults, actualResults);
+			var assignmentScoreCalculator = CreateAssignmentScoreCalculator();
+			var result = assignmentScoreCalculator.GetAssignmentScore
+			(
+				assignmentSubmissionResults,
+				roundDigits: 2
+			);
+
+			Assert.Equal(2.95, result);
 		}
 
 		/// <summary>
-		/// Ensures that GetUpdatedAssignmentResults returns the correct results.
+		/// Ensures GetAssignmentScore correctly returns zero when given a list
+		/// of zero submission results.
 		/// </summary>
 		[Fact]
-		public void GetUpdatedAssignmentResults_CorrectResults()
+		public void GetAssignmentScore_GivenZeroAssignmentSubmissionResults_ReturnsZero()
 		{
-			var users = GetUsers();
-			var questions = GetQuestions();
-			var sections = GetSections();
-			var assignments = GetAssignments(sections, questions);
-			var submissions = GetSubmissions(users, questions);
+			var assignmentSubmissionResults = new List<AssignmentSubmissionResult>();
 
-			var scoreCalculator = new AssignmentScoreCalculator();
-			var expectedResults = GetExpectedUpdatedAssignmentResults();
-			var actualResults = scoreCalculator.GetUpdatedAssignmentResults
+			var assignmentScoreCalculator = CreateAssignmentScoreCalculator();
+			var result = assignmentScoreCalculator.GetAssignmentScore
 			(
-				assignments,
-				users,
-				sections[0],
-				"Gradebook1",
-				DueDate,
-				submissions
+				assignmentSubmissionResults,
+				roundDigits: 2
 			);
 
-			VerifyUpdatedAssignmentResults(expectedResults, actualResults);
+			Assert.Equal(0.0, result);
 		}
 
 		/// <summary>
-		/// Returns a list of users.
+		/// Ensures GetAssignmentStatus correctly returns the assignment status
+		/// given a set of question results.
 		/// </summary>
-		private IList<User> GetUsers()
+		[Fact]
+		public void GetAssignmentStatus_GivenQuestionResults_ReturnsAssignmentStatus()
 		{
-			return Collections.CreateList
+			var questionResults = Collections.CreateList
 			(
-				new User() { Id = 1, LastName = "Last1", FirstName = "First1" },
-				new User() { Id = 2, LastName = "Last2", FirstName = "First2" },
-				new User() { Id = 3, LastName = "Last3", FirstName = "First3" }
+				CreateQuestionResult(status: new SubmissionStatus(Completion.Completed, late: false)),
+				CreateQuestionResult(status: new SubmissionStatus(Completion.InProgress, late: true)),
+				CreateQuestionResult(status: new SubmissionStatus(Completion.NotStarted, late: true))
 			);
+
+			var expectedResult = new SubmissionStatus(Completion.Completed, late: false);
+			var submissionStatusCalculator = CreateSubmissionStatusCalculator
+			(
+				questionResults.Select(qr => qr.Status),
+				expectedResult
+			);
+
+			var assignmentScoreCalculator = CreateAssignmentScoreCalculator
+			(
+				submissionStatusCalculator
+			);
+
+			var result = assignmentScoreCalculator.GetAssignmentStatus(questionResults);
+
+			Assert.Equal(expectedResult, result);
 		}
 
 		/// <summary>
-		/// Returns a list of sections.
+		/// Ensures GetAssignmentStatus correctly returns the assignment status
+		/// given a set of question results.
 		/// </summary>
-		private IList<Section> GetSections()
+		[Fact]
+		public void GetAssignmentStatus_GivenAssignmentSubmissionResults_ReturnsHighestScoringStatus()
 		{
-			return Collections.CreateList
+			var assignmentSubmissionResults = Collections.CreateList
 			(
-				new Section() { Id = 1, DisplayName = "Period1" },
-				new Section() { Id = 2, DisplayName = "Period2" }
-			);
-		}
-
-		/// <summary>
-		/// Returns a list of questions.
-		/// </summary>
-		private IList<Question> GetQuestions()
-		{
-			return Collections.CreateList<Question>
-			(
-				new MethodQuestion() { Id = 1, Name = "Question1" },
-				new MethodQuestion() { Id = 2, Name = "Question2" },
-				new MethodQuestion() { Id = 3, Name = "Question3" },
-				new MethodQuestion() { Id = 4, Name = "Question4" }
-			);
-		}
-
-		/// <summary>
-		/// Returns a list of assignments.
-		/// </summary>
-		private IList<Assignment> GetAssignments(
-			IList<Section> sections, 
-			IList<Question> questions)
-		{
-			return Collections.CreateList
-			(
-				new Assignment()
-				{
-					Name = "Unit 1a",
-					GroupName = "Unit 1",
-					DueDates = GetDueDates(sections),
-					Questions = GetAssignmentQuestions(questions.Take(3)),
-				},
-				new Assignment()
-				{
-					Name = "Unit 1b",
-					GroupName = "Unit 1",
-					DueDates = GetDueDates(sections),
-					Questions = GetAssignmentQuestions(questions.Skip(3))
-				}
-			);
-		}
-
-		/// <summary>
-		/// Returns a list of assignment questions.
-		/// </summary>
-		public IList<AssignmentQuestion> GetAssignmentQuestions(IEnumerable<Question> questions)
-		{
-			return questions
-				.Select
+				CreateAssignmentSubmissionResult
 				(
-					question => new AssignmentQuestion()
-					{
-						Question = question,
-						QuestionId = question.Id,
-						Points = 1.0
-					}
-				).ToList();
-		}
-
-		/// <summary>
-		/// Returns a list of due dates.
-		/// </summary>
-		private IList<AssignmentDueDate> GetDueDates(IList<Section> sections)
-		{
-			return Collections.CreateList
-			(
-				new AssignmentDueDate()
-				{
-					Section = sections[0],
-					SectionId = sections[0].Id,
-					DueDate = DueDate
-				},
-				new AssignmentDueDate()
-				{
-					Section = sections[1],
-					SectionId = sections[1].Id,
-					DueDate = DueDate
-				}
+					score: 1.0, 
+					status: new SubmissionStatus(Completion.Completed, late: false)
+				),
+				CreateAssignmentSubmissionResult
+				(
+					score: 0.0,
+					status: new SubmissionStatus(Completion.InProgress, late: true)
+				),
+				CreateAssignmentSubmissionResult
+				(
+					score: 0.0,
+					status: new SubmissionStatus(Completion.NotStarted, late: true)
+				)
 			);
-		}
 
-		/// <summary>
-		/// Returns a list of question submissions.
-		/// </summary>
-		private IList<UserQuestionSubmission> GetSubmissions(
-			IList<User> users, 
-			IList<Question> questions)
-		{
-			return Collections.CreateList
+			var assignmentScoreCalculator = CreateAssignmentScoreCalculator();
+			var result = assignmentScoreCalculator.GetAssignmentStatus
 			(
-				GetUserQuestionSubmission(users[0], questions[0], 0.0, DueDate - TimeSpan.FromDays(1)),
-				GetUserQuestionSubmission(users[0], questions[0], 1.0, DueDate - TimeSpan.FromDays(1)),
-				GetUserQuestionSubmission(users[0], questions[0], 1.0, DueDate + TimeSpan.FromHours(1)),
-				GetUserQuestionSubmission(users[0], questions[1], 1.0, DueDate + TimeSpan.FromHours(50)),
-				GetUserQuestionSubmission(users[0], questions[2], 1.0, DueDate - TimeSpan.FromHours(50)),
-				GetUserQuestionSubmission(users[0], questions[3], 1.0, DueDate + TimeSpan.FromHours(50)),
-				GetUserQuestionSubmission(users[1], questions[0], 0.0, DueDate - TimeSpan.FromDays(1)),
-				GetUserQuestionSubmission(users[1], questions[0], 1.0, DueDate - TimeSpan.FromDays(1)),
-				GetUserQuestionSubmission(users[1], questions[2], 0.0, DueDate + TimeSpan.FromDays(1)),
-				GetUserQuestionSubmission(users[2], questions[0], 0.0, DueDate - TimeSpan.FromDays(1)),
-				GetUserQuestionSubmission(users[2], questions[0], 1.0, DueDate - TimeSpan.FromDays(1))
+				assignmentSubmissionResults,
+				dueDate: null
 			);
+
+			Assert.Equal(assignmentSubmissionResults[0].Status, result);
 		}
 
 		/// <summary>
-		/// Returns a new user question submission.
+		/// Ensures GetAssignmentStatus correctly returns a status of NotStarted
+		/// that is not yet late, when the due date has not yet been reached.
 		/// </summary>
-		private UserQuestionSubmission GetUserQuestionSubmission(
-			User user,
-			Question question,
-			double score,
-			DateTime submissionTime)
+		[Fact]
+		public void GetAssignmentStatus_GivenZeroAssignmentSubmissionResultsBeforeDeadline_ReturnNotStartedOnTime()
 		{
-			return new UserQuestionSubmission()
-			{
-				Score = score,
-				DateSubmitted = submissionTime,
-				UserQuestionData = new UserQuestionData()
-				{
-					User = user,
-					UserId = user.Id,
-					Question = question,
-					QuestionId = question.Id,
-				}
-			};
-		}
+			var assignmentSubmissionResults = new List<AssignmentSubmissionResult>();
 
-		/// <summary>
-		/// Returns the expected section assignment results.
-		/// </summary>
-		private SectionAssignmentResults GetExpectedSectionAssignmentResults()
-		{
-			return new SectionAssignmentResults
+			var timeProvider = new Mock<ITimeProvider>();
+			timeProvider.Setup(m => m.UtcNow).Returns(DateTime.MinValue);
+
+			var assignmentScoreCalculator = CreateAssignmentScoreCalculator
 			(
-				"Unit 1",
-				"Period1",
-				4.0,
-				new List<SectionAssignmentResult>()
-				{
-					new SectionAssignmentResult
-					(
-						"Unit 1",
-						"Last1",
-						"First1",
-						3.7,
-						new List<StudentQuestionResult>()
-						{
-							new StudentQuestionResult(0, "Question1", 1.0, 1.0, Status(Completion.Completed, late: false)),
-							new StudentQuestionResult(0, "Question2", 1.0, 0.85, Status(Completion.Completed, late: true)),
-							new StudentQuestionResult(0, "Question3", 1.0, 1.0, Status(Completion.Completed, late: false)),
-							new StudentQuestionResult(0, "Question4", 1.0, 0.85, Status(Completion.Completed, late: true)),
-						},
-						new SubmissionStatus(Completion.Completed, late: true)
-					),
-					new SectionAssignmentResult
-					(
-						"Unit 1",
-						"Last2",
-						"First2",
-						1.0,
-						new List<StudentQuestionResult>()
-						{
-							new StudentQuestionResult(0, "Question1", 1.0, 1.0, Status(Completion.Completed, late: false)),
-							new StudentQuestionResult(0, "Question2", 1.0, 0.0, Status(Completion.NotStarted, late: true)),
-							new StudentQuestionResult(0, "Question3", 1.0, 0.0, Status(Completion.InProgress, late: true)),
-							new StudentQuestionResult(0, "Question4", 1.0, 0.0, Status(Completion.NotStarted, late: true)),
-						},
-						new SubmissionStatus(Completion.InProgress, late: true)
-					),
-					new SectionAssignmentResult
-					(
-						"Unit 1",
-						"Last3",
-						"First3",
-						1.0,
-						new List<StudentQuestionResult>()
-						{
-							new StudentQuestionResult(0, "Question1", 1.0, 1.0, Status(Completion.Completed, late: false)),
-							new StudentQuestionResult(0, "Question2", 1.0, 0.0, Status(Completion.NotStarted, late: true)),
-							new StudentQuestionResult(0, "Question3", 1.0, 0.0, Status(Completion.NotStarted, late: true)),
-							new StudentQuestionResult(0, "Question4", 1.0, 0.0, Status(Completion.NotStarted, late: true)),
-						},
-						new SubmissionStatus(Completion.InProgress, late: true)
-					)
-				}
+				timeProvider: timeProvider.Object
 			);
-		}
 
-		/// <summary>
-		/// Returns the expected student assignment results.
-		/// </summary>
-		private StudentAssignmentResults GetExpectedStudentAssignmentResults()
-		{
-			return new StudentAssignmentResults
+			var result = assignmentScoreCalculator.GetAssignmentStatus
 			(
-				"Last1",
-				"First1",
-				"Period1",
-				new List<StudentAssignmentResult>()
-				{
-					new StudentAssignmentResult
-					(
-						"Unit 1a",
-						DueDate,
-						2.85,
-						new List<StudentQuestionResult>()
-						{
-							new StudentQuestionResult(0, "Question1", 1.0, 1.0, Status(Completion.Completed, late: false)),
-							new StudentQuestionResult(0, "Question2", 1.0, 0.85, Status(Completion.Completed, late: true)),
-							new StudentQuestionResult(0, "Question3", 1.0, 1.0, Status(Completion.Completed, late: false))
-						},
-						new SubmissionStatus(Completion.Completed, late: true)
-					),
-					new StudentAssignmentResult
-					(
-						"Unit 1b",
-						DueDate,
-						0.85,
-						new List<StudentQuestionResult>()
-						{
-							new StudentQuestionResult(0, "Question4", 1.0, 0.85, Status(Completion.Completed, late: true)),
-						},
-						new SubmissionStatus(Completion.Completed, late: true)
-					)
-				}
+				assignmentSubmissionResults, DateTime.MaxValue
 			);
+
+			Assert.Equal(Completion.NotStarted, result.Completion);
+			Assert.False(result.Late);
 		}
 
 		/// <summary>
-		/// Returns the expected student assignment results.
+		/// Ensures GetAssignmentStatus correctly returns a status of NotStarted
+		/// that is late, when the due date has been passed.
 		/// </summary>
-		private UpdatedSectionAssignmentResults GetExpectedUpdatedAssignmentResults()
+		[Fact]
+		public void GetAssignmentStatus_GivenZeroAssignmentSubmissionResultsAfterDeadline_ReturnNotStartedLate()
 		{
-			return new UpdatedSectionAssignmentResults
+			var assignmentSubmissionResults = new List<AssignmentSubmissionResult>();
+
+			var timeProvider = new Mock<ITimeProvider>();
+			timeProvider.Setup(m => m.UtcNow).Returns(DateTime.MaxValue);
+
+			var assignmentScoreCalculator = CreateAssignmentScoreCalculator
 			(
-				"Period1",
-				"Gradebook1",
-				DueDate,
-				new List<SectionAssignmentResults>()
-				{
-					new SectionAssignmentResults
+				timeProvider: timeProvider.Object
+			);
+
+			var result = assignmentScoreCalculator.GetAssignmentStatus
+			(
+				assignmentSubmissionResults, DateTime.MinValue
+			);
+
+			Assert.Equal(Completion.NotStarted, result.Completion);
+			Assert.True(result.Late);
+		}
+
+		/// <summary>
+		/// Creates a mock submission status calculator.
+		/// </summary>
+		private ISubmissionStatusCalculator CreateSubmissionStatusCalculator(
+			IEnumerable<SubmissionStatus> expectedQuestionStatus,
+			SubmissionStatus expectedResult)
+		{
+			var submissionStatusCalculator = new Mock<ISubmissionStatusCalculator>();
+			submissionStatusCalculator
+				.Setup
+				(
+					m => m.GetStatusForAssignment
 					(
-						"Unit 1",
-						"Period1",
-						4.0,
-						Collections.CreateList
+						It.Is<IList<SubmissionStatus>>
 						(
-							new SectionAssignmentResult
-							(
-								"Unit 1",
-								"Last1",
-								"First1",
-								3.7,
-								new List<StudentQuestionResult>()
-								{
-									new StudentQuestionResult(0, "Question1", 1.0, 1.0, Status(Completion.Completed, late: false)),
-									new StudentQuestionResult(0, "Question2", 1.0, 0.85, Status(Completion.Completed, late: true)),
-									new StudentQuestionResult(0, "Question3", 1.0, 1.0, Status(Completion.Completed, late: false)),
-									new StudentQuestionResult(0, "Question4", 1.0, 0.85, Status(Completion.Completed, late: true)),
-								},
-								new SubmissionStatus(Completion.Completed, late: true)
-							)
+							list => list.SequenceEqual(expectedQuestionStatus)
 						)
 					)
-				}
+				).Returns(expectedResult);
+
+			return submissionStatusCalculator.Object;
+		}
+
+		/// <summary>
+		/// Creates an assignment score calculator.
+		/// </summary>
+		private AssignmentScoreCalculator CreateAssignmentScoreCalculator(
+			ISubmissionStatusCalculator submissionStatusCalculator = null,
+			ITimeProvider timeProvider = null)
+		{
+			return new AssignmentScoreCalculator
+			(
+				submissionStatusCalculator, 
+				timeProvider
 			);
 		}
 
 		/// <summary>
-		/// Verifies updated results.
+		/// Creates a question result with the given score and status.
 		/// </summary>
-		private void VerifyUpdatedAssignmentResults(
-			UpdatedSectionAssignmentResults expected,
-			UpdatedSectionAssignmentResults actual)
+		private StudentQuestionResult CreateQuestionResult(
+			double score = 0.0, 
+			SubmissionStatus status = null)
 		{
-			Assert.Equal(expected.GradebookName, actual.GradebookName);
-			Assert.Equal(expected.SectionName, actual.SectionName);
-			Assert.Equal(expected.AssignmentsLastGradedDate, actual.AssignmentsLastGradedDate);
-			Assert.Equal(expected.AssignmentResults.Count, actual.AssignmentResults.Count);
-			for (int index = 0; index < expected.AssignmentResults.Count; index++)
-			{
-				VerifySectionAssignmentResults
-				(
-					expected.AssignmentResults[index],
-					actual.AssignmentResults[index]
-				);
-			}
+			return new StudentQuestionResult
+			(
+				questionId: 1,
+				assignmentId: 1,
+				userId: 1,
+				combinedSubmissions: false,
+				questionName: "",
+				questionPoints: 0.0,
+				score: score,
+				status: status,
+				submissionResults: null
+			);
 		}
 
 		/// <summary>
-		/// Verifies section results.
+		/// Creates an assignment submission result with the given score and status.
 		/// </summary>
-		private void VerifySectionAssignmentResults(
-			SectionAssignmentResults expected,
-			SectionAssignmentResults actual)
+		private AssignmentSubmissionResult CreateAssignmentSubmissionResult(
+			double score = 0.0,
+			SubmissionStatus status = null)
 		{
-			Assert.Equal(expected.AssignmentName, actual.AssignmentName);
-			Assert.Equal(expected.SectionName, actual.SectionName);
-			Assert.Equal(expected.Points, actual.Points);
-			Assert.Equal(expected.AssignmentResults.Count, actual.AssignmentResults.Count);
-			for (int index = 0; index < expected.AssignmentResults.Count; index++)
-			{
-				VerifySectionAssignmentResult
-				(
-					expected.AssignmentResults[index],
-					actual.AssignmentResults[index]
-				);
-			}
-		}
-
-		/// <summary>
-		/// Verifies assignment group results.
-		/// </summary>
-		private void VerifySectionAssignmentResult(
-			SectionAssignmentResult expected,
-			SectionAssignmentResult actual)
-		{
-			Assert.Equal(expected.AssignmentGroupName, actual.AssignmentGroupName);
-			Assert.Equal(expected.LastName, actual.LastName);
-			Assert.Equal(expected.FirstName, actual.FirstName);
-			Assert.Equal(expected.Score, actual.Score);
-			Assert.Equal(expected.Status.Completion, actual.Status.Completion);
-			Assert.Equal(expected.Status.Late, actual.Status.Late);
-			Assert.Equal(expected.QuestionResults.Count, actual.QuestionResults.Count);
-			for (int index = 0; index < expected.QuestionResults.Count; index++)
-			{
-				VerifyStudentQuestionResult
-				(
-					expected.QuestionResults[index],
-					actual.QuestionResults[index]
-				);
-			}
-		}
-
-		/// <summary>
-		/// Verifies student results.
-		/// </summary>
-		private void VerifyStudentAssignmentResults(
-			StudentAssignmentResults expected,
-			StudentAssignmentResults actual)
-		{
-			Assert.Equal(expected.LastName, actual.LastName);
-			Assert.Equal(expected.FirstName, actual.FirstName);
-			Assert.Equal(expected.SectionName, actual.SectionName);
-			Assert.Equal(expected.AssignmentResults.Count, actual.AssignmentResults.Count);
-			for (int index = 0; index < expected.AssignmentResults.Count; index++)
-			{
-				VerifyStudentAssignmentResult
-				(
-					expected.AssignmentResults[index],
-					actual.AssignmentResults[index]
-				);
-			}
-		}
-
-		/// <summary>
-		/// Verifies student assignment results.
-		/// </summary>
-		private void VerifyStudentAssignmentResult(
-			StudentAssignmentResult expected,
-			StudentAssignmentResult actual)
-		{
-			Assert.Equal(expected.AssignmentName, actual.AssignmentName);
-			Assert.Equal(expected.AssignmentDueDate, actual.AssignmentDueDate);
-			Assert.Equal(expected.Score, actual.Score);
-			Assert.Equal(expected.Status.Completion, actual.Status.Completion);
-			Assert.Equal(expected.Status.Late, actual.Status.Late);
-			Assert.Equal(expected.QuestionResults.Count, actual.QuestionResults.Count);
-			for (int index = 0; index < expected.QuestionResults.Count; index++)
-			{
-				VerifyStudentQuestionResult
-				(
-					expected.QuestionResults[index],
-					actual.QuestionResults[index]
-				);
-			}
-		}
-
-		/// <summary>
-		/// Verifies a single question result.
-		/// </summary>
-		private void VerifyStudentQuestionResult(
-			StudentQuestionResult expected,
-			StudentQuestionResult actual)
-		{
-			Assert.Equal(expected.QuestionName, actual.QuestionName);
-			Assert.Equal(expected.QuestionPoints, actual.QuestionPoints);
-			Assert.Equal(expected.Score, actual.Score);
-			Assert.Equal(expected.Status.Completion, actual.Status.Completion);
-			Assert.Equal(expected.Status.Late, actual.Status.Late);
-		}
-
-		/// <summary>
-		/// Returns a new SubmissionStatus object.
-		/// </summary>
-		private SubmissionStatus Status(Completion completion, bool late)
-		{
-			return new SubmissionStatus(completion, late);
+			return new AssignmentSubmissionResult
+			(
+				assignmentId: 1,
+				userId: 1,
+				submissionDate: DateTime.MinValue,
+				status: status,
+				score: score,
+				assignmentPoints: 0.0,
+				questionResults: null
+			);
 		}
 	}
 }

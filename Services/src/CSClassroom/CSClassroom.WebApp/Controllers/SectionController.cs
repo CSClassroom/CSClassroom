@@ -183,17 +183,20 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// </summary>
 		private void EnsureNoDuplicateSectionGradebooks(Section section)
 		{
-			var classroomGradebookIds = section.SectionGradebooks
-				.Select(d => d.ClassroomGradebookId)
-				.ToList();
-
-			if (classroomGradebookIds.Distinct().Count() != classroomGradebookIds.Count)
+			if (section.SectionGradebooks != null)
 			{
-				ModelState.AddModelError
-				(
-					"SectionGradebooks", 
-					"You may only have one section gradebook per classroom gradebook."
-				);
+				var classroomGradebookIds = section.SectionGradebooks
+					.Select(d => d.ClassroomGradebookId)
+					.ToList();
+
+				if (classroomGradebookIds.Distinct().Count() != classroomGradebookIds.Count)
+				{
+					ModelState.AddModelError
+					(
+						"SectionGradebooks",
+						"You may only have one section gradebook per classroom gradebook."
+					);
+				}
 			}
 		}
 	}

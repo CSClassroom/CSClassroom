@@ -10,1214 +10,1255 @@ using CSC.CSClassroom.Model.Users;
 
 namespace CSC.CSClassroom.Repository.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
-    {
-        protected override void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
-                .HasAnnotation("ProductVersion", "1.1.0-rtm-22752");
+	[DbContext(typeof(DatabaseContext))]
+	partial class DatabaseContextModelSnapshot : ModelSnapshot
+	{
+		protected override void BuildModel(ModelBuilder modelBuilder)
+		{
+			modelBuilder
+				.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
+				.HasAnnotation("ProductVersion", "1.1.2");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Classrooms.Classroom", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Classrooms.Classroom", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<TimeSpan>("DefaultTimeDue");
+					b.Property<TimeSpan>("DefaultTimeDue");
 
-                    b.Property<string>("DisplayName")
-                        .IsRequired();
+					b.Property<string>("DisplayName")
+						.IsRequired();
 
-                    b.Property<string>("GitHubOrganization")
-                        .IsRequired();
+					b.Property<string>("GitHubOrganization")
+						.IsRequired();
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50);
+					b.Property<string>("Name")
+						.IsRequired()
+						.HasMaxLength(50);
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+					b.HasIndex("Name")
+						.IsUnique();
 
-                    b.ToTable("Classrooms");
-                });
+					b.ToTable("Classrooms");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Classrooms.Section", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Classrooms.Section", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<bool>("AllowNewRegistrations");
+					b.Property<bool>("AllowNewRegistrations");
 
-                    b.Property<int>("ClassroomId");
+					b.Property<int>("ClassroomId");
 
-                    b.Property<string>("DisplayName")
-                        .IsRequired();
+					b.Property<string>("DisplayName")
+						.IsRequired();
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50);
+					b.Property<string>("Name")
+						.IsRequired()
+						.HasMaxLength(50);
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("ClassroomId", "Name")
-                        .IsUnique();
+					b.HasIndex("ClassroomId", "Name")
+						.IsUnique();
 
-                    b.ToTable("Sections");
-                });
+					b.ToTable("Sections");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Build", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Build", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<int>("CommitId");
+					b.Property<int>("CommitId");
 
-                    b.Property<DateTime>("DateCompleted");
+					b.Property<DateTime>("DateCompleted");
 
-                    b.Property<DateTime>("DateStarted");
+					b.Property<DateTime>("DateStarted");
 
-                    b.Property<string>("Output");
+					b.Property<string>("Output");
 
-                    b.Property<int>("Status");
+					b.Property<int>("Status");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("CommitId")
-                        .IsUnique();
+					b.HasIndex("CommitId")
+						.IsUnique();
 
-                    b.ToTable("Build");
-                });
+					b.ToTable("Build");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Checkpoint", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Checkpoint", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<string>("DisplayName");
+					b.Property<string>("DisplayName");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(50);
+					b.Property<string>("Name")
+						.HasMaxLength(50);
 
-                    b.Property<int>("ProjectId");
+					b.Property<int>("ProjectId");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("ProjectId", "Name")
-                        .IsUnique();
+					b.HasIndex("ProjectId", "Name")
+						.IsUnique();
 
-                    b.ToTable("Checkpoints");
-                });
+					b.ToTable("Checkpoints");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.CheckpointDates", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.CheckpointDates", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<int>("CheckpointId");
+					b.Property<int>("CheckpointId");
 
-                    b.Property<DateTime>("DueDate");
+					b.Property<DateTime>("DueDate");
 
-                    b.Property<int>("SectionId");
+					b.Property<int>("SectionId");
 
-                    b.Property<DateTime?>("StartDate");
+					b.Property<DateTime?>("StartDate");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("SectionId");
+					b.HasIndex("SectionId");
 
-                    b.HasIndex("CheckpointId", "SectionId")
-                        .IsUnique();
+					b.HasIndex("CheckpointId", "SectionId")
+						.IsUnique();
 
-                    b.ToTable("CheckpointDates");
-                });
+					b.ToTable("CheckpointDates");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.CheckpointTestClass", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.CheckpointTestClass", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<int>("CheckpointId");
+					b.Property<int>("CheckpointId");
 
-                    b.Property<bool>("Required");
+					b.Property<bool>("Required");
 
-                    b.Property<int>("TestClassId");
+					b.Property<int>("TestClassId");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("TestClassId");
+					b.HasIndex("TestClassId");
 
-                    b.HasIndex("CheckpointId", "TestClassId")
-                        .IsUnique();
+					b.HasIndex("CheckpointId", "TestClassId")
+						.IsUnique();
 
-                    b.ToTable("CheckpointTestClasses");
-                });
+					b.ToTable("CheckpointTestClasses");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Commit", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Commit", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<string>("BuildJobId");
+					b.Property<string>("BuildJobId");
 
-                    b.Property<string>("BuildRequestToken");
+					b.Property<string>("BuildRequestToken");
 
-                    b.Property<DateTime>("CommitDate");
+					b.Property<DateTime>("CommitDate");
 
-                    b.Property<string>("Message");
+					b.Property<string>("Message");
 
-                    b.Property<int>("ProjectId");
+					b.Property<int>("ProjectId");
 
-                    b.Property<DateTime>("PushDate");
+					b.Property<DateTime>("PushDate");
 
-                    b.Property<string>("Sha");
+					b.Property<string>("Sha");
 
-                    b.Property<int>("UserId");
+					b.Property<int>("UserId");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+					b.HasIndex("UserId");
 
-                    b.HasIndex("ProjectId", "UserId", "Sha")
-                        .IsUnique();
+					b.HasIndex("ProjectId", "UserId", "Sha")
+						.IsUnique();
 
-                    b.ToTable("Commits");
-                });
+					b.ToTable("Commits");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.ImmutableFilePath", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.ImmutableFilePath", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<string>("Path");
+					b.Property<string>("Path");
 
-                    b.Property<int>("ProjectId");
+					b.Property<int>("ProjectId");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("ProjectId");
+					b.HasIndex("ProjectId");
 
-                    b.ToTable("ImmutableFilePaths");
-                });
+					b.ToTable("ImmutableFilePaths");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.PrivateFilePath", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.PrivateFilePath", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<string>("Path");
+					b.Property<string>("Path");
 
-                    b.Property<int>("ProjectId");
+					b.Property<int>("ProjectId");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("ProjectId");
+					b.HasIndex("ProjectId");
 
-                    b.ToTable("PrivateFilePaths");
-                });
+					b.ToTable("PrivateFilePaths");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Project", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Project", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<bool>("BuildCommits");
+					b.Property<bool>("BuildCommits");
 
-                    b.Property<int>("ClassroomId");
+					b.Property<int>("ClassroomId");
 
-                    b.Property<bool>("ExplicitSubmissionRequired");
+					b.Property<bool>("ExplicitSubmissionRequired");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50);
+					b.Property<string>("Name")
+						.IsRequired()
+						.HasMaxLength(50);
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("ClassroomId", "Name")
-                        .IsUnique();
+					b.HasIndex("ClassroomId", "Name")
+						.IsUnique();
 
-                    b.ToTable("Projects");
-                });
+					b.ToTable("Projects");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Submission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Submission", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<int>("CheckpointId");
+					b.Property<int>("CheckpointId");
 
-                    b.Property<int>("CommitId");
+					b.Property<int>("CommitId");
 
-                    b.Property<DateTime?>("DateFeedbackRead");
+					b.Property<DateTime?>("DateFeedbackRead");
 
-                    b.Property<DateTime?>("DateFeedbackSaved");
+					b.Property<DateTime?>("DateFeedbackSaved");
 
-                    b.Property<DateTime>("DateSubmitted");
+					b.Property<DateTime>("DateSubmitted");
 
-                    b.Property<string>("Feedback");
+					b.Property<string>("Feedback");
 
-                    b.Property<bool>("FeedbackSent");
+					b.Property<bool>("FeedbackSent");
 
-                    b.Property<int>("PullRequestNumber");
+					b.Property<int>("PullRequestNumber");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("CommitId");
+					b.HasIndex("CommitId");
 
-                    b.HasIndex("CheckpointId", "CommitId", "DateSubmitted")
-                        .IsUnique();
+					b.HasIndex("CheckpointId", "CommitId", "DateSubmitted")
+						.IsUnique();
 
-                    b.ToTable("Submissions");
-                });
+					b.ToTable("Submissions");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.TestClass", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.TestClass", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<string>("ClassName");
+					b.Property<string>("ClassName");
 
-                    b.Property<string>("DisplayName");
+					b.Property<string>("DisplayName");
 
-                    b.Property<int>("Order");
+					b.Property<int>("Order");
 
-                    b.Property<int>("ProjectId");
+					b.Property<int>("ProjectId");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("ProjectId");
+					b.HasIndex("ProjectId");
 
-                    b.ToTable("TestClasses");
-                });
+					b.ToTable("TestClasses");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.TestResult", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.TestResult", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<int>("BuildId");
+					b.Property<int>("BuildId");
 
-                    b.Property<string>("ClassName");
+					b.Property<string>("ClassName");
 
-                    b.Property<string>("FailureMessage");
+					b.Property<string>("FailureMessage");
 
-                    b.Property<string>("FailureOutput");
+					b.Property<string>("FailureOutput");
 
-                    b.Property<string>("FailureTrace");
+					b.Property<string>("FailureTrace");
 
-                    b.Property<bool>("PreviouslySucceeded");
+					b.Property<bool>("PreviouslySucceeded");
 
-                    b.Property<bool>("Succeeded");
+					b.Property<bool>("Succeeded");
 
-                    b.Property<string>("TestName");
+					b.Property<string>("TestName");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("BuildId", "ClassName", "TestName")
-                        .IsUnique();
+					b.HasIndex("BuildId", "ClassName", "TestName")
+						.IsUnique();
 
-                    b.ToTable("TestResults");
-                });
+					b.ToTable("TestResults");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.Assignment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.Assignment", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<int>("ClassroomId");
+					b.Property<bool>("AnswerInOrder");
 
-                    b.Property<string>("GroupName")
-                        .HasMaxLength(50);
+					b.Property<int>("ClassroomId");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50);
+					b.Property<bool>("CombinedSubmissions");
 
-                    b.HasKey("Id");
+					b.Property<string>("GroupName")
+						.HasMaxLength(100);
 
-                    b.HasIndex("ClassroomId", "Name")
-                        .IsUnique();
+					b.Property<bool>("IsPrivate");
 
-                    b.ToTable("Assignments");
-                });
+					b.Property<int?>("MaxAttempts");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.AssignmentDueDate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<string>("Name")
+						.IsRequired()
+						.HasMaxLength(100);
 
-                    b.Property<int>("AssignmentId");
+					b.Property<bool>("OnlyShowCombinedScore");
 
-                    b.Property<DateTime>("DueDate");
+					b.HasKey("Id");
 
-                    b.Property<int>("SectionId");
+					b.HasIndex("ClassroomId", "Name")
+						.IsUnique();
 
-                    b.HasKey("Id");
+					b.ToTable("Assignments");
+				});
 
-                    b.HasIndex("SectionId");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.AssignmentDueDate", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.HasIndex("AssignmentId", "SectionId")
-                        .IsUnique();
+					b.Property<int>("AssignmentId");
 
-                    b.ToTable("AssignmentDueDates");
-                });
+					b.Property<DateTime>("DueDate");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.AssignmentQuestion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<int>("SectionId");
 
-                    b.Property<int>("AssignmentId");
+					b.HasKey("Id");
 
-                    b.Property<int>("Order");
+					b.HasIndex("SectionId");
 
-                    b.Property<double>("Points");
+					b.HasIndex("AssignmentId", "SectionId")
+						.IsUnique();
 
-                    b.Property<int>("QuestionId");
+					b.ToTable("AssignmentDueDates");
+				});
 
-                    b.HasKey("Id");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.AssignmentQuestion", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.HasIndex("QuestionId");
+					b.Property<int>("AssignmentId");
 
-                    b.HasIndex("AssignmentId", "QuestionId")
-                        .IsUnique();
+					b.Property<string>("Name");
 
-                    b.ToTable("AssignmentQuestions");
-                });
+					b.Property<int>("Order");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ClassroomGradebook", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<double>("Points");
 
-                    b.Property<int>("ClassroomId");
+					b.Property<int>("QuestionId");
 
-                    b.Property<string>("Name")
-                        .IsRequired();
+					b.HasKey("Id");
 
-                    b.Property<int>("Order");
+					b.HasIndex("QuestionId");
 
-                    b.HasKey("Id");
+					b.HasIndex("AssignmentId", "Name")
+						.IsUnique();
 
-                    b.HasIndex("ClassroomId", "Name")
-                        .IsUnique();
+					b.ToTable("AssignmentQuestions");
+				});
 
-                    b.ToTable("ClassroomGradebooks");
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ClassroomGradebook", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.CodeConstraint", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<int>("ClassroomId");
 
-                    b.Property<int>("CodeQuestionId");
+					b.Property<string>("Name")
+						.IsRequired();
 
-                    b.Property<string>("ErrorMessage")
-                        .IsRequired();
+					b.Property<int>("Order");
 
-                    b.Property<int>("Frequency");
+					b.HasKey("Id");
 
-                    b.Property<int>("Order");
+					b.HasIndex("ClassroomId", "Name")
+						.IsUnique();
 
-                    b.Property<string>("Regex")
-                        .IsRequired();
+					b.ToTable("ClassroomGradebooks");
+				});
 
-                    b.Property<int>("Type");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.CodeConstraint", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.HasKey("Id");
+					b.Property<int>("CodeQuestionId");
 
-                    b.HasIndex("CodeQuestionId");
+					b.Property<string>("ErrorMessage")
+						.IsRequired();
 
-                    b.ToTable("CodeConstraints");
-                });
+					b.Property<int>("Frequency");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.CodeQuestionTest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<int>("Order");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired();
+					b.Property<string>("Regex")
+						.IsRequired();
 
-                    b.Property<string>("ExpectedOutput");
+					b.Property<int>("Type");
 
-                    b.Property<string>("ExpectedReturnValue");
+					b.HasKey("Id");
 
-                    b.Property<string>("Name");
+					b.HasIndex("CodeQuestionId");
 
-                    b.Property<int>("Order");
+					b.ToTable("CodeConstraints");
+				});
 
-                    b.HasKey("Id");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.CodeQuestionTest", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.ToTable("CodeQuestionTests");
+					b.Property<string>("Discriminator")
+						.IsRequired();
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("CodeQuestionTest");
-                });
+					b.Property<string>("ExpectedOutput");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ImportedClass", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<string>("ExpectedReturnValue");
 
-                    b.Property<string>("ClassName")
-                        .IsRequired();
+					b.Property<string>("Name");
 
-                    b.Property<int>("CodeQuestionId");
+					b.Property<int>("Order");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("CodeQuestionId");
+					b.ToTable("CodeQuestionTests");
 
-                    b.ToTable("ImportedClasses");
-                });
+					b.HasDiscriminator<string>("Discriminator").HasValue("CodeQuestionTest");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MultipleChoiceQuestionChoice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ImportedClass", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<bool>("Correct");
+					b.Property<string>("ClassName")
+						.IsRequired();
 
-                    b.Property<int>("MultipleChoiceQuestionId");
+					b.Property<int>("CodeQuestionId");
 
-                    b.Property<int>("Order");
+					b.HasKey("Id");
 
-                    b.Property<string>("Value");
+					b.HasIndex("CodeQuestionId");
 
-                    b.HasKey("Id");
+					b.ToTable("ImportedClasses");
+				});
 
-                    b.HasIndex("MultipleChoiceQuestionId");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MultipleChoiceQuestionChoice", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.ToTable("MultipleChoiceQuestionChoices");
-                });
+					b.Property<bool>("Correct");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.PrerequisiteQuestion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<string>("Explanation");
 
-                    b.Property<int>("FirstQuestionId");
+					b.Property<int>("MultipleChoiceQuestionId");
 
-                    b.Property<int>("Order");
+					b.Property<int>("Order");
 
-                    b.Property<int>("SecondQuestionId");
+					b.Property<string>("Value");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("FirstQuestionId");
+					b.HasIndex("MultipleChoiceQuestionId");
 
-                    b.HasIndex("SecondQuestionId");
+					b.ToTable("MultipleChoiceQuestionChoices");
+				});
 
-                    b.ToTable("PrerequisiteQuestions");
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.PrerequisiteQuestion", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.Question", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<int>("FirstQuestionId");
 
-                    b.Property<bool>("AllowPartialCredit");
+					b.Property<int>("Order");
 
-                    b.Property<string>("Description")
-                        .IsRequired();
+					b.Property<int>("SecondQuestionId");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired();
+					b.HasKey("Id");
 
-                    b.Property<bool>("IsPrivate");
+					b.HasIndex("FirstQuestionId");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50);
+					b.HasIndex("SecondQuestionId");
 
-                    b.Property<int>("QuestionCategoryId");
+					b.ToTable("PrerequisiteQuestions");
+				});
 
-                    b.HasKey("Id");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.Question", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.HasIndex("QuestionCategoryId", "Name")
-                        .IsUnique();
+					b.Property<bool>("AllowPartialCredit");
 
-                    b.ToTable("Questions");
+					b.Property<string>("Description")
+						.IsRequired();
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Question");
-                });
+					b.Property<string>("Discriminator")
+						.IsRequired();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.QuestionCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<string>("Name")
+						.IsRequired()
+						.HasMaxLength(50);
 
-                    b.Property<int>("ClassroomId");
+					b.Property<int>("QuestionCategoryId");
 
-                    b.Property<bool>("IsPrivate");
+					b.HasKey("Id");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50);
+					b.HasIndex("QuestionCategoryId", "Name")
+						.IsUnique();
 
-                    b.HasKey("Id");
+					b.ToTable("Questions");
 
-                    b.HasIndex("ClassroomId", "Name")
-                        .IsUnique();
+					b.HasDiscriminator<string>("Discriminator").HasValue("Question");
+				});
 
-                    b.ToTable("QuestionCategories");
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.QuestionCategory", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.RequiredMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<int>("ClassroomId");
 
-                    b.Property<int>("ClassQuestionId");
+					b.Property<string>("Name")
+						.IsRequired()
+						.HasMaxLength(100);
 
-                    b.Property<bool>("IsPublic");
+					b.Property<int?>("RandomlySelectedQuestionId");
 
-                    b.Property<bool>("IsStatic");
+					b.HasKey("Id");
 
-                    b.Property<string>("Name");
+					b.HasIndex("RandomlySelectedQuestionId")
+						.IsUnique();
 
-                    b.Property<string>("ParamTypes");
+					b.HasIndex("ClassroomId", "Name", "RandomlySelectedQuestionId")
+						.IsUnique();
 
-                    b.Property<string>("ReturnType");
+					b.ToTable("QuestionCategories");
+				});
 
-                    b.HasKey("Id");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.RequiredMethod", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.HasIndex("ClassQuestionId");
+					b.Property<int>("ClassQuestionId");
 
-                    b.ToTable("RequiredMethods");
-                });
+					b.Property<bool>("IsPublic");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.SectionGradebook", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<bool>("IsStatic");
 
-                    b.Property<int>("ClassroomGradebookId");
+					b.Property<string>("Name");
 
-                    b.Property<DateTime>("LastTransferDate");
+					b.Property<string>("ParamTypes");
 
-                    b.Property<int>("SectionId");
+					b.Property<string>("ReturnType");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("SectionId");
+					b.HasIndex("ClassQuestionId");
 
-                    b.HasIndex("ClassroomGradebookId", "SectionId")
-                        .IsUnique();
+					b.ToTable("RequiredMethods");
+				});
 
-                    b.ToTable("SectionGradebooks");
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.SectionGradebook", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ShortAnswerQuestionBlank", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<int>("ClassroomGradebookId");
 
-                    b.Property<string>("Answer");
+					b.Property<DateTime>("LastTransferDate");
 
-                    b.Property<string>("Name");
+					b.Property<int>("SectionId");
 
-                    b.Property<int>("Order");
+					b.HasKey("Id");
 
-                    b.Property<int>("ShortAnswerQuestionId");
+					b.HasIndex("SectionId");
 
-                    b.HasKey("Id");
+					b.HasIndex("ClassroomGradebookId", "SectionId")
+						.IsUnique();
 
-                    b.HasIndex("ShortAnswerQuestionId");
+					b.ToTable("SectionGradebooks");
+				});
 
-                    b.ToTable("ShortAnswerQuestionBlanks");
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ShortAnswerQuestionBlank", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.UserQuestionData", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<string>("Answer");
 
-                    b.Property<string>("CachedQuestionData");
+					b.Property<string>("Name");
 
-                    b.Property<DateTime?>("CachedQuestionDataTime");
+					b.Property<int>("Order");
 
-                    b.Property<string>("LastQuestionSubmission");
+					b.Property<bool>("Regex");
 
-                    b.Property<int>("NumAttempts");
+					b.Property<int>("ShortAnswerQuestionId");
 
-                    b.Property<int>("QuestionId");
+					b.HasKey("Id");
 
-                    b.Property<int?>("Seed");
+					b.HasIndex("ShortAnswerQuestionId");
 
-                    b.Property<int>("UserId");
+					b.ToTable("ShortAnswerQuestionBlanks");
+				});
 
-                    b.HasKey("Id");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.UserQuestionData", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.HasIndex("UserId");
+					b.Property<int>("AssignmentQuestionId");
 
-                    b.HasIndex("QuestionId", "UserId")
-                        .IsUnique();
+					b.Property<string>("CachedQuestionData");
 
-                    b.ToTable("UserQuestionData");
-                });
+					b.Property<DateTime?>("CachedQuestionDataTime");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.UserQuestionSubmission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.Property<string>("LastQuestionSubmission");
 
-                    b.Property<DateTime>("DateSubmitted");
+					b.Property<int>("NumAttempts");
 
-                    b.Property<double>("Score");
+					b.Property<int?>("Seed");
 
-                    b.Property<int>("UserQuestionDataId");
+					b.Property<int>("UserId");
 
-                    b.HasKey("Id");
+					b.HasKey("Id");
 
-                    b.HasIndex("UserQuestionDataId");
+					b.HasIndex("UserId");
 
-                    b.ToTable("UserQuestionSubmission");
-                });
+					b.HasIndex("AssignmentQuestionId", "UserId")
+						.IsUnique();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Users.ClassroomMembership", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.ToTable("UserQuestionData");
+				});
 
-                    b.Property<int>("ClassroomId");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.UserQuestionSubmission", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<string>("GitHubTeam");
+					b.Property<string>("CachedQuestionData");
 
-                    b.Property<bool>("InGitHubOrganization");
+					b.Property<DateTime>("DateSubmitted");
 
-                    b.Property<int>("Role");
+					b.Property<double>("Score");
 
-                    b.Property<int>("UserId");
+					b.Property<int?>("Seed");
 
-                    b.HasKey("Id");
+					b.Property<string>("SubmissionContents");
 
-                    b.HasIndex("ClassroomId");
+					b.Property<int>("UserQuestionDataId");
 
-                    b.HasIndex("UserId", "ClassroomId")
-                        .IsUnique();
+					b.HasKey("Id");
 
-                    b.ToTable("ClassroomMemberships");
-                });
+					b.HasIndex("UserQuestionDataId");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Users.SectionMembership", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.ToTable("UserQuestionSubmission");
+				});
 
-                    b.Property<int>("ClassroomMembershipId");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Users.ClassroomMembership", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<int>("Role");
+					b.Property<int>("ClassroomId");
 
-                    b.Property<int>("SectionId");
+					b.Property<string>("GitHubTeam");
 
-                    b.HasKey("Id");
+					b.Property<bool>("InGitHubOrganization");
 
-                    b.HasIndex("SectionId");
+					b.Property<int>("Role");
 
-                    b.HasIndex("ClassroomMembershipId", "SectionId")
-                        .IsUnique();
+					b.Property<int>("UserId");
 
-                    b.ToTable("SectionMemberships");
-                });
+					b.HasKey("Id");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Users.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+					b.HasIndex("ClassroomId");
 
-                    b.Property<string>("EmailAddress");
+					b.HasIndex("UserId", "ClassroomId")
+						.IsUnique();
 
-                    b.Property<bool>("EmailAddressConfirmed");
+					b.ToTable("ClassroomMemberships");
+				});
 
-                    b.Property<string>("EmailConfirmationCode");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Users.SectionMembership", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.Property<string>("FirstName");
+					b.Property<int>("ClassroomMembershipId");
 
-                    b.Property<string>("GitHubLogin");
+					b.Property<int>("Role");
 
-                    b.Property<string>("LastName");
+					b.Property<int>("SectionId");
 
-                    b.Property<bool>("SuperUser");
+					b.HasKey("Id");
 
-                    b.Property<string>("UniqueId");
+					b.HasIndex("SectionId");
 
-                    b.Property<string>("UserName");
+					b.HasIndex("ClassroomMembershipId", "SectionId")
+						.IsUnique();
 
-                    b.HasKey("Id");
+					b.ToTable("SectionMemberships");
+				});
 
-                    b.HasIndex("UniqueId")
-                        .IsUnique();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Users.User", b =>
+				{
+					b.Property<int>("Id")
+						.ValueGeneratedOnAdd();
 
-                    b.ToTable("Users");
-                });
+					b.Property<string>("EmailAddress");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ClassQuestionTest", b =>
-                {
-                    b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestionTest");
+					b.Property<bool>("EmailAddressConfirmed");
 
-                    b.Property<int>("ClassQuestionId");
+					b.Property<string>("EmailConfirmationCode");
 
-                    b.Property<string>("Description")
-                        .IsRequired();
+					b.Property<string>("FirstName");
 
-                    b.Property<string>("MethodBody");
+					b.Property<string>("GitHubLogin");
 
-                    b.Property<string>("ReturnType")
-                        .IsRequired();
+					b.Property<string>("LastName");
 
-                    b.HasIndex("ClassQuestionId");
+					b.Property<bool>("SuperUser");
 
-                    b.ToTable("ClassQuestionTest");
+					b.Property<string>("UniqueId");
 
-                    b.HasDiscriminator().HasValue("ClassQuestionTest");
-                });
+					b.Property<string>("UserName");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MethodQuestionTest", b =>
-                {
-                    b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestionTest");
+					b.HasKey("Id");
 
-                    b.Property<int>("MethodQuestionId");
+					b.HasIndex("UniqueId")
+						.IsUnique();
 
-                    b.Property<string>("ParameterValues");
+					b.ToTable("Users");
+				});
 
-                    b.HasIndex("MethodQuestionId");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ClassQuestionTest", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestionTest");
 
-                    b.ToTable("MethodQuestionTest");
+					b.Property<int>("ClassQuestionId");
 
-                    b.HasDiscriminator().HasValue("MethodQuestionTest");
-                });
+					b.Property<string>("Description")
+						.IsRequired();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ProgramQuestionTest", b =>
-                {
-                    b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestionTest");
+					b.Property<string>("MethodBody");
 
-                    b.Property<string>("CommandLineArguments");
+					b.Property<string>("ReturnType")
+						.IsRequired();
 
-                    b.Property<int>("ProgramQuestionId");
+					b.HasIndex("ClassQuestionId");
 
-                    b.Property<string>("TestDescription")
-                        .IsRequired();
+					b.ToTable("ClassQuestionTest");
 
-                    b.HasIndex("ProgramQuestionId");
+					b.HasDiscriminator().HasValue("ClassQuestionTest");
+				});
 
-                    b.ToTable("ProgramQuestionTest");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MethodQuestionTest", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestionTest");
 
-                    b.HasDiscriminator().HasValue("ProgramQuestionTest");
-                });
+					b.Property<int>("MethodQuestionId");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.CodeQuestion", b =>
-                {
-                    b.HasBaseType("CSC.CSClassroom.Model.Questions.Question");
+					b.Property<string>("ParameterValues");
 
-                    b.Property<string>("InitialSubmission");
+					b.HasIndex("MethodQuestionId");
 
-                    b.ToTable("CodeQuestion");
+					b.ToTable("MethodQuestionTest");
 
-                    b.HasDiscriminator().HasValue("CodeQuestion");
-                });
+					b.HasDiscriminator().HasValue("MethodQuestionTest");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MultipleChoiceQuestion", b =>
-                {
-                    b.HasBaseType("CSC.CSClassroom.Model.Questions.Question");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ProgramQuestionTest", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestionTest");
 
-                    b.Property<bool>("AllowMultipleCorrectAnswers");
+					b.Property<string>("CommandLineArguments");
 
-                    b.ToTable("MultipleChoiceQuestion");
+					b.Property<int>("ProgramQuestionId");
 
-                    b.HasDiscriminator().HasValue("MultipleChoiceQuestion");
-                });
+					b.Property<string>("TestDescription")
+						.IsRequired();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ShortAnswerQuestion", b =>
-                {
-                    b.HasBaseType("CSC.CSClassroom.Model.Questions.Question");
+					b.HasIndex("ProgramQuestionId");
 
+					b.ToTable("ProgramQuestionTest");
 
-                    b.ToTable("ShortAnswerQuestion");
+					b.HasDiscriminator().HasValue("ProgramQuestionTest");
+				});
 
-                    b.HasDiscriminator().HasValue("ShortAnswerQuestion");
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.CodeQuestion", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.Question");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ClassQuestion", b =>
-                {
-                    b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestion");
+					b.Property<string>("InitialSubmission");
 
-                    b.Property<bool>("AllowPublicFields");
+					b.ToTable("CodeQuestion");
 
-                    b.Property<string>("ClassName")
-                        .IsRequired();
+					b.HasDiscriminator().HasValue("CodeQuestion");
+				});
 
-                    b.Property<int>("ClassSubmissionType")
-                        .ValueGeneratedOnAdd()
-                        .HasDefaultValue(0);
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MultipleChoiceQuestion", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.Question");
 
-                    b.Property<string>("FileTemplate")
-                        .IsRequired();
+					b.Property<bool>("AllowMultipleCorrectAnswers");
 
-                    b.ToTable("ClassQuestion");
+					b.ToTable("MultipleChoiceQuestion");
 
-                    b.HasDiscriminator().HasValue("ClassQuestion");
-                });
+					b.HasDiscriminator().HasValue("MultipleChoiceQuestion");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.GeneratedQuestionTemplate", b =>
-                {
-                    b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestion");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.RandomlySelectedQuestion", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.Question");
 
-                    b.Property<DateTime>("DateModified");
 
-                    b.Property<string>("FullGeneratorFileContents");
+					b.ToTable("RandomlySelectedQuestion");
 
-                    b.Property<int>("FullGeneratorFileLineOffset");
+					b.HasDiscriminator().HasValue("RandomlySelectedQuestion");
+				});
 
-                    b.Property<string>("GeneratorContents");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ShortAnswerQuestion", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.Question");
 
-                    b.ToTable("GeneratedQuestionTemplate");
+					b.Property<string>("Explanation");
 
-                    b.HasDiscriminator().HasValue("GeneratedQuestionTemplate");
-                });
+					b.ToTable("ShortAnswerQuestion");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MethodQuestion", b =>
-                {
-                    b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestion");
+					b.HasDiscriminator().HasValue("ShortAnswerQuestion");
+				});
 
-                    b.Property<string>("MethodName")
-                        .IsRequired();
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ClassQuestion", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestion");
 
-                    b.Property<string>("ParameterTypes")
-                        .IsRequired();
+					b.Property<bool>("AllowPublicFields");
 
-                    b.Property<string>("ReturnType")
-                        .IsRequired();
+					b.Property<string>("ClassName")
+						.IsRequired();
 
-                    b.ToTable("MethodQuestion");
+					b.Property<int>("ClassSubmissionType")
+						.ValueGeneratedOnAdd()
+						.HasDefaultValue(0);
 
-                    b.HasDiscriminator().HasValue("MethodQuestion");
-                });
+					b.Property<string>("FileTemplate")
+						.IsRequired();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ProgramQuestion", b =>
-                {
-                    b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestion");
+					b.ToTable("ClassQuestion");
 
-                    b.Property<string>("ProgramClassName")
-                        .IsRequired();
+					b.HasDiscriminator().HasValue("ClassQuestion");
+				});
 
-                    b.ToTable("ProgramQuestion");
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.GeneratedQuestionTemplate", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestion");
 
-                    b.HasDiscriminator().HasValue("ProgramQuestion");
-                });
+					b.Property<DateTime>("DateModified");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Classrooms.Section", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
-                        .WithMany("Sections")
-                        .HasForeignKey("ClassroomId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.Property<string>("FullGeneratorFileContents");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Build", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Commit", "Commit")
-                        .WithOne("Build")
-                        .HasForeignKey("CSC.CSClassroom.Model.Projects.Build", "CommitId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.Property<int>("FullGeneratorFileLineOffset");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Checkpoint", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Project", "Project")
-                        .WithMany("Checkpoints")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.Property<string>("GeneratorContents");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.CheckpointDates", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Checkpoint", "Checkpoint")
-                        .WithMany("SectionDates")
-                        .HasForeignKey("CheckpointId")
-                        .OnDelete(DeleteBehavior.Cascade);
+					b.Property<int?>("NumSeeds");
 
-                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Section", "Section")
-                        .WithMany()
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.ToTable("GeneratedQuestionTemplate");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.CheckpointTestClass", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Checkpoint", "Checkpoint")
-                        .WithMany("TestClasses")
-                        .HasForeignKey("CheckpointId")
-                        .OnDelete(DeleteBehavior.Cascade);
+					b.HasDiscriminator().HasValue("GeneratedQuestionTemplate");
+				});
 
-                    b.HasOne("CSC.CSClassroom.Model.Projects.TestClass", "TestClass")
-                        .WithMany("CheckpointTestClasses")
-                        .HasForeignKey("TestClassId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MethodQuestion", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestion");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Commit", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
+					b.Property<string>("MethodName")
+						.IsRequired();
 
-                    b.HasOne("CSC.CSClassroom.Model.Users.User", "User")
-                        .WithMany("Commits")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.Property<string>("ParameterTypes")
+						.IsRequired();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.ImmutableFilePath", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Project")
-                        .WithMany("ImmutableFilePaths")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.Property<string>("ReturnType")
+						.IsRequired();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.PrivateFilePath", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Project")
-                        .WithMany("PrivateFilePaths")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.ToTable("MethodQuestion");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Project", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
-                        .WithMany()
-                        .HasForeignKey("ClassroomId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.HasDiscriminator().HasValue("MethodQuestion");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Submission", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Checkpoint", "Checkpoint")
-                        .WithMany("Submissions")
-                        .HasForeignKey("CheckpointId")
-                        .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ProgramQuestion", b =>
+				{
+					b.HasBaseType("CSC.CSClassroom.Model.Questions.CodeQuestion");
 
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Commit", "Commit")
-                        .WithMany("Submissions")
-                        .HasForeignKey("CommitId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.Property<string>("ProgramClassName")
+						.IsRequired();
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.TestClass", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Project", "Project")
-                        .WithMany("TestClasses")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.ToTable("ProgramQuestion");
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Projects.TestResult", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Projects.Build", "Build")
-                        .WithMany("TestResults")
-                        .HasForeignKey("BuildId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.HasDiscriminator().HasValue("ProgramQuestion");
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.Assignment", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
-                        .WithMany()
-                        .HasForeignKey("ClassroomId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Classrooms.Section", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
+						.WithMany("Sections")
+						.HasForeignKey("ClassroomId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.AssignmentDueDate", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.Assignment", "Assignment")
-                        .WithMany("DueDates")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Build", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Projects.Commit", "Commit")
+						.WithOne("Build")
+						.HasForeignKey("CSC.CSClassroom.Model.Projects.Build", "CommitId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Section", "Section")
-                        .WithMany()
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Checkpoint", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Projects.Project", "Project")
+						.WithMany("Checkpoints")
+						.HasForeignKey("ProjectId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.AssignmentQuestion", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.Assignment", "Assignment")
-                        .WithMany("Questions")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.CheckpointDates", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Projects.Checkpoint", "Checkpoint")
+						.WithMany("SectionDates")
+						.HasForeignKey("CheckpointId")
+						.OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("CSC.CSClassroom.Model.Questions.Question", "Question")
-                        .WithMany("AssignmentQuestions")
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.HasOne("CSC.CSClassroom.Model.Classrooms.Section", "Section")
+						.WithMany()
+						.HasForeignKey("SectionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ClassroomGradebook", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
-                        .WithMany("ClassroomGradebooks")
-                        .HasForeignKey("ClassroomId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.CheckpointTestClass", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Projects.Checkpoint", "Checkpoint")
+						.WithMany("TestClasses")
+						.HasForeignKey("CheckpointId")
+						.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.CodeConstraint", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.CodeQuestion")
-                        .WithMany("CodeConstraints")
-                        .HasForeignKey("CodeQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.HasOne("CSC.CSClassroom.Model.Projects.TestClass", "TestClass")
+						.WithMany("CheckpointTestClasses")
+						.HasForeignKey("TestClassId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ImportedClass", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.CodeQuestion")
-                        .WithMany("ImportedClasses")
-                        .HasForeignKey("CodeQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Commit", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Projects.Project", "Project")
+						.WithMany()
+						.HasForeignKey("ProjectId")
+						.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MultipleChoiceQuestionChoice", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.MultipleChoiceQuestion", "MultipleChoiceQuestion")
-                        .WithMany("Choices")
-                        .HasForeignKey("MultipleChoiceQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.HasOne("CSC.CSClassroom.Model.Users.User", "User")
+						.WithMany("Commits")
+						.HasForeignKey("UserId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.PrerequisiteQuestion", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.Question", "FirstQuestion")
-                        .WithMany("SubsequentQuestions")
-                        .HasForeignKey("FirstQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.ImmutableFilePath", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Projects.Project")
+						.WithMany("ImmutableFilePaths")
+						.HasForeignKey("ProjectId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-                    b.HasOne("CSC.CSClassroom.Model.Questions.Question", "SecondQuestion")
-                        .WithMany("PrerequisiteQuestions")
-                        .HasForeignKey("SecondQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.PrivateFilePath", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Projects.Project")
+						.WithMany("PrivateFilePaths")
+						.HasForeignKey("ProjectId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.Question", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.QuestionCategory", "QuestionCategory")
-                        .WithMany("Questions")
-                        .HasForeignKey("QuestionCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Project", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
+						.WithMany()
+						.HasForeignKey("ClassroomId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.QuestionCategory", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
-                        .WithMany("Categories")
-                        .HasForeignKey("ClassroomId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Submission", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Projects.Checkpoint", "Checkpoint")
+						.WithMany("Submissions")
+						.HasForeignKey("CheckpointId")
+						.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.RequiredMethod", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.ClassQuestion", "ClassQuestion")
-                        .WithMany("RequiredMethods")
-                        .HasForeignKey("ClassQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.HasOne("CSC.CSClassroom.Model.Projects.Commit", "Commit")
+						.WithMany("Submissions")
+						.HasForeignKey("CommitId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.SectionGradebook", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.ClassroomGradebook", "ClassroomGradebook")
-                        .WithMany("SectionGradebooks")
-                        .HasForeignKey("ClassroomGradebookId")
-                        .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.TestClass", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Projects.Project", "Project")
+						.WithMany("TestClasses")
+						.HasForeignKey("ProjectId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Section", "Section")
-                        .WithMany("SectionGradebooks")
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Projects.TestResult", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Projects.Build", "Build")
+						.WithMany("TestResults")
+						.HasForeignKey("BuildId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ShortAnswerQuestionBlank", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.ShortAnswerQuestion", "ShortAnswerQuestion")
-                        .WithMany("Blanks")
-                        .HasForeignKey("ShortAnswerQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.Assignment", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
+						.WithMany()
+						.HasForeignKey("ClassroomId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.UserQuestionData", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.Question", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.AssignmentDueDate", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.Assignment", "Assignment")
+						.WithMany("DueDates")
+						.HasForeignKey("AssignmentId")
+						.OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("CSC.CSClassroom.Model.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+					b.HasOne("CSC.CSClassroom.Model.Classrooms.Section", "Section")
+						.WithMany()
+						.HasForeignKey("SectionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.UserQuestionSubmission", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.UserQuestionData", "UserQuestionData")
-                        .WithMany("Submissions")
-                        .HasForeignKey("UserQuestionDataId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.AssignmentQuestion", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.Assignment", "Assignment")
+						.WithMany("Questions")
+						.HasForeignKey("AssignmentId")
+						.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Users.ClassroomMembership", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
-                        .WithMany()
-                        .HasForeignKey("ClassroomId")
-                        .OnDelete(DeleteBehavior.Cascade);
+					b.HasOne("CSC.CSClassroom.Model.Questions.Question", "Question")
+						.WithMany("AssignmentQuestions")
+						.HasForeignKey("QuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-                    b.HasOne("CSC.CSClassroom.Model.Users.User", "User")
-                        .WithMany("ClassroomMemberships")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ClassroomGradebook", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
+						.WithMany("ClassroomGradebooks")
+						.HasForeignKey("ClassroomId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Users.SectionMembership", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Users.ClassroomMembership", "ClassroomMembership")
-                        .WithMany("SectionMemberships")
-                        .HasForeignKey("ClassroomMembershipId")
-                        .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.CodeConstraint", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.CodeQuestion")
+						.WithMany("CodeConstraints")
+						.HasForeignKey("CodeQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Section", "Section")
-                        .WithMany("SectionMemberships")
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ImportedClass", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.CodeQuestion")
+						.WithMany("ImportedClasses")
+						.HasForeignKey("CodeQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ClassQuestionTest", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.ClassQuestion", "ClassQuestion")
-                        .WithMany("Tests")
-                        .HasForeignKey("ClassQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MultipleChoiceQuestionChoice", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.MultipleChoiceQuestion", "MultipleChoiceQuestion")
+						.WithMany("Choices")
+						.HasForeignKey("MultipleChoiceQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MethodQuestionTest", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.MethodQuestion", "MethodQuestion")
-                        .WithMany("Tests")
-                        .HasForeignKey("MethodQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.PrerequisiteQuestion", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.Question", "FirstQuestion")
+						.WithMany()
+						.HasForeignKey("FirstQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ProgramQuestionTest", b =>
-                {
-                    b.HasOne("CSC.CSClassroom.Model.Questions.ProgramQuestion", "ProgramQuestion")
-                        .WithMany("Tests")
-                        .HasForeignKey("ProgramQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-        }
-    }
+					b.HasOne("CSC.CSClassroom.Model.Questions.Question", "SecondQuestion")
+						.WithMany()
+						.HasForeignKey("SecondQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.Question", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.QuestionCategory", "QuestionCategory")
+						.WithMany("Questions")
+						.HasForeignKey("QuestionCategoryId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.QuestionCategory", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
+						.WithMany("Categories")
+						.HasForeignKey("ClassroomId")
+						.OnDelete(DeleteBehavior.Cascade);
+
+					b.HasOne("CSC.CSClassroom.Model.Questions.RandomlySelectedQuestion", "RandomlySelectedQuestion")
+						.WithOne("ChoicesCategory")
+						.HasForeignKey("CSC.CSClassroom.Model.Questions.QuestionCategory", "RandomlySelectedQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.RequiredMethod", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.ClassQuestion", "ClassQuestion")
+						.WithMany("RequiredMethods")
+						.HasForeignKey("ClassQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.SectionGradebook", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.ClassroomGradebook", "ClassroomGradebook")
+						.WithMany("SectionGradebooks")
+						.HasForeignKey("ClassroomGradebookId")
+						.OnDelete(DeleteBehavior.Cascade);
+
+					b.HasOne("CSC.CSClassroom.Model.Classrooms.Section", "Section")
+						.WithMany("SectionGradebooks")
+						.HasForeignKey("SectionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ShortAnswerQuestionBlank", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.ShortAnswerQuestion", "ShortAnswerQuestion")
+						.WithMany("Blanks")
+						.HasForeignKey("ShortAnswerQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.UserQuestionData", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.AssignmentQuestion", "AssignmentQuestion")
+						.WithMany()
+						.HasForeignKey("AssignmentQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+
+					b.HasOne("CSC.CSClassroom.Model.Users.User", "User")
+						.WithMany()
+						.HasForeignKey("UserId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.UserQuestionSubmission", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.UserQuestionData", "UserQuestionData")
+						.WithMany("Submissions")
+						.HasForeignKey("UserQuestionDataId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Users.ClassroomMembership", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
+						.WithMany()
+						.HasForeignKey("ClassroomId")
+						.OnDelete(DeleteBehavior.Cascade);
+
+					b.HasOne("CSC.CSClassroom.Model.Users.User", "User")
+						.WithMany("ClassroomMemberships")
+						.HasForeignKey("UserId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Users.SectionMembership", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Users.ClassroomMembership", "ClassroomMembership")
+						.WithMany("SectionMemberships")
+						.HasForeignKey("ClassroomMembershipId")
+						.OnDelete(DeleteBehavior.Cascade);
+
+					b.HasOne("CSC.CSClassroom.Model.Classrooms.Section", "Section")
+						.WithMany("SectionMemberships")
+						.HasForeignKey("SectionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ClassQuestionTest", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.ClassQuestion", "ClassQuestion")
+						.WithMany("Tests")
+						.HasForeignKey("ClassQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.MethodQuestionTest", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.MethodQuestion", "MethodQuestion")
+						.WithMany("Tests")
+						.HasForeignKey("MethodQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+
+			modelBuilder.Entity("CSC.CSClassroom.Model.Questions.ProgramQuestionTest", b =>
+				{
+					b.HasOne("CSC.CSClassroom.Model.Questions.ProgramQuestion", "ProgramQuestion")
+						.WithMany("Tests")
+						.HasForeignKey("ProgramQuestionId")
+						.OnDelete(DeleteBehavior.Cascade);
+				});
+		}
+	}
 }

@@ -1,0 +1,21 @@
+﻿@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@inject ITimeZoneProvider TimeZoneProvider;
+@model IList<DateTime>
+
+<h4>All submissions:</h4>
+<ul>
+    @foreach (var submissionDate in Model)
+    {
+        <li>
+            @if (ViewBag.Assignment.CombinedSubmissions)
+            {
+                @Html.ActionLink(submissionDate.FormatLongDateTime(TimeZoneProvider), "ViewAllSubmissions", new {submissionDate = submissionDate.ToEpoch()})
+            }
+            else
+            {
+                @Html.ActionLink(submissionDate.FormatLongDateTime(TimeZoneProvider), "ViewSubmission", new {submissionDate = submissionDate.ToEpoch()})
+            }
+        </li>
+    }
+</ul> 

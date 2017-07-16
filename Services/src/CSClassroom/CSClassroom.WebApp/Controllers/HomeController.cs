@@ -1,6 +1,9 @@
 ﻿using System.Linq;
 using CSC.CSClassroom.Model.Users;
+using CSC.CSClassroom.Service.Identity;
 using CSC.CSClassroom.WebApp.Filters;
+using CSC.CSClassroom.WebApp.Settings;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CSC.CSClassroom.WebApp.Controllers
@@ -11,11 +14,17 @@ namespace CSC.CSClassroom.WebApp.Controllers
 	public class HomeController : BaseController
 	{
 		/// <summary>
+		/// Whether or not to show full error information.
+		/// </summary>
+		private readonly ErrorSettings _errorSettings;
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public HomeController(BaseControllerArgs args) 
+		public HomeController(BaseControllerArgs args, ErrorSettings errorSettings) 
 			: base(args)
 		{
+			_errorSettings = errorSettings;
 		}
 
 		/// <summary>
@@ -58,7 +67,17 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[Authorization(RequiredAccess.Anonymous)]
 		public IActionResult Error()
 		{
-			return View();
+			if (_errorSettings.ShowExceptions && IdentityState >= IdentityState.Registered)
+			{
+				var exceptionHandlerFeature = HttpContext.Features
+					.Get<IExceptionHandlerFeature>();
+
+				return View(exceptionHandlerFeature?.Error);
+			}
+			else
+			{
+				return View();
+			}
 		}
 	}
 }

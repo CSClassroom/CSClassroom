@@ -1,4 +1,5 @@
-﻿using CSC.Common.Infrastructure.Utilities;
+﻿using CSC.Common.Infrastructure.System;
+using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Questions.QuestionGeneration;
@@ -8,7 +9,9 @@ namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
 	/// <summary>
 	/// Creates question updaters.
 	/// </summary>
-	public class QuestionUpdaterFactory : IQuestionResultVisitor<IQuestionUpdater, IModelErrorCollection>
+	public class QuestionUpdaterFactory : 
+		IQuestionUpdaterFactory, 
+		IQuestionResultVisitor<IQuestionUpdater, IModelErrorCollection>
 	{
 		/// <summary>
 		/// The database context.
@@ -18,15 +21,24 @@ namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
 		/// <summary>
 		/// The question generator.
 		/// </summary>
-		private readonly QuestionGenerator _questionGenerator;
+		private readonly IQuestionGenerator _questionGenerator;
+
+		/// <summary>
+		/// The time provider.
+		/// </summary>
+		private readonly ITimeProvider _timeProvider;
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public QuestionUpdaterFactory(DatabaseContext dbContext, QuestionGenerator questionGenerator)
+		public QuestionUpdaterFactory(
+			DatabaseContext dbContext, 
+			IQuestionGenerator questionGenerator, 
+			ITimeProvider timeProvider)
 		{
 			_dbContext = dbContext;
 			_questionGenerator = questionGenerator;
+			_timeProvider = timeProvider;
 		}
 
 		/// <summary>
@@ -94,7 +106,24 @@ namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
 			GeneratedQuestionTemplate question,
 			IModelErrorCollection errors)
 		{
-			return new GeneratedQuestionUpdater(_dbContext, question, errors, _questionGenerator);
+			return new GeneratedQuestionUpdater
+			(
+				_dbContext, 
+				question, 
+				errors, 
+				_questionGenerator, 
+				_timeProvider
+			);
+		}
+
+		/// <summary>
+		/// Creates a question updater for a randomly selected question.
+		/// </summary>
+		IQuestionUpdater IQuestionResultVisitor<IQuestionUpdater, IModelErrorCollection>.Visit(
+			RandomlySelectedQuestion question,
+			IModelErrorCollection errors)
+		{
+			return new RandomlySelectedQuestionUpdater(_dbContext, question, errors);
 		}
 	}
 }

@@ -31,5 +31,20 @@ namespace CSC.CSClassroom.Model.Questions
 		/// When the submission occured.
 		/// </summary>
 		public DateTime DateSubmitted { get; set; }
+
+		/// <summary>
+		/// The seed used to generate the question (if the question was generated).
+		/// </summary>
+		public int? Seed { get; set; }
+
+		/// <summary>
+		/// Any relevant cached question data for the question grader.
+		/// </summary>
+		public string CachedQuestionData { get; set; }
+
+		/// <summary>
+		/// The serialized question submission.
+		/// </summary>
+		public string SubmissionContents { get; set; }
 	}
 }

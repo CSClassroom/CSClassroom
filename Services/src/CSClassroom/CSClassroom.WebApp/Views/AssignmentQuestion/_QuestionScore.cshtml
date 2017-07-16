@@ -1,0 +1,26 @@
+﻿@using System.Runtime.InteropServices.ComTypes
+@using System.Threading.Tasks
+@using CSC.Common.Infrastructure.Serialization
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@using CSC.CSClassroom.WebApp.ViewModels.Shared
+@using CSC.CSClassroom.Model.Users
+@inject ITimeZoneProvider TimeZoneProvider;
+@model CSC.CSClassroom.Model.Questions.ServiceResults.SubmissionResult
+
+@{
+    string statusColor = (Model.ScoreWithoutLateness == 0.0)
+        ? "red"
+        : (Model.ScoreWithoutLateness < Model.QuestionPoints)
+            ? "goldenrod"
+            : "green";
+}
+
+<br />
+<h5 style="font-weight: bold; color: @statusColor">Question Score: @Math.Round(Model.ScoreWithoutLateness, 2, MidpointRounding.AwayFromZero) / @Model.QuestionPoints</h5>
+@if (Model.ScoreWithLateness < Model.ScoreWithoutLateness)
+{
+    <h5>(Late: @Math.Round(Model.ScoreWithLateness, 2, MidpointRounding.AwayFromZero) / @Model.QuestionPoints)</h5>
+}
+
+

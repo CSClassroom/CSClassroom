@@ -9,6 +9,7 @@ using CSC.CSClassroom.Model.Questions.ServiceResults;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Questions.AssignmentScoring;
+using CSC.CSClassroom.Service.Questions.Validators;
 using Microsoft.EntityFrameworkCore;
 
 namespace CSC.CSClassroom.Service.Questions
@@ -24,19 +25,40 @@ namespace CSC.CSClassroom.Service.Questions
 		private readonly DatabaseContext _dbContext;
 
 		/// <summary>
-		/// The assignment result generator.
+		/// The assignment validator.
 		/// </summary>
-		private readonly IAssignmentScoreCalculator _assignmentScoreCalculator;
+		private readonly IAssignmentValidator _assignmentValidator; 
+
+		/// <summary>
+		/// The section assignment report generator.
+		/// </summary>
+		private readonly ISectionAssignmentReportGenerator _sectionAssignmentReportGenerator;
+
+		/// <summary>
+		/// The student assignment report generator.
+		/// </summary>
+		private readonly IStudentAssignmentReportGenerator _studentAssignmentReportGenerator;
+
+		/// <summary>
+		/// The updated assignment report generator.
+		/// </summary>
+		private readonly IUpdatedAssignmentReportGenerator _updatedAssignmentReportGenerator;
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public AssignmentService(
-			DatabaseContext dbContext, 
-			IAssignmentScoreCalculator assignmentScoreCalculator)
+			DatabaseContext dbContext,
+			IAssignmentValidator assignmentValidator,
+			ISectionAssignmentReportGenerator sectionAssignmentReportGenerator,
+			IStudentAssignmentReportGenerator studentAssignmentReportGenerator,
+			IUpdatedAssignmentReportGenerator updatedAssignmentReportGenerator)
 		{
 			_dbContext = dbContext;
-			_assignmentScoreCalculator = assignmentScoreCalculator;
+			_assignmentValidator = assignmentValidator;
+			_sectionAssignmentReportGenerator = sectionAssignmentReportGenerator;
+			_studentAssignmentReportGenerator = studentAssignmentReportGenerator;
+			_updatedAssignmentReportGenerator = updatedAssignmentReportGenerator;
 		}
 
 		/// <summary>
@@ -53,29 +75,30 @@ namespace CSC.CSClassroom.Service.Questions
 		/// <summary>
 		/// Returns the list of assignments.
 		/// </summary>
-		public async Task<IList<Assignment>> GetAssignmentsAsync(
+		private async Task<IList<Assignment>> GetAssignmentsAsync(
 			string classroomName,
 			string sectionName,
-			string groupName)
+			string groupName,
+			bool admin)
 		{
 			var classroom = await LoadClassroomAsync(classroomName);
 			var section = classroom.Sections.SingleOrDefault(s => s.Name == sectionName);
-			if (section == null)
-			{
-				return null;
-			}
 
-			IQueryable<AssignmentQuestion> assignmentQuestionsQuery = 
-				_dbContext.AssignmentQuestions.Where
-				(
-					aq =>  aq.Assignment.ClassroomId == section.ClassroomId
-						&& aq.Assignment.DueDates.Any(d => d.SectionId == section.Id)
-				)
+			IQueryable<AssignmentQuestion> assignmentQuestionsQuery = _dbContext.AssignmentQuestions
 				.Include(aq => aq.Question)
 				.Include(aq => aq.Assignment)
 				.Include(aq => aq.Assignment.Classroom)
 				.Include(aq => aq.Assignment.Questions)
-				.Include(aq => aq.Assignment.DueDates);
+				.Include(aq => aq.Assignment.DueDates)
+				.Where(aq => aq.Assignment.ClassroomId == classroom.Id);
+
+			if (section != null)
+			{
+				assignmentQuestionsQuery = assignmentQuestionsQuery.Where
+				(
+					aq => aq.Assignment.DueDates.Any(d => d.SectionId == section.Id)
+				);
+			}
 
 			if (groupName != null)
 			{
@@ -87,6 +110,7 @@ namespace CSC.CSClassroom.Service.Questions
 
 			return assignmentQuestions.Select(aq => aq.Assignment)
 				.Distinct()
+				.Where(a => admin || !a.IsPrivate)
 				.ToList();
 		}
 
@@ -124,7 +148,7 @@ namespace CSC.CSClassroom.Service.Questions
 		{
 			var classroom = await LoadClassroomAsync(classroomName);
 
-			if (!UpdateAssignment(assignment, modelErrors))
+			if (!await UpdateAssignmentAsync(assignment, modelErrors))
 				return false;
 
 			assignment.ClassroomId = classroom.Id;
@@ -145,7 +169,7 @@ namespace CSC.CSClassroom.Service.Questions
 		{
 			var classroom = await LoadClassroomAsync(classroomName);
 
-			if (!UpdateAssignment(assignment, modelErrors))
+			if (!await UpdateAssignmentAsync(assignment, modelErrors))
 				return false;
 
 			assignment.ClassroomId = classroom.Id;
@@ -168,57 +192,6 @@ namespace CSC.CSClassroom.Service.Questions
 		}
 
 		/// <summary>
-		/// Returns the submissions for a given section. Optionally filters
-		/// by assignment group name, user ID, and/or date.
-		/// </summary>
-		private async Task<IList<UserQuestionSubmission>> GetSubmissionsAsync(
-			int sectionId,
-			string assignmentGroupName,
-			int? userId)
-		{
-			var questionDataQuery = _dbContext.UserQuestionData.Where
-			(
-				uqd => uqd.User.ClassroomMemberships.Any
-				(
-					cm => cm.SectionMemberships.Any
-					(
-						sm =>  sm.SectionId == sectionId
-							&& sm.Role == SectionRole.Student
-					)
-				)
-			);
-
-			if (assignmentGroupName != null)
-			{
-				questionDataQuery = questionDataQuery.Where
-				(
-					uqd => uqd.Question.AssignmentQuestions.Any
-					(
-						aq => aq.Assignment.GroupName == assignmentGroupName
-					)
-				);
-			}
-
-			if (userId != null)
-			{
-				questionDataQuery = questionDataQuery.Where
-				(
-					uqd => uqd.UserId == userId.Value
-				);
-			}
-
-			var questionData = await questionDataQuery
-				.Include(uqd => uqd.Submissions)
-				.ToListAsync();
-
-			var submissions = questionData
-				.SelectMany(uqd => uqd.Submissions)
-				.ToList();
-
-			return submissions;
-		}
-
-		/// <summary>
 		/// Returns the results for a single assignment group in a single section.
 		/// </summary>
 		public async Task<SectionAssignmentResults> GetSectionAssignmentResultsAsync(
@@ -233,7 +206,13 @@ namespace CSC.CSClassroom.Service.Questions
 				return null;
 			}
 
-			var assignments = await GetAssignmentsAsync(classroomName, sectionName, assignmentGroupName);
+			var assignments = await GetAssignmentsAsync
+			(
+				classroomName, 
+				sectionName, 
+				assignmentGroupName,
+				admin: true
+			);
 
 			var students = await _dbContext.SectionMemberships
 				.Where
@@ -244,14 +223,15 @@ namespace CSC.CSClassroom.Service.Questions
 				.Select(sm => sm.ClassroomMembership.User)
 				.ToListAsync();
 
-			var submissions = await GetSubmissionsAsync
+			var submissions = await GetUserQuestionSubmissionsAsync
 			(
+				classroom.Id,
 				section.Id,
 				assignmentGroupName,
 				userId: null
 			);
 
-			return _assignmentScoreCalculator.GetSectionAssignmentResults
+			return _sectionAssignmentReportGenerator.GetSectionAssignmentGroupResults
 			(
 				assignmentGroupName,
 				assignments,
@@ -282,7 +262,13 @@ namespace CSC.CSClassroom.Service.Questions
 				sg => sg.ClassroomGradebook.Name == gradebookName
 			)?.LastTransferDate ?? DateTime.MinValue;
 
-			var assignments = await GetAssignmentsAsync(classroomName, sectionName, groupName: null);
+			var assignments = await GetAssignmentsAsync
+			(
+				classroomName, 
+				sectionName, 
+				groupName: null,
+				admin: true
+			);
 
 			var students = await _dbContext.SectionMemberships
 				.Where
@@ -293,14 +279,15 @@ namespace CSC.CSClassroom.Service.Questions
 				.Select(sm => sm.ClassroomMembership.User)
 				.ToListAsync();
 
-			var submissions = await GetSubmissionsAsync
+			var submissions = await GetUserQuestionSubmissionsAsync
 			(
+				classroom.Id,
 				section.Id,
 				assignmentGroupName: null,
 				userId: null
 			);
 
-			return _assignmentScoreCalculator.GetUpdatedAssignmentResults
+			return _updatedAssignmentReportGenerator.GetUpdatedAssignmentGroupResults
 			(
 				assignments,
 				students,
@@ -316,7 +303,8 @@ namespace CSC.CSClassroom.Service.Questions
 		/// </summary>
 		public async Task<StudentAssignmentResults> GetStudentAssignmentResultsAsync(
 			string classroomName,
-			int userId)
+			int userId,
+			bool admin)
 		{
 			var classroom = await LoadClassroomAsync(classroomName);
 			
@@ -324,35 +312,47 @@ namespace CSC.CSClassroom.Service.Questions
 				.Where(u => u.Id == userId)
 				.SingleOrDefaultAsync();
 
-			var section = await _dbContext.SectionMemberships.Where
-				(
-					sm => sm.ClassroomMembership.UserId == userId
-						&& sm.ClassroomMembership.ClassroomId == classroom.Id
-						&& sm.Role == SectionRole.Student
-				)
-				.Select(sm => sm.Section)
-				.FirstOrDefaultAsync();
+			var section = !admin
+				? await _dbContext
+					.SectionMemberships
+					.Where
+					(
+						sm =>  sm.ClassroomMembership.UserId == userId
+							&& sm.ClassroomMembership.ClassroomId == classroom.Id
+							&& sm.Role == SectionRole.Student
+					)
+					.Select(sm => sm.Section)
+					.FirstOrDefaultAsync()
+				: null;
 
-			if (section == null)
+			if (section == null && !admin)
 			{
 				return null;
 			}
 
-			var assignments = await GetAssignmentsAsync(classroomName, section.Name, groupName: null);
-
-			var submissions = await GetSubmissionsAsync
+			var assignments = await GetAssignmentsAsync
 			(
-				section.Id,
+				classroomName, 
+				section?.Name, 
+				groupName: null,
+				admin: admin
+			);
+
+			var submissions = await GetUserQuestionSubmissionsAsync
+			(
+				classroom.Id,
+				section?.Id,
 				null /*assignmentGroupName*/,
 				userId
 			);
 
-			return _assignmentScoreCalculator.GetStudentAssignmentResults
+			return _studentAssignmentReportGenerator.GetStudentAssignmentGroupResults
 			(
 				user,
 				section,
 				assignments,
-				submissions
+				submissions,
+				admin
 			);
 		}
 
@@ -405,17 +405,11 @@ namespace CSC.CSClassroom.Service.Questions
 		/// <summary>
 		/// Updates a assignment.
 		/// </summary>
-		private bool UpdateAssignment(Assignment assignment, IModelErrorCollection modelErrors)
+		private async Task<bool> UpdateAssignmentAsync(Assignment assignment, IModelErrorCollection modelErrors)
 		{
-			if (assignment.DueDates != null)
+			if (!await _assignmentValidator.ValidateAssignmentAsync(assignment, modelErrors))
 			{
-				var sections = assignment.DueDates.Select(d => d.SectionId).ToList();
-				if (sections.Distinct().Count() != sections.Count)
-				{
-					modelErrors.AddError("DueDates", "You may only have one due date per section.");
-
-					return false;
-				}
+				return false;
 			}
 
 			UpdateQuestionOrder(assignment.Questions);
@@ -450,6 +444,70 @@ namespace CSC.CSClassroom.Service.Questions
 				question.Order = index;
 				index++;
 			}
+		}
+		
+		/// <summary>
+		/// Returns the submissions for a given section. Optionally filters
+		/// by assignment group name, user ID, and/or date.
+		/// </summary>
+		private async Task<IList<UserQuestionSubmission>> GetUserQuestionSubmissionsAsync(
+			int classroomId,
+			int? sectionId,
+			string assignmentGroupName,
+			int? userId)
+		{
+			var submissionsQuery = 
+				sectionId.HasValue
+				? _dbContext.UserQuestionSubmissions.Where
+					(
+						submission => submission
+							.UserQuestionData
+							.User
+							.ClassroomMemberships.Any
+							(
+								cm => cm.SectionMemberships.Any
+								(
+									sm => sm.SectionId == sectionId
+										  && sm.Role == SectionRole.Student
+								)
+							)
+					)
+				: _dbContext.UserQuestionSubmissions.Where
+					(
+						submission => submission
+							.UserQuestionData
+							.AssignmentQuestion
+							.Assignment
+							.ClassroomId == classroomId
+					);
+
+			if (assignmentGroupName != null)
+			{
+				submissionsQuery = submissionsQuery.Where
+				(
+					submission => submission
+						.UserQuestionData
+						.AssignmentQuestion
+						.Assignment
+						.GroupName == assignmentGroupName
+				);
+			}
+
+			if (userId != null)
+			{
+				submissionsQuery = submissionsQuery.Where
+				(
+					submission => submission
+						.UserQuestionData
+						.UserId == userId.Value
+				);
+			}
+
+			var submissions = await submissionsQuery
+				.Include(submission => submission.UserQuestionData.AssignmentQuestion.Question)
+				.ToListAsync();
+
+			return submissions;
 		}
 
 		/// <summary>

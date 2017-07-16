@@ -28,6 +28,7 @@ namespace CSC.CSClassroom.WebApp.Configuration
 		{
 			builder.RegisterInstance(GetHostName(webAppSettings)).As<WebAppHost>();
 			builder.RegisterInstance(GetEmailAddress(webAppSettings)).As<WebAppEmail>();
+			builder.RegisterInstance(GetErrorSettings(webAppSettings)).As<ErrorSettings>();
 			builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();
 			builder.RegisterType<ActionContextAccessor>().As<IActionContextAccessor>();
 			builder.RegisterType<IdentityProvider>().As<IIdentityProvider>().InstancePerLifetimeScope();
@@ -62,6 +63,14 @@ namespace CSC.CSClassroom.WebApp.Configuration
 		private static WebAppEmail GetEmailAddress(IConfigurationSection webAppSettings)
 		{
 			return new WebAppEmail(webAppSettings["EmailAddress"]);
+		}
+
+		/// <summary>
+		/// Returns settings about how to display errors to users.
+		/// </summary>
+		private static ErrorSettings GetErrorSettings(IConfigurationSection webAppSettings)
+		{
+			return new ErrorSettings(webAppSettings.GetValue<bool>("ShowExceptions"));
 		}
 
 		/// <summary>

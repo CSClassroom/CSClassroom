@@ -1,8 +1,10 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using CSC.CSClassroom.Model.Classrooms;
+using CSC.CSClassroom.Model.Questions;
 using CSC.CSClassroom.Service.Classrooms;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
+using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -69,6 +71,21 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 			var classroom = await classroomService.GetClassroomAsync("Class2");
 
 			Assert.Null(classroom);
+		}
+
+		/// <summary>
+		/// Ensures that GetClassroomsWithAccessAsync returns the classrooms
+		/// the student has access to.
+		/// </summary>
+		[Fact]
+		public async Task GetClassroomsWithAccessAsync_UserNotFound_ReturnsNull()
+		{
+			var database = new TestDatabaseBuilder().Build();
+
+			var classroomService = new ClassroomService(database.Context);
+			var classrooms = await classroomService.GetClassroomsWithAccessAsync(userId: 100);
+
+			Assert.Equal(0, classrooms.Count);
 		}
 
 		/// <summary>
@@ -203,15 +220,26 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 			(
 				new Classroom()
 				{
-					Name = "Class1"
+					Name = "Class1",
+					ClassroomGradebooks = Collections.CreateList
+					(
+						new ClassroomGradebook() { Id = 1 },
+						new ClassroomGradebook() { Id = 2 }
+					)
 				}
 			);
 
 			database.Reload();
 
-			var classroom = database.Context.Classrooms.Single();
+			var classroom = database.Context
+				.Classrooms
+				.Include(c => c.ClassroomGradebooks)
+				.Single();
 
 			Assert.Equal("Class1", classroom.Name);
+			Assert.Equal(2, classroom.ClassroomGradebooks.Count);
+			Assert.Equal(0, classroom.ClassroomGradebooks[0].Order);
+			Assert.Equal(1, classroom.ClassroomGradebooks[1].Order);
 		}
 
 		/// <summary>
