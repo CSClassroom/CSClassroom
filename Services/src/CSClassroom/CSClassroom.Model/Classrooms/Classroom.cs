@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Questions;
 
 namespace CSC.CSClassroom.Model.Classrooms
@@ -62,6 +63,16 @@ namespace CSC.CSClassroom.Model.Classrooms
 		public TimeSpan DefaultTimeDue { get; set; }
 
 		/// <summary>
+		/// Whether or not the class is active.
+		/// </summary>
+		[Display
+		(
+			Name = "Active",
+			Description = "Whether or not the class is active. Students cannot access inactive classes."
+		)]
+		public bool IsActive { get; set; }
+
+		/// <summary>
 		/// The sections in this classroom.
 		/// </summary>
 		public virtual ICollection<Section> Sections { get; set; }
@@ -70,6 +81,16 @@ namespace CSC.CSClassroom.Model.Classrooms
 		/// The categories of questions available in this classroom.
 		/// </summary>
 		public virtual ICollection<QuestionCategory> Categories { get; set; }
+
+		/// <summary>
+		/// The assignments available in this classroom.
+		/// </summary>
+		public virtual ICollection<Assignment> Assignments { get; set; }
+
+		/// <summary>
+		/// The projects available in this classroom.
+		/// </summary>
+		public virtual ICollection<Project> Projects { get; set; }
 
 		/// <summary>
 		/// The gradebooks for this classroom.

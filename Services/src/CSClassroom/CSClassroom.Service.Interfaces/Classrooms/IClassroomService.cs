@@ -41,6 +41,13 @@ namespace CSC.CSClassroom.Service.Classrooms
 		Task UpdateClassroomAsync(Classroom classroom);
 
 		/// <summary>
+		/// Archives a classroom.
+		/// </summary>
+		Task<bool> ArchiveClassroomAsync(
+			string classroomName, 
+			string archivedClassroomName);
+
+		/// <summary>
 		/// Removes a classroom.
 		/// </summary>
 		/// <param name="classroomName">The name of the classroom to remove.</param>

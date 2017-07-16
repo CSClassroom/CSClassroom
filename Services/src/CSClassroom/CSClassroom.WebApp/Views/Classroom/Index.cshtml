@@ -18,6 +18,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.DisplayName)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -31,9 +34,13 @@
                 @Html.DisplayFor(modelItem => item.DisplayName)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+            <td>
                 <a asp-action="Home" asp-route-className="@item.Name">Home</a> |
                 <a asp-action="Admins" asp-controller="Admin" asp-route-className="@item.Name">Admins</a> |
                 <a asp-action="Edit" asp-route-className="@item.Name">Edit</a> |
+                <a asp-action="Archive" asp-route-className="@item.Name">Archive</a> |
                 <a asp-action="Delete" asp-route-className="@item.Name">Delete</a>
             </td>
         </tr>

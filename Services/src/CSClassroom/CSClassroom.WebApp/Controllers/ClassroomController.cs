@@ -82,27 +82,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		}
 
 		/// <summary>
-		/// Shows the details of a classroom.
-		/// </summary>
-		[Route("Classes/{className}/Details")]
-		[Authorization(RequiredAccess.SuperUser)]
-		public async Task<IActionResult> Details(string className)
-		{
-			if (className == null)
-			{
-				return NotFound();
-			}
-
-			var classroom = await ClassroomService.GetClassroomAsync(className);
-			if (classroom == null)
-			{
-				return NotFound();
-			}
-
-			return View(classroom);
-		}
-
-		/// <summary>
 		/// Creates a new classroom.
 		/// </summary>
 		[Route("CreateClass")]
@@ -173,6 +152,52 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			{
 				return View("CreateEdit", classroom);
 			}
+		}
+
+		/// <summary>
+		/// Archives a classroom.
+		/// </summary>
+		[Route("Classes/{className}/Archive")]
+		[Authorization(RequiredAccess.SuperUser)]
+		public async Task<IActionResult> Archive(string className)
+		{
+			if (className == null)
+			{
+				return NotFound();
+			}
+
+			var classroom = await ClassroomService.GetClassroomAsync(className);
+			if (classroom == null)
+			{
+				return NotFound();
+			}
+
+			return View("Archive", classroom);
+		}
+
+		/// <summary>
+		/// Archives a classroom.
+		/// </summary>
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		[Route("Classes/{className}/Archive")]
+		[Authorization(RequiredAccess.SuperUser)]
+		public async Task<IActionResult> Archive(
+			string className, 
+			string archivedClassName)
+		{
+			var result = await ClassroomService.ArchiveClassroomAsync
+			(
+				className, 
+				archivedClassName
+			);
+
+			if (!result)
+			{
+				return NotFound();
+			}
+
+			return RedirectToAction("Index");
 		}
 
 		/// <summary>

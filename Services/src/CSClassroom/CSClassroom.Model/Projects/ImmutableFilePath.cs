@@ -18,6 +18,11 @@
 		public int ProjectId { get; set; }
 
 		/// <summary>
+		/// The project that this private file path belongs to.
+		/// </summary>
+		public Project Project { get; set; }
+
+		/// <summary>
 		/// The path.
 		/// </summary>
 		public string Path { get; set; }

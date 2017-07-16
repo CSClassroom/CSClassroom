@@ -2,10 +2,12 @@
 using System.Threading.Tasks;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Classrooms;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace CSC.CSClassroom.Service.UnitTests.Classrooms
@@ -26,7 +28,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 				.AddClassroom("Class2")
 				.Build();
 
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			var classrooms = await classroomService.GetClassroomsAsync();
 
 			Assert.Equal(2, classrooms.Count);
@@ -50,7 +52,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 
 			database.Reload();
 
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			var classroom = await classroomService.GetClassroomAsync("Class1");
 
 			Assert.Equal("Class1", classroom.Name);
@@ -67,7 +69,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 				.AddClassroom("Class1")
 				.Build();
 
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			var classroom = await classroomService.GetClassroomAsync("Class2");
 
 			Assert.Null(classroom);
@@ -82,7 +84,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 		{
 			var database = new TestDatabaseBuilder().Build();
 
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			var classrooms = await classroomService.GetClassroomsWithAccessAsync(userId: 100);
 
 			Assert.Equal(0, classrooms.Count);
@@ -110,7 +112,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 
 			database.Reload();
 
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			var classrooms = await classroomService.GetClassroomsWithAccessAsync(userId);
 
 			Assert.Equal(1, classrooms.Count);
@@ -138,7 +140,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 
 			database.Reload();
 
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			var classrooms = await classroomService.GetClassroomsWithAccessAsync(userId);
 
 			Assert.Equal(1, classrooms.Count);
@@ -166,7 +168,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 
 			database.Reload();
 
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			var classrooms = await classroomService.GetClassroomsWithAccessAsync(userId);
 			classrooms = classrooms.OrderBy(c => c.ClassroomId).ToList();
 
@@ -198,7 +200,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 
 			database.Reload();
 
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			var admins = await classroomService.GetClassroomAdminsAsync("Class1");
 			admins = admins.OrderBy(a => a.UserId).ToList();
 
@@ -215,7 +217,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 		{
 			var database = new TestDatabaseBuilder().Build();
 
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			await classroomService.CreateClassroomAsync
 			(
 				new Classroom()
@@ -259,7 +261,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 			classroom.DisplayName = "New Display Name";
 
 			// Apply the update
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			await classroomService.UpdateClassroomAsync(classroom);
 
 			database.Reload();
@@ -268,6 +270,60 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 
 			Assert.Equal("Class1", classroom.Name);
 			Assert.Equal("New Display Name", classroom.DisplayName);
+		}
+
+		/// <summary>
+		/// Ensures that ArchiveClassroomAsync returns false when the
+		/// classroom doesn't exist.
+		/// </summary>
+		[Fact]
+		public async Task ArchiveClassroomAsync_ClassroomNotFound_ReturnsFalse()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.Build();
+
+			var classroomService = GetClassroomService(database.Context);
+
+			var result = await classroomService.ArchiveClassroomAsync
+			(
+				"Class2", 
+				"Class2-Archived"
+			);
+
+			Assert.False(result);
+		}
+
+		/// <summary>
+		/// Ensures that ArchiveClassroomAsync returns false when the
+		/// classroom doesn't exist.
+		/// </summary>
+		[Fact]
+		public async Task ArchiveClassroomAsync_ClassrooFound_ReturnsTrueAndArchivesClassroom()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.Build();
+
+			var mockArchiver = new Mock<IClassroomArchiver>();
+			mockArchiver
+				.Setup(a => a.ArchiveClassroomAsync("Class1", "Class1A"))
+				.Returns(Task.CompletedTask);
+
+			var classroomService = GetClassroomService
+			(
+				database.Context,
+				mockArchiver.Object
+			);
+
+			var result = await classroomService.ArchiveClassroomAsync
+			(
+				"Class1",
+				"Class1A"
+			);
+
+			Assert.True(result);
+			mockArchiver.Verify(a => a.ArchiveClassroomAsync("Class1", "Class1A"));
 		}
 
 		/// <summary>
@@ -284,12 +340,22 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 
 			database.Reload();
 
-			var classroomService = new ClassroomService(database.Context);
+			var classroomService = GetClassroomService(database.Context);
 			await classroomService.DeleteClassroomAsync("Class1");
 
 			database.Reload();
 
 			Assert.Equal(0, database.Context.Classrooms.Count());
+		}
+
+		/// <summary>
+		/// Returns a new ClassroomService object.
+		/// </summary>
+		private ClassroomService GetClassroomService(
+			DatabaseContext dbContext,
+			IClassroomArchiver archiver = null)
+		{
+			return new ClassroomService(dbContext, archiver);
 		}
 	}
 }

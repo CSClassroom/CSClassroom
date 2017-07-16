@@ -32,6 +32,15 @@
             </div>
         </div>
         <div class="form-group">
+            <label asp-for="IsActive" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="IsActive" class="form-control-static"></p>
+                <input asp-for="IsActive" class="checkbox" type="checkbox" value="true" />
+                <input type="hidden" name="IsActive" value="false" />
+                <span asp-validation-for="IsActive" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
             <label asp-for="GitHubOrganization" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <p asp-description-for="GitHubOrganization" class="form-control-static"></p>

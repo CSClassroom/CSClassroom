@@ -20,11 +20,19 @@ namespace CSC.CSClassroom.Service.Classrooms
 		private readonly DatabaseContext _dbContext;
 
 		/// <summary>
+		/// The classroom archiver.
+		/// </summary>
+		private readonly IClassroomArchiver _classroomArchiver;
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public ClassroomService(DatabaseContext dbContext)
+		public ClassroomService(
+			DatabaseContext dbContext,
+			IClassroomArchiver classroomArchiver)
 		{
 			_dbContext = dbContext;
+			_classroomArchiver = classroomArchiver;
 		}
 
 		/// <summary>
@@ -32,7 +40,10 @@ namespace CSC.CSClassroom.Service.Classrooms
 		/// </summary>
 		public async Task<IList<Classroom>> GetClassroomsAsync()
 		{
-			return await _dbContext.Classrooms.ToListAsync();
+			return await _dbContext.Classrooms
+				.OrderBy(c => !c.IsActive)
+				.ThenBy(c => c.Name)
+				.ToListAsync();
 		}
 
 		/// <summary>
@@ -138,6 +149,30 @@ namespace CSC.CSClassroom.Service.Classrooms
 			_dbContext.Update(classroom);
 
 			await _dbContext.SaveChangesAsync();
+		}
+
+		/// <summary>
+		/// Archives a classroom.
+		/// </summary>
+		public async Task<bool> ArchiveClassroomAsync(
+			string classroomName,
+			string archivedClassroomName)
+		{
+			var classroomExists = await _dbContext.Classrooms
+				.AnyAsync(c => c.Name == classroomName);
+
+			if (!classroomExists)
+			{
+				return false;
+			}
+
+			await _classroomArchiver.ArchiveClassroomAsync
+			(
+				classroomName, 
+				archivedClassroomName
+			);
+
+			return true;
 		}
 
 		/// <summary>

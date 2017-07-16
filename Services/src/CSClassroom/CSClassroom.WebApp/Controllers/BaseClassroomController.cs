@@ -112,7 +112,13 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			}
 			else
 			{
-				return ClassroomMembership?.Role ?? ClassroomRole.None;
+				var classroomRole = ClassroomMembership?.Role ?? ClassroomRole.None;
+				if (!Classroom.IsActive && classroomRole < ClassroomRole.Admin)
+				{
+					classroomRole = ClassroomRole.None;
+				}
+
+				return classroomRole;
 			}
 		}
 	}

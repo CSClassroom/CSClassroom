@@ -19,6 +19,11 @@ namespace CSC.CSClassroom.Model.Questions
 		public int CodeQuestionId { get; set; }
 
 		/// <summary>
+		/// The code question containing this code constraint.
+		/// </summary>
+		public CodeQuestion CodeQuestion { get; set; }
+
+		/// <summary>
 		/// The regular expression to match.
 		/// </summary>
 		[Required]

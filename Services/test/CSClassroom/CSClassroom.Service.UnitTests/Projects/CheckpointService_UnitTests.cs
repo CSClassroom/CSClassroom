@@ -278,8 +278,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Checkpoints
 			var database = GetDatabaseBuilderWithCheckpoint().Build();
 
 			var checkpoint = database.Context.Checkpoints
-				.Include(c => c.Project)
-				.Include(c => c.Project.Classroom)
 				.Include(c => c.TestClasses)
 				.Include(c => c.SectionDates)
 				.Single();

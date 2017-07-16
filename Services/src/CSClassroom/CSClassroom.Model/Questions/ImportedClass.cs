@@ -15,6 +15,11 @@ namespace CSC.CSClassroom.Model.Questions
 		public int CodeQuestionId { get; set; }
 
 		/// <summary>
+		/// The code question containing this import.
+		/// </summary>
+		public CodeQuestion CodeQuestion { get; set; }
+
+		/// <summary>
 		/// The class name (or wildcard).
 		/// </summary>
 		[Required]

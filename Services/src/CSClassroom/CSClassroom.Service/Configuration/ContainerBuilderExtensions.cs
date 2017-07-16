@@ -66,6 +66,7 @@ namespace CSC.CSClassroom.Service.Configuration
 		private static void RegisterClassroomComponents(
 			this ContainerBuilder builder)
 		{
+			builder.RegisterType<ClassroomArchiver>().As<IClassroomArchiver>();
 			builder.RegisterType<ClassroomService>().As<IClassroomService>();
 			builder.RegisterType<SectionService>().As<ISectionService>();
 		}

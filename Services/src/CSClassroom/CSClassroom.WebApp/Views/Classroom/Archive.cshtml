@@ -1,0 +1,28 @@
+@model Classroom
+
+@{
+    ViewData["Title"] = "Archive";
+}
+
+<h2>Archive Class</h2>
+<span>Archiving a class renames the current class to a new name. It then creates a new version of the class with the current name. The new version of the class contains all assignments and projects of the current class, but no sections/students/submissions.</span>
+<form asp-action="Archive">
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label class="col-md-2 control-label">Archived Class Name</label>
+            <div class="col-md-10">
+                <p class="form-control-static">Enter the name of the archived version of this class.</p>
+                <input name="archivedClassName" class="form-control" type="text" value="@(Model.Name + "-Archived")" required />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Archive" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

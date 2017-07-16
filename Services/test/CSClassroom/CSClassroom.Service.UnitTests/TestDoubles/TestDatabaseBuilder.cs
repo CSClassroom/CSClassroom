@@ -37,6 +37,11 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 		}
 
 		/// <summary>
+		/// The DbContextOptions for this database builder.
+		/// </summary>
+		public DbContextOptions<DatabaseContext> Options => _store.Options;
+
+		/// <summary>
 		/// Adds a classroom to the database.
 		/// </summary>
 		public TestDatabaseBuilder AddClassroom(string classroomName)
@@ -45,7 +50,8 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 			{
 				Name = classroomName,
 				DisplayName = $"{classroomName} DisplayName",
-				GitHubOrganization = $"{classroomName}GitHubOrg"
+				GitHubOrganization = $"{classroomName}GitHubOrg",
+				IsActive = true
 			};
 
 			_buildContext.Classrooms.Add(classroom);
