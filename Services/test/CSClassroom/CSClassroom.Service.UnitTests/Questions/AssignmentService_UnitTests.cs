@@ -152,6 +152,57 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 		}
 
 		/// <summary>
+		/// Ensures that CreateAssignmentAsync updates the group name to be
+		/// the assignment name if the group name is blank.
+		/// </summary>
+		[Fact]
+		public async Task CreateAssignmentAsync_EmptyGroupName_GroupNameIsAssignmentName()
+		{
+			var database = GetDatabase().Build();
+			var sectionId = database.Context.Sections.First().Id;
+			var questionIds = database.Context
+				.Questions
+				.Take(2)
+				.Select(q => q.Id)
+				.ToList();
+
+			database.Reload();
+
+			var newAssignment = CreateNewAssignment(sectionId, questionIds);
+			newAssignment.GroupName = null;
+
+			var modelErrors = new MockErrorCollection();
+			var assignmentValidator = CreateMockAssignmentValidator
+			(
+				newAssignment,
+				modelErrors,
+				validAssignment: true
+			);
+
+			var assignmentService = GetAssignmentService
+			(
+				database.Context,
+				assignmentValidator
+			);
+
+			var result = await assignmentService.CreateAssignmentAsync
+			(
+				"Class1",
+				newAssignment,
+				modelErrors
+			);
+
+			Assert.True(result);
+			Assert.False(modelErrors.HasErrors);
+
+			database.Reload();
+
+			var assignment = database.Context.Assignments.Single();
+			
+			Assert.Equal("Unit 1a", assignment.GroupName);
+		}
+
+		/// <summary>
 		/// Ensures that CreateAssignmentAsync does not create an assignment
 		/// when there are two due dates for the same section.
 		/// </summary>
@@ -267,6 +318,53 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 			Assert.Equal(2, assignment.Questions.Count);
 			Assert.Equal(questionIds[2], assignment.Questions.OrderBy(q => q.Order).First().QuestionId);
 			Assert.Equal(questionIds[1], assignment.Questions.OrderBy(q => q.Order).Last().QuestionId);
+		}
+
+		/// <summary>
+		/// Ensures that UpdateAssignmentAsync updates the group name to be
+		/// the assignment name if the group name is blank.
+		/// </summary>
+		[Fact]
+		public async Task UpdateAssignmentAsync_EmptyGroupName_GroupNameIsAssignmentName()
+		{
+			var database = GetDatabaseWithAssignments().Build();
+			var assignment = database.Context.Assignments
+				.Include(a => a.Questions)
+				.First();
+
+			database.Reload();
+			assignment.GroupName = null;
+
+			var modelErrors = new MockErrorCollection();
+			var assignmentValidator = CreateMockAssignmentValidator
+			(
+				assignment,
+				modelErrors,
+				validAssignment: true
+			);
+
+			var assignmentService = GetAssignmentService
+			(
+				database.Context,
+				assignmentValidator
+			);
+
+			var result = await assignmentService.UpdateAssignmentAsync
+			(
+				"Class1",
+				assignment,
+				modelErrors
+			);
+
+			Assert.True(result);
+			Assert.False(modelErrors.HasErrors);
+
+			database.Reload();
+
+			assignment = database.Context.Assignments
+				.Single(a => a.Id == assignment.Id);
+
+			Assert.Equal("Unit 1a", assignment.GroupName);
 		}
 
 		/// <summary>

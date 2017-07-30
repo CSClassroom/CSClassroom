@@ -414,6 +414,11 @@ namespace CSC.CSClassroom.Service.Questions
 
 			UpdateQuestionOrder(assignment.Questions);
 
+			if (string.IsNullOrWhiteSpace(assignment.GroupName))
+			{
+				assignment.GroupName = assignment.Name;
+			}
+
 			_dbContext.RemoveUnwantedObjects
 			(
 				_dbContext.AssignmentQuestions,
