@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CSC.BuildService.Model.ProjectRunner;
 using CSC.Common.Infrastructure.Serialization;
+using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Classrooms;
@@ -139,7 +140,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			ViewBag.ProjectNames = new List<SelectListItem>
 			(
-				projects.OrderBy(p => p.Name).Select
+				projects.OrderBy(p => p.Name, new NaturalComparer()).Select
 				(
 					project => new SelectListItem()
 					{

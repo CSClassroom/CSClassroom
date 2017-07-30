@@ -54,7 +54,7 @@ namespace CSC.CSClassroom.Model.Projects
 		/// </summary>
 		[Display
 		(
-			Name = "Explicit Submissions Required",
+			Name = "Submissions",
 			Description = "Select whether this project will require students to submit " +
 				"for each checkpoint."
 		)]

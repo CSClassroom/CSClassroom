@@ -1,3 +1,4 @@
+@using CSC.Common.Infrastructure.Utilities
 @model IEnumerable<Project>
 
 @{
@@ -22,7 +23,8 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.OrderBy(p => p.Name, new NaturalComparer()))
+{
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)

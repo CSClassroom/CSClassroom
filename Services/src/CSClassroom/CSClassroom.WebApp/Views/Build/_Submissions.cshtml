@@ -1,4 +1,5 @@
-﻿@model CheckpointSubmissionsViewModel
+﻿@using CSC.Common.Infrastructure.Utilities
+@model CheckpointSubmissionsViewModel
 
 <hr />
 <h3>Submissions</h3>
@@ -15,7 +16,7 @@
         <th>
         </th>
     </tr>
-    @foreach (var checkpointStatus in Model.Checkpoints)
+    @foreach (var checkpointStatus in Model.Checkpoints.OrderBy(c => c.CheckpointDisplayName, new NaturalComparer()))
     {
         <tr>
             <td>
