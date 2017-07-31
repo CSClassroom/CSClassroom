@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace CSC.CSClassroom.Model.Questions
+namespace CSC.CSClassroom.Model.Assignments
 {
 	/// <summary>
 	/// An exercise that requires a class (or part of a class)

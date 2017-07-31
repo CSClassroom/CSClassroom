@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.System;
 using CSC.Common.Infrastructure.Utilities;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.QuestionGeneration;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
 using MoreLinq;
 
-namespace CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters
+namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 {
 	/// <summary>
 	/// A UserQuestionDataUpdater for generated question templates.

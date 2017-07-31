@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters
+namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 {
 	/// <summary>
 	/// Creates user question data updaters.

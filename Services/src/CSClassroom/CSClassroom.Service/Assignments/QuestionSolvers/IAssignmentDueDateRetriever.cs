@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
+namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 {
 	/// <summary>
 	/// Retrieves an assignment due date from the database.

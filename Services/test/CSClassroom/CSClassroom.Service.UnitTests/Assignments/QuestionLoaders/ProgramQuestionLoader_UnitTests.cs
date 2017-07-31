@@ -1,12 +1,12 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.QuestionLoaders;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.QuestionLoaders;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionLoaders
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionLoaders
 {
 	/// <summary>
 	/// Unit tests for the ProgramQuestionLoader class.

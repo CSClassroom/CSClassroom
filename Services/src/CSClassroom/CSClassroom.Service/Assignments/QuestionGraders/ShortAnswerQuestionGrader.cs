@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Extensions;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionGraders
+namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 {
 	/// <summary>
 	/// Grades a short answer question.

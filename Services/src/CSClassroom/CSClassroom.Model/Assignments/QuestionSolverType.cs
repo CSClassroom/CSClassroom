@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CSC.CSClassroom.Model.Questions
+namespace CSC.CSClassroom.Model.Assignments
 {
 	/// <summary>
 	/// The type of solver supported for this question.

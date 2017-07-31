@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CSC.CSClassroom.Service.Questions.UserQuestionDataLoaders
+namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders
 {
 	/// <summary>
 	/// Loads user question data from the database.

@@ -1,7 +1,7 @@
-﻿using CSC.CSClassroom.Model.Questions;
+﻿using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionDuplicators
+namespace CSC.CSClassroom.Service.Assignments.QuestionDuplicators
 {
 	/// <summary>
 	/// Loads a generated question.

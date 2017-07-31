@@ -1,4 +1,4 @@
-﻿namespace CSC.CSClassroom.Model.Questions.ServiceResults
+﻿namespace CSC.CSClassroom.Model.Assignments.ServiceResults
 {
 	/// <summary>
 	/// A scored result of a question submission.

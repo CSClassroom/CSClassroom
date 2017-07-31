@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CSC.Common.Infrastructure.Utilities;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 using Moq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.UserQuestionDataUpdaters
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 {
 	/// <summary>
 	/// Unit tests for the GeneratedQuestionSeedGenerator class.

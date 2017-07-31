@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
+namespace CSC.CSClassroom.Service.Assignments.QuestionUpdaters
 {
 	/// <summary>
 	/// Updates a question in the database.

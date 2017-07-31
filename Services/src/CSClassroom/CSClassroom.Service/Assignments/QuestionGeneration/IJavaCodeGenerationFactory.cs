@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
+namespace CSC.CSClassroom.Service.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// Creates classes for java code generation.

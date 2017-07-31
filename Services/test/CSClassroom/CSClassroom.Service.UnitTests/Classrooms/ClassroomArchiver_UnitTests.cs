@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.Classrooms;

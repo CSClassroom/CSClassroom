@@ -1,6 +1,6 @@
-﻿using CSC.CSClassroom.Model.Questions;
+﻿using CSC.CSClassroom.Model.Assignments;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionDuplicators
+namespace CSC.CSClassroom.Service.Assignments.QuestionDuplicators
 {
 	/// <summary>
 	/// Duplicates question objects.

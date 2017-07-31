@@ -4,14 +4,14 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using CSC.BuildService.Model.CodeRunner;
 using CSC.BuildService.Service.CodeRunner;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.QuestionGeneration;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Moq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionGeneration
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// Unit tests for the QuestionGenerator class.

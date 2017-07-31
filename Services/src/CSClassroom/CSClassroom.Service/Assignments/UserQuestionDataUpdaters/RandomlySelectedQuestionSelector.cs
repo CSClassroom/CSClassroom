@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using CSC.Common.Infrastructure.Utilities;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using MoreLinq;
 
-namespace CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters
+namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 {
 	/// <summary>
 	/// Generates the next question to show for a randomly selected question.

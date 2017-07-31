@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.WebApp.Extensions;
 using CSC.CSClassroom.WebApp.Providers;
 using CSC.CSClassroom.WebApp.ViewHelpers.NestedTables;

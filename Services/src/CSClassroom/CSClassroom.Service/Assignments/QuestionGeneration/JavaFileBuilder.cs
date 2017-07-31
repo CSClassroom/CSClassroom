@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
+namespace CSC.CSClassroom.Service.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// Generates a java file containing a single class.

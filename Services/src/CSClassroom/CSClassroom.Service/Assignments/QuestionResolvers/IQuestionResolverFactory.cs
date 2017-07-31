@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionResolvers
+namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 {
 	/// <summary>
 	/// Creates a question resolver for a given UserQuestionData object.

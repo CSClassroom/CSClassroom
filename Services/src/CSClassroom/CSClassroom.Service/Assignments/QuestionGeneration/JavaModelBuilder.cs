@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
+namespace CSC.CSClassroom.Service.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// Generates a java object model, corresponding to a C# object model

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using CSC.CSClassroom.Model.Classrooms;
 
-namespace CSC.CSClassroom.Model.Questions
+namespace CSC.CSClassroom.Model.Assignments
 {
 	/// <summary>
 	/// A gradebook for assignments.

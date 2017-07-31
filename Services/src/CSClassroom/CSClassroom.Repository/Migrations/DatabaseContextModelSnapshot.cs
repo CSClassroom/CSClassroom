@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Model.Projects;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Model.Users;
 
 namespace CSC.CSClassroom.Repository.Migrations

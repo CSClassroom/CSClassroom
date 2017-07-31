@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CSC.CSClassroom.Model.Questions.ServiceResults
+namespace CSC.CSClassroom.Model.Assignments.ServiceResults
 {
 	/// <summary>
 	/// Contains the results for a given assignment in a given section.

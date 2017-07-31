@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionResolvers
+namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 {
 	/// <summary>
 	/// Returns the actual question presented to the user, given

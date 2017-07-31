@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Serialization;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.QuestionLoaders;
-using CSC.CSClassroom.Service.Questions.QuestionResolvers;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.QuestionLoaders;
+using CSC.CSClassroom.Service.Assignments.QuestionResolvers;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using Moq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionResolvers
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 {
 	/// <summary>
 	/// Unit tests for the RandomlySelectedQuestionResolver class. 

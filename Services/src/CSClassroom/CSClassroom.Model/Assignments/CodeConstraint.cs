@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CSC.CSClassroom.Model.Questions
+namespace CSC.CSClassroom.Model.Assignments
 {
 	/// <summary>
 	/// A constraint on the code that may be submitted

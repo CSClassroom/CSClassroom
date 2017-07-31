@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CSC.CSClassroom.Service.Questions.UserQuestionDataLoaders
+namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders
 {
 	/// <summary>
 	/// Creates user question data loaders. 

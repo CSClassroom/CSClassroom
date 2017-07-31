@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Serialization;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.QuestionResolvers;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.QuestionResolvers;
 using Moq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionResolvers
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 {
 	/// <summary>
 	/// Unit tests for the GeneratedQuestionTemplateResolver class. 

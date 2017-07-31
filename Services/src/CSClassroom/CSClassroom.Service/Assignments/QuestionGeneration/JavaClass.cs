@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
+namespace CSC.CSClassroom.Service.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// Represents a data-only java class, with accessors.

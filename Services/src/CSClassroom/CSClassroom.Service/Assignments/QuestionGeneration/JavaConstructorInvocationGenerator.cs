@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
+namespace CSC.CSClassroom.Service.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// Represents a java constructor invocation.

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.UserQuestionDataUpdaters
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 {
 	/// <summary>
 	/// Unit tests for the UserQuestionDataLoaderFactory class.

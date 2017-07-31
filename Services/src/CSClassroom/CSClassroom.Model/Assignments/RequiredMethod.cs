@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
-namespace CSC.CSClassroom.Model.Questions
+namespace CSC.CSClassroom.Model.Assignments
 {
 	/// <summary>
 	/// A required method for a class question.

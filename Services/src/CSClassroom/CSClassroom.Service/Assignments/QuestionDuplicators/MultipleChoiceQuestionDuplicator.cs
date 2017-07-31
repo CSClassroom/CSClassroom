@@ -1,8 +1,8 @@
-﻿using CSC.CSClassroom.Model.Questions;
+﻿using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionDuplicators
+namespace CSC.CSClassroom.Service.Assignments.QuestionDuplicators
 {
 	/// <summary>
 	/// Detaches a multiple choice question.

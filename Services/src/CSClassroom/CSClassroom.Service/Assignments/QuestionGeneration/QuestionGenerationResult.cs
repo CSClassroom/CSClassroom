@@ -1,4 +1,4 @@
-﻿namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
+﻿namespace CSC.CSClassroom.Service.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// The result of attempting to generate a question.

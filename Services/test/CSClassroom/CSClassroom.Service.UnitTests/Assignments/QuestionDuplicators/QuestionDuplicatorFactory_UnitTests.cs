@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.QuestionDuplicators;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.QuestionDuplicators;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionDuplicators
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionDuplicators
 {
 	/// <summary>
 	/// Unit tests for the QuestionDuplicatorFactory class.

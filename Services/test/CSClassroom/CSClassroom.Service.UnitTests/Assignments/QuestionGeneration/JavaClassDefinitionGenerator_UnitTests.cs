@@ -1,9 +1,9 @@
 using System.Linq;
-using CSC.CSClassroom.Service.Questions.QuestionGeneration;
+using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionGeneration
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// Unit tests for the JavaClassDefinitionGenerator class.

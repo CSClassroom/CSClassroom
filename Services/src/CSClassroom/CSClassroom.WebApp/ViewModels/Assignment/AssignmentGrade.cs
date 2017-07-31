@@ -15,7 +15,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		/// <summary>
 		/// The graded assignment.
 		/// </summary>
-		public Model.Questions.Assignment Assignment { get; }
+		public Model.Assignments.Assignment Assignment { get; }
 
 		/// <summary>
 		/// The score for the assignment.
@@ -27,7 +27,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		/// </summary>
 		public AssignmentGrade(
 			User user, 
-			Model.Questions.Assignment assignment, 
+			Model.Assignments.Assignment assignment, 
 			double score)
 		{
 			User = user;

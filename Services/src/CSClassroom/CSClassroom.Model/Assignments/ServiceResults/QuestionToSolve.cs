@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using CSC.CSClassroom.Model.Users;
 
-namespace CSC.CSClassroom.Model.Questions.ServiceResults
+namespace CSC.CSClassroom.Model.Assignments.ServiceResults
 {
 	/// <summary>
 	/// A question to solve.

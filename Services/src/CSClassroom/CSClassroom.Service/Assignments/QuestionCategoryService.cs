@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CSC.CSClassroom.Model.Classrooms;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace CSC.CSClassroom.Service.Questions
+namespace CSC.CSClassroom.Service.Assignments
 {
 	/// <summary>
 	/// Performs question category operations.

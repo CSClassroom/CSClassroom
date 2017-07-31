@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using CSC.CSClassroom.Model.Projects;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 
 namespace CSC.CSClassroom.Model.Classrooms
 {

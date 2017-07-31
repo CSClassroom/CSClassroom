@@ -1,10 +1,10 @@
 ﻿using CSC.Common.Infrastructure.System;
 using CSC.Common.Infrastructure.Utilities;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions.QuestionGeneration;
+using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
+namespace CSC.CSClassroom.Service.Assignments.QuestionUpdaters
 {
 	/// <summary>
 	/// Creates question updaters.

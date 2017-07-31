@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Utilities;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 
-namespace CSC.CSClassroom.Service.Questions
+namespace CSC.CSClassroom.Service.Assignments
 {
 	/// <summary>
 	/// Performs assignment operations.

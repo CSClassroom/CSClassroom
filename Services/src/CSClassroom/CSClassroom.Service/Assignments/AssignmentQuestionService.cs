@@ -1,16 +1,16 @@
 ﻿using System;
 using CSC.Common.Infrastructure.System;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.Repository;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataLoaders;
-using CSC.CSClassroom.Service.Questions.QuestionSolvers;
+using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders;
 
-namespace CSC.CSClassroom.Service.Questions
+namespace CSC.CSClassroom.Service.Assignments
 {
 	/// <summary>
 	/// Performs assignment operations.

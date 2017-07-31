@@ -4,17 +4,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Serialization;
 using CSC.Common.Infrastructure.Utilities;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions.QuestionDuplicators;
-using CSC.CSClassroom.Service.Questions.QuestionGeneration;
-using CSC.CSClassroom.Service.Questions.QuestionLoaders;
-using CSC.CSClassroom.Service.Questions.QuestionUpdaters;
-using CSC.CSClassroom.Service.Questions.Validators;
+using CSC.CSClassroom.Service.Assignments.QuestionDuplicators;
+using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
+using CSC.CSClassroom.Service.Assignments.QuestionLoaders;
+using CSC.CSClassroom.Service.Assignments.QuestionUpdaters;
+using CSC.CSClassroom.Service.Assignments.Validators;
 using Microsoft.EntityFrameworkCore;
 
-namespace CSC.CSClassroom.Service.Questions
+namespace CSC.CSClassroom.Service.Assignments
 {
 	/// <summary>
 	/// Performs question operations.

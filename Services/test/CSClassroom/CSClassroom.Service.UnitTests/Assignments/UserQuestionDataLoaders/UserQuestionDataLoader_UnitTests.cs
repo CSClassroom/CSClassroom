@@ -4,17 +4,17 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions.QuestionLoaders;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataLoaders;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters;
-using CSC.CSClassroom.Service.UnitTests.Questions.UserQuestionDataUpdaters;
+using CSC.CSClassroom.Service.Assignments.QuestionLoaders;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
+using CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using Moq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.UserQuestionDataLoaders
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataLoaders
 {
 	/// <summary>
 	/// Unit tests for the UserQuestionDataLoader class.

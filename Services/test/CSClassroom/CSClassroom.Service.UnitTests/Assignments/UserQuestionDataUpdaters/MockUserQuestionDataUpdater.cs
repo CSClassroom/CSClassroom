@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.UserQuestionDataUpdaters
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 {
 	/// <summary>
 	/// A mock user question data updater.

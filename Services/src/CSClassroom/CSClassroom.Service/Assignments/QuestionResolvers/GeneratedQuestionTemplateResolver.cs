@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Serialization;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using MoreLinq;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionResolvers
+namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 {
 	/// <summary>
 	/// Resolves generated question templates.

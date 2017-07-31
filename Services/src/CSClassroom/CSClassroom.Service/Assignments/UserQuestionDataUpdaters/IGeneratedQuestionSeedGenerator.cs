@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 
-namespace CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters
+namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 {
 	/// <summary>
 	/// Generates a new seed for a GeneratedQuestionTemplate.

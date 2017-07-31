@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 
-namespace CSC.CSClassroom.Service.Questions.AssignmentScoring
+namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 {
 	/// <summary>
 	/// Calculates the score and status of an assignment.

@@ -1,6 +1,6 @@
 ﻿using CSC.CSClassroom.Model.Users;
 
-namespace CSC.CSClassroom.Model.Questions
+namespace CSC.CSClassroom.Model.Assignments
 {
 	/// <summary>
 	/// A grade for an assignment.

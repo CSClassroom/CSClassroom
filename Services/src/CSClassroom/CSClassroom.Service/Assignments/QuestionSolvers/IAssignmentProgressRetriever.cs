@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
+namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 {
 	/// <summary>
 	/// Retrieves the progress of an assignment for a student.

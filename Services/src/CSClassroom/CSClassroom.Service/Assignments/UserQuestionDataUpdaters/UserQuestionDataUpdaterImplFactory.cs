@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using CSC.Common.Infrastructure.System;
 using CSC.Common.Infrastructure.Utilities;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions.QuestionGeneration;
+using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
 
-namespace CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters
+namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 {
 	/// <summary>
 	/// Creates UserQuestionDataUpdater implementations for a given UserQuestionData object.

@@ -4,19 +4,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Classrooms;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions;
-using CSC.CSClassroom.Service.Questions.AssignmentScoring;
-using CSC.CSClassroom.Service.Questions.Validators;
+using CSC.CSClassroom.Service.Assignments;
+using CSC.CSClassroom.Service.Assignments.AssignmentScoring;
+using CSC.CSClassroom.Service.Assignments.Validators;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions
+namespace CSC.CSClassroom.Service.UnitTests.Assignments
 {
 	/// <summary>
 	/// Unit tests for the assignment service.

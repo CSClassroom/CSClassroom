@@ -4,12 +4,12 @@ using System.Linq;
 using CSC.Common.Infrastructure.Interfaces.Extensions;
 using MoreLinq;
 using CSC.CSClassroom.Model.Classrooms;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.Model.Users;
 using CSC.Common.Infrastructure.System;
 
-namespace CSC.CSClassroom.Service.Questions.AssignmentScoring
+namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 {
 	/// <summary>
 	/// Generates an assignment report with updated assignment results.

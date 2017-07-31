@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionGraders
+namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 {
 	/// <summary>
 	/// Grades a multiple choice question.

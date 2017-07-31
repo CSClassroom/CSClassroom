@@ -1,4 +1,4 @@
-﻿namespace CSC.CSClassroom.Model.Questions
+﻿namespace CSC.CSClassroom.Model.Assignments
 {
 	/// <summary>
 	/// A submission that contains an answer to a code question.

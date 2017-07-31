@@ -5,17 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.System;
 using CSC.Common.Infrastructure.Utilities;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions.QuestionGeneration;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters;
+using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.UserQuestionDataUpdaters
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 {
 	/// <summary>
 	/// Unit tests for the RandomlySelectedUserQuestionDataUpdater class.

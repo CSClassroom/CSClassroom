@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionLoaders
+namespace CSC.CSClassroom.Service.Assignments.QuestionLoaders
 {
 	/// <summary>
 	/// Creates question loaders.

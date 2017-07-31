@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionLoaders
+namespace CSC.CSClassroom.Service.Assignments.QuestionLoaders
 {
 	/// <summary>
 	/// Loads a question from the database.

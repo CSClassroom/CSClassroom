@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CSC.Common.Infrastructure.System;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 
-namespace CSC.CSClassroom.Service.Questions.AssignmentScoring
+namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 {
 	/// <summary>
 	/// Calculates the status of a submission for a question 

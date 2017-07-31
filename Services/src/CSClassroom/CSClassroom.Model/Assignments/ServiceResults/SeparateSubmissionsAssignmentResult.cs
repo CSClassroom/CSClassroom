@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CSC.CSClassroom.Model.Questions.ServiceResults
+namespace CSC.CSClassroom.Model.Assignments.ServiceResults
 {
 	/// <summary>
 	/// An assignment result for an assignment with questions that are 

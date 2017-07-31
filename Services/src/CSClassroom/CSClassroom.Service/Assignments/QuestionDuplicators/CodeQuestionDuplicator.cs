@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionDuplicators
+namespace CSC.CSClassroom.Service.Assignments.QuestionDuplicators
 {
 	/// <summary>
 	/// Duplicates a code question.

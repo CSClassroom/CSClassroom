@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CSC.CSClassroom.Model.Questions.ServiceResults.Errors
+namespace CSC.CSClassroom.Model.Assignments.ServiceResults.Errors
 {
 	/// <summary>
 	/// An error indicating that the parameter types of a method do not match.

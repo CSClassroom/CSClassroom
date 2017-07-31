@@ -1,6 +1,6 @@
 ﻿using System;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 
 namespace CSC.CSClassroom.WebApp.Extensions
 {

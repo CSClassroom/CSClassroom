@@ -2,7 +2,7 @@
 using System.Linq;
 using CSC.Common.Infrastructure.Extensions;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
+namespace CSC.CSClassroom.Service.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// Generates a serializable class.

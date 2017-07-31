@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataLoaders;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
+namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 {
 	/// <summary>
 	/// Functionality relating to solving questions.

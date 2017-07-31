@@ -7,7 +7,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using CSC.Common.Infrastructure.Configuration;
 using CSC.Common.Infrastructure.Serialization;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Repository.Configuration;
 using CSC.CSClassroom.Service.Configuration;

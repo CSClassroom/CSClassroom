@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using CSC.Common.Infrastructure.Serialization;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions.QuestionLoaders;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters;
+using CSC.CSClassroom.Service.Assignments.QuestionLoaders;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionResolvers
+namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 {
 	/// <summary>
 	/// Creates a question resolver for a given UserQuestionData object.

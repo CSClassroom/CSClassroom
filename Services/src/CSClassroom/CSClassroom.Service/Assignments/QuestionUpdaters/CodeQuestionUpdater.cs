@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Utilities;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
+namespace CSC.CSClassroom.Service.Assignments.QuestionUpdaters
 {
 	/// <summary>
 	/// Updates a code question.

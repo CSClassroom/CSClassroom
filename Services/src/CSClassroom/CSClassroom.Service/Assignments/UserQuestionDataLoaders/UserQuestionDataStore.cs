@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSC.Common.Infrastructure.Serialization;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 
-namespace CSC.CSClassroom.Service.Questions.UserQuestionDataLoaders
+namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders
 {
 	/// <summary>
 	/// Returns and updates user question data.

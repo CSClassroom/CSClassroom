@@ -29,7 +29,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Question
 		{
 			Type = type;
 
-			var question = (Model.Questions.Question)Activator.CreateInstance(type);
+			var question = (Model.Assignments.Question)Activator.CreateInstance(type);
 			DisplayName = question.QuestionTypeDisplay;
 			Description = question.QuestionTypeDescription;
 		}

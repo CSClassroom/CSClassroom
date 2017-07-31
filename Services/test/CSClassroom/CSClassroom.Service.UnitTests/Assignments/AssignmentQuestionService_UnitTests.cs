@@ -5,21 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Serialization;
 using CSC.Common.Infrastructure.System;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions;
-using CSC.CSClassroom.Service.Questions.AssignmentScoring;
-using CSC.CSClassroom.Service.Questions.QuestionGraders;
-using CSC.CSClassroom.Service.Questions.QuestionResolvers;
-using CSC.CSClassroom.Service.Questions.QuestionSolvers;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataLoaders;
+using CSC.CSClassroom.Service.Assignments;
+using CSC.CSClassroom.Service.Assignments.AssignmentScoring;
+using CSC.CSClassroom.Service.Assignments.QuestionGraders;
+using CSC.CSClassroom.Service.Assignments.QuestionResolvers;
+using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Moq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions
+namespace CSC.CSClassroom.Service.UnitTests.Assignments
 {
 	/// <summary>
 	/// Unit tests for the AssignmentService class.

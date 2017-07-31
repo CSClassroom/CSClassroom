@@ -4,15 +4,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Classrooms;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions.AssignmentScoring;
-using CSC.CSClassroom.Service.Questions.Validators;
+using CSC.CSClassroom.Service.Assignments.AssignmentScoring;
+using CSC.CSClassroom.Service.Assignments.Validators;
 using Microsoft.EntityFrameworkCore;
 
-namespace CSC.CSClassroom.Service.Questions
+namespace CSC.CSClassroom.Service.Assignments
 {
 	/// <summary>
 	/// Performs assignment operations.

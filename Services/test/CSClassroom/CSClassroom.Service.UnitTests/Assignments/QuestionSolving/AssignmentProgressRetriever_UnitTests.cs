@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
-using CSC.CSClassroom.Service.Questions.QuestionSolvers;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
+using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 {
 	/// <summary>
 	/// Unit tests for the UnsolvedPrereqRetriever class.

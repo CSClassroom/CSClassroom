@@ -1,4 +1,4 @@
-﻿namespace CSC.CSClassroom.Model.Questions.ServiceResults.Errors
+﻿namespace CSC.CSClassroom.Model.Assignments.ServiceResults.Errors
 {
 	/// <summary>
 	/// An error indicating the return type of a method does not match.

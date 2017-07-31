@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.WebApp.Extensions;
 using CSC.CSClassroom.WebApp.Providers;
 

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.QuestionUpdaters;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.QuestionUpdaters;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionUpdaters
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionUpdaters
 {
 	/// <summary>
 	/// Unit tests for the QuestionUpdaterFactory class.

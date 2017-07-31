@@ -1,4 +1,4 @@
-﻿using CSC.CSClassroom.Model.Questions;
+﻿using CSC.CSClassroom.Model.Assignments;
 
 namespace CSC.CSClassroom.WebApp.BasePages
 {

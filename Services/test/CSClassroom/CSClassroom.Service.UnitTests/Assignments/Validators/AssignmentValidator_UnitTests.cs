@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.Validators;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.Validators;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.Validators
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.Validators
 {
 	/// <summary>
 	/// Unit tests for the assignment validator class.

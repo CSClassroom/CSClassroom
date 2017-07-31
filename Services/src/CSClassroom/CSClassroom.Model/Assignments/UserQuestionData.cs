@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using CSC.CSClassroom.Model.Users;
 
-namespace CSC.CSClassroom.Model.Questions
+namespace CSC.CSClassroom.Model.Assignments
 {
 	/// <summary>
 	/// A submission of a question result.

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using CSC.Common.Infrastructure.Interfaces.Extensions;
 using CSC.CSClassroom.Model.Classrooms;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.Model.Users;
 
-namespace CSC.CSClassroom.Service.Questions.AssignmentScoring
+namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 {
 	/// <summary>
 	/// Generates group results for all users/assignment groups in a given

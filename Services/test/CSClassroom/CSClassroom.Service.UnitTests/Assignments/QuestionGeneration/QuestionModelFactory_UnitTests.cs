@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.QuestionGeneration;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
 using Moq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionGeneration
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// Unit tests for the QuestionModelFactory class.

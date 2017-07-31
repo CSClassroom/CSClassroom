@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using CSC.CSClassroom.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
+namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 {
 	/// <summary>
 	/// Retrieves an assignment due date from the database.

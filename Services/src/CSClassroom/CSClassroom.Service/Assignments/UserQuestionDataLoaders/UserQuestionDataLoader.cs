@@ -4,13 +4,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Interfaces.Extensions;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions.QuestionLoaders;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters;
+using CSC.CSClassroom.Service.Assignments.QuestionLoaders;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 using Microsoft.EntityFrameworkCore;
 
-namespace CSC.CSClassroom.Service.Questions.UserQuestionDataLoaders
+namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders
 {
 	/// <summary>
 	/// Loads user question data.

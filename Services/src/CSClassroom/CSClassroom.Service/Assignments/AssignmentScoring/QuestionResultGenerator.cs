@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.Model.Users;
 using MoreLinq;
 
-namespace CSC.CSClassroom.Service.Questions.AssignmentScoring
+namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 {
 	/// <summary>
 	/// Generates a result for a single question completed by a student.

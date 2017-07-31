@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Service.Questions.QuestionResolvers;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Service.Assignments.QuestionResolvers;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionResolvers
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 {
 	/// <summary>
 	/// Unit tests for the QuestionResolverFactory class.

@@ -1,4 +1,4 @@
-﻿namespace CSC.CSClassroom.Service.Questions.QuestionGeneration
+﻿namespace CSC.CSClassroom.Service.Assignments.QuestionGeneration
 {
 	/// <summary>
 	/// Represents a property in a serializable class, backed by 

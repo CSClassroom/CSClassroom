@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.AssignmentScoring
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 {
 	/// <summary>
 	/// A submission with a score.

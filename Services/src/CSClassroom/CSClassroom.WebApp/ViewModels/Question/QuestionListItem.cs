@@ -13,7 +13,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Question
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public QuestionListItem(Model.Questions.Question question, IEnumerable<string> actions, IUrlHelper urlHelper)
+		public QuestionListItem(Model.Assignments.Question question, IEnumerable<string> actions, IUrlHelper urlHelper)
 		{
 			Name = question.Name;
 			ActionLinks = string.Join

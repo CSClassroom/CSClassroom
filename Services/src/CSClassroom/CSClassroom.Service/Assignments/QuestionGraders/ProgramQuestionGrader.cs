@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using CSC.BuildService.Model.CodeRunner;
 using CSC.BuildService.Service.CodeRunner;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults.Errors;
-using CSC.CSClassroom.Service.Questions.QuestionGeneration;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults.Errors;
+using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionGraders
+namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 {
 	/// <summary>
 	/// Grades a program question.

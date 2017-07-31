@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CSC.CSClassroom.Model.Questions
+namespace CSC.CSClassroom.Model.Assignments
 {
 	/// <summary>
 	/// A submitted choice

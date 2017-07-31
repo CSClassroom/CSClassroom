@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using CSC.Common.Infrastructure.Utilities;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionUpdaters
+namespace CSC.CSClassroom.Service.Assignments.QuestionUpdaters
 {
 	/// <summary>
 	/// Creates question updaters.

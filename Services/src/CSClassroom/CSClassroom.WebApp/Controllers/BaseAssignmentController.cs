@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using CSC.CSClassroom.Model.Projects;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Service.Classrooms;
 using CSC.CSClassroom.Service.Projects;
-using CSC.CSClassroom.Service.Questions;
+using CSC.CSClassroom.Service.Assignments;
 
 namespace CSC.CSClassroom.WebApp.Controllers
 {

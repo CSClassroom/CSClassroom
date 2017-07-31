@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CSC.CSClassroom.Model.Classrooms;
-using CSC.CSClassroom.Model.Questions;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
+using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.Model.Users;
-using CSC.CSClassroom.Service.Questions.AssignmentScoring;
+using CSC.CSClassroom.Service.Assignments.AssignmentScoring;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Moq;
 using MoreLinq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.AssignmentScoring
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 {
 	/// <summary>
 	/// Unit tests for the AssignmentGroupResultGenerator class.

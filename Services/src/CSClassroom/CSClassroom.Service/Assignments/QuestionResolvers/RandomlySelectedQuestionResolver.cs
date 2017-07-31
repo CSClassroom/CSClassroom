@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Serialization;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions.QuestionLoaders;
+using CSC.CSClassroom.Service.Assignments.QuestionLoaders;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
-namespace CSC.CSClassroom.Service.Questions.QuestionResolvers
+namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 {
 	/// <summary>
 	/// Resolves randomly selected questions.

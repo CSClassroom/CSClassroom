@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using CSC.CSClassroom.Model.Questions.ServiceResults.Errors;
+using CSC.CSClassroom.Model.Assignments.ServiceResults.Errors;
 
-namespace CSC.CSClassroom.Model.Questions.ServiceResults
+namespace CSC.CSClassroom.Model.Assignments.ServiceResults
 {
 	/// <summary>
 	/// A result of a code question submission.

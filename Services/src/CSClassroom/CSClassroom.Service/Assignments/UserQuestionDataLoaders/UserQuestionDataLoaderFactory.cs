@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
-using CSC.CSClassroom.Service.Questions.QuestionLoaders;
-using CSC.CSClassroom.Service.Questions.UserQuestionDataUpdaters;
+using CSC.CSClassroom.Service.Assignments.QuestionLoaders;
+using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 
-namespace CSC.CSClassroom.Service.Questions.UserQuestionDataLoaders
+namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders
 {
 	/// <summary>
 	/// Creates user question data loaders.

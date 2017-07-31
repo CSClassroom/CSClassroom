@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CSC.Common.Infrastructure.System;
-using CSC.CSClassroom.Model.Questions.ServiceResults;
-using CSC.CSClassroom.Service.Questions.AssignmentScoring;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
+using CSC.CSClassroom.Service.Assignments.AssignmentScoring;
 using Moq;
 using Xunit;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.AssignmentScoring
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 {
 	/// <summary>
 	/// Unit tests for the SubmissionStatusCalculator class.

@@ -4,9 +4,9 @@ using System.Text;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Classrooms;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 
-namespace CSC.CSClassroom.Service.Questions.Validators
+namespace CSC.CSClassroom.Service.Assignments.Validators
 {
 	/// <summary>
 	/// Validates add/update operations for questions.

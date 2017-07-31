@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CSC.CSClassroom.Service.Questions.QuestionGeneration;
+using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 
 namespace CSC.CSClassroom.Service.UnitTests.TestDoubles

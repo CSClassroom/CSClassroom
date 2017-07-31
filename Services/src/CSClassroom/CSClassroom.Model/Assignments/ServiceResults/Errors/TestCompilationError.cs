@@ -1,4 +1,4 @@
-﻿namespace CSC.CSClassroom.Model.Questions.ServiceResults.Errors
+﻿namespace CSC.CSClassroom.Model.Assignments.ServiceResults.Errors
 {
 	/// <summary>
 	/// A compilation error that occured when compiling the tests for the submitted class.

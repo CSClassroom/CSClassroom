@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Classrooms;
-using CSC.CSClassroom.Service.Questions;
+using CSC.CSClassroom.Service.Assignments;
 using CSC.CSClassroom.WebApp.Filters;
 using Microsoft.AspNetCore.Mvc;
 

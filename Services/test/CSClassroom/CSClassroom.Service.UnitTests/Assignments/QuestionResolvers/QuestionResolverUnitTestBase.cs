@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
-using CSC.CSClassroom.Model.Questions;
+using CSC.CSClassroom.Model.Assignments;
 
-namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionResolvers
+namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 {
 	/// <summary>
 	/// The base class for classes that unit test different types

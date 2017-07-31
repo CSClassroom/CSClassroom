@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CSC.CSClassroom.Model.Questions
+namespace CSC.CSClassroom.Model.Assignments
 {
 	/// <summary>
 	/// A submission of a question result.
