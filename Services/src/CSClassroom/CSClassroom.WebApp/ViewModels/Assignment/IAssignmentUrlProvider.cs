@@ -27,7 +27,10 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		/// <summary>
 		/// Returns the URL for the question.
 		/// </summary>
-		string GetQuestionUrl(StudentQuestionResult result);
+		string GetQuestionUrl(
+			int assignmentId,
+			int questionId,
+			int userId);
 
 		/// <summary>
 		/// Returns the URL for a question submission.

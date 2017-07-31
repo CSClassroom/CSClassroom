@@ -1,0 +1,74 @@
+﻿@using CSC.CSClassroom.Model.Questions.ServiceResults
+@model AssignmentProgress
+@{
+    int? linkUserId = Model.UserId != ViewBag.User.Id
+        ? Model.UserId
+        : (int?) null;
+}
+<style>
+    .center {
+        text-align: center
+    }
+
+    .question-container {
+        display: inline-block;
+        text-align: left
+    }
+</style>
+<table style="width: 100%">
+    <tbody>
+    <tr>
+        <td>
+            @if (Model.PreviousAssignmentQuestionId.HasValue)
+            {
+                @Html.ActionLink(
+                    "Previous",
+                    "Solve",
+                    new
+                    {
+                        id = Model.PreviousAssignmentQuestionId.Value,
+                        userId = linkUserId
+                    })
+            }
+        </td>
+        <td style="width: 100%;">
+            <div id="wrapper" class="center">
+                <p class="center"><strong>@ViewBag.Assignment.Name</strong></p>
+                <div id="container" class="question-container">
+                    @foreach (var question in Model.Questions)
+                    {
+                        string id = (question.AssignmentQuestionId == Model.CurrentAssignmentQuestionId ? "id=currentQuestion" : "");
+                        string check = (question.Completion == QuestionCompletion.Completed ? "checked" : "");
+                        string partial = (question.Completion == QuestionCompletion.PartiallyCompleted ? "class=partial" : "");
+                        string fontWeight = (question.AssignmentQuestionId == Model.CurrentAssignmentQuestionId ? "bold" : "normal");
+                        <input @id readonly="readonly" onclick="return false;" type="checkbox" @check @partial style="vertical-align: middle"/>
+                        @Html.ActionLink(
+                            question.AssignmentQuestionName, 
+                            "Solve", 
+                            new { id = question.AssignmentQuestionId, userId = linkUserId }, 
+                            new { style=$"font-weight: {fontWeight}; vertical-align: middle" })
+                        <br/>
+                    }
+                </div>
+            </div>
+        </td>
+        <td>
+            @if (Model.NextAssignmentQuestionId.HasValue)
+            {
+                @Html.ActionLink(
+                    "Next",
+                    "Solve",
+                    new
+                    {
+                        id = Model.NextAssignmentQuestionId.Value,
+                        userId = linkUserId
+                    })
+            }
+        </td>
+    </tr>
+    </tbody>
+</table>
+<script>
+    $(".partial").prop("indeterminate", true);
+</script>
+

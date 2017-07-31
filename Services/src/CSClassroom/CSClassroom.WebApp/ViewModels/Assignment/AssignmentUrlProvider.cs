@@ -73,34 +73,30 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		/// <summary>
 		/// Returns the URL of the question.
 		/// </summary>
-		public string GetQuestionUrl(StudentQuestionResult result)
+		public string GetQuestionUrl(
+			int assignmentId, 
+			int questionId, 
+			int userId)
 		{
 			object routeValues = _admin
 				? (object)new
 					{
-						assignmentId = result.AssignmentId,
-						id = result.QuestionId,
-						userId = result.UserId
+						assignmentId = assignmentId,
+						id = questionId,
+						userId = userId
 					}
 				: (object)new
 					{
-						assignmentId = result.AssignmentId,
-						id = result.QuestionId
+						assignmentId = assignmentId,
+						id = questionId
 					};
 
-			if (result.CombinedSubmissions)
-			{
-				return null;
-			}
-			else
-			{
-				return _urlHelper.Action
-				(
-					"Solve",
-					"AssignmentQuestion",
-					routeValues
-				);
-			}
+			return _urlHelper.Action
+			(
+				"Solve",
+				"AssignmentQuestion",
+				routeValues
+			);
 		}
 
 		/// <summary>

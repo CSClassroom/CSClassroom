@@ -48,12 +48,15 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 			IAssignmentUrlProvider urlProvider,
 			ITimeZoneProvider timeZoneProvider)
 		{
-			var url = urlProvider.GetQuestionUrl(questionResult);
 			var name = questionResult.QuestionName;
 
-			QuestionName = url != null 
-				? GetLink(url, name, preventWrapping: true)
-				: GetColoredText("black", name, bold: false, preventWrapping: true);
+			QuestionName = GetColoredText
+			(
+				"black", 
+				name, 
+				bold: false, 
+				preventWrapping: true
+			);
 			
 			ScoreText = GetColoredText
 			(

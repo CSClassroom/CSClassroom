@@ -51,7 +51,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 			);
 
 			var resolvedQuestion = new MethodQuestion();
-			var unsolvedPrereqsRetriever = GetMockUnsolvedPrereqRetriever(store);
+			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever(store);
 			var resolverFactory = GetMockQuestionResolverFactory
 			(
 				store, 
@@ -61,7 +61,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
-				unsolvedPrereqsRetriever: unsolvedPrereqsRetriever
+				assignmentProgressRetriever: assignmentProgressRetriever
 			);
 
 			var result = await questionSolver.GetQuestionToSolveAsync
@@ -89,13 +89,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 			bool isInteractive)
 		{
 			var store = GetUserQuestionDataStore(interactive: isInteractive);
-			var unsolvedPrereqsRetriever = GetMockUnsolvedPrereqRetriever(store);
+			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever(store);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
 
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
-				unsolvedPrereqsRetriever: unsolvedPrereqsRetriever
+				assignmentProgressRetriever: assignmentProgressRetriever
 			);
 
 			var result = await questionSolver.GetQuestionToSolveAsync
@@ -120,13 +120,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 		{
 			var expectedSeed = generated ? 1 : (int?)null;
 			var store = GetUserQuestionDataStore(generated: generated, seed: 1);
-			var unsolvedPrereqsRetriever = GetMockUnsolvedPrereqRetriever(store);
+			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever(store);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
 
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
-				unsolvedPrereqsRetriever: unsolvedPrereqsRetriever
+				assignmentProgressRetriever: assignmentProgressRetriever
 			);
 
 			var result = await questionSolver.GetQuestionToSolveAsync
@@ -139,25 +139,32 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 		}
 
 		/// <summary>
-		/// Ensures that any unsolved prerequisites are returned when
-		/// GetQuestionToSolveAsync is called.
+		/// Ensures that the assignment progress is returned when
+		/// GetQuestionToSolveAsync is called for an assignment that
+		/// does not have combined submissions.
 		/// </summary>
 		[Fact]
-		public async Task GetQuestionToSolveAsync_ReturnsUnsolvedPrereqs()
+		public async Task GetQuestionToSolveAsync_SeparateSubmissions_ReturnsAssignmentProgress()
 		{
-			var expectedUnsolvedPrereqs = new List<AssignmentQuestion>();
-			var store = GetUserQuestionDataStore();
+			var store = GetUserQuestionDataStore(interactive: true);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
-			var unsolvedPrereqsRetriever = GetMockUnsolvedPrereqRetriever
+			var assignmentProgress = new AssignmentProgress
+			(
+				userId: 0,
+				currentAssignmentQuestionId: 0,
+				questions: null
+			);
+
+			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever
 			(
 				store, 
-				expectedUnsolvedPrereqs
+				assignmentProgress
 			);
 
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
-				unsolvedPrereqsRetriever: unsolvedPrereqsRetriever
+				assignmentProgressRetriever: assignmentProgressRetriever
 			);
 
 			var result = await questionSolver.GetQuestionToSolveAsync
@@ -166,7 +173,31 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 				assignmentQuestionId: 1
 			);
 
-			Assert.Equal(expectedUnsolvedPrereqs, result.UnsolvedPrerequisites);
+			Assert.Equal(assignmentProgress, result.AssignmentProgress);
+		}
+
+		/// <summary>
+		/// Ensures that the assignment progress is not returned when
+		/// GetQuestionToSolveAsync is called for an assignment that
+		/// has combined submissions.
+		/// </summary>
+		[Fact]
+		public async Task GetQuestionToSolveAsync_CombinedSubmissions_NoAssignmentProgress()
+		{
+			var store = GetUserQuestionDataStore(interactive: false);
+			var resolverFactory = GetMockQuestionResolverFactory(store);
+			var questionSolver = GetQuestionSolver
+			(
+				questionResolverFactory: resolverFactory
+			);
+
+			var result = await questionSolver.GetQuestionToSolveAsync
+			(
+				store,
+				assignmentQuestionId: 1
+			);
+
+			Assert.Null(result.AssignmentProgress);
 		}
 
 		/// <summary>
@@ -186,13 +217,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 
 			var store = GetUserQuestionDataStore(lastSubmission: "LastSubmission");
 			var serializer = GetMockJsonSerializer("LastSubmission", lastSubmission);
-			var unsolvedPrereqsRetriever = GetMockUnsolvedPrereqRetriever(store);
+			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever(store);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
 
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
-				unsolvedPrereqsRetriever: unsolvedPrereqsRetriever,
+				assignmentProgressRetriever: assignmentProgressRetriever,
 				jsonSerializer: serializer
 			);
 
@@ -238,13 +269,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 				pastSubmissions: GetPastSubmissions(actualPastSubmissions)
 			);
 			
-			var unsolvedPrereqsRetriever = GetMockUnsolvedPrereqRetriever(store);
+			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever(store);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
 
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
-				unsolvedPrereqsRetriever: unsolvedPrereqsRetriever
+				assignmentProgressRetriever: assignmentProgressRetriever
 			);
 
 			var result = await questionSolver.GetQuestionToSolveAsync
@@ -538,7 +569,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 			Assert.Equal(1, result.QuestionSubmitted.NumAttemptsRemaining);
 			Assert.Equal(1, result.QuestionSubmitted.PastSubmissions.Count);
 			Assert.Equal(SubmissionDate, result.QuestionSubmitted.PastSubmissions[0]);
-			Assert.Equal(null, result.QuestionSubmitted.UnsolvedPrerequisites);
+			Assert.Equal(null, result.QuestionSubmitted.AssignmentProgress);
 			Assert.Equal(questionResult, result.QuestionResult);
 			Assert.Equal(1.0, result.QuestionPoints);
 			Assert.Equal(SubmissionDate, result.SubmissionDate);
@@ -698,33 +729,31 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 		}
 
 		/// <summary>
-		/// Returns a mock UnsolvedPrereqRetriever.
+		/// Returns a mock assignment progress retriever.
 		/// </summary>
-		private IUnsolvedPrereqsRetriever GetMockUnsolvedPrereqRetriever(
+		private IAssignmentProgressRetriever GetMockAssignmentProgressRetriever(
 			UserQuestionDataStore store,
-			IList<AssignmentQuestion> unsolvedPrereqs = null)
+			AssignmentProgress assignmentProgress = null)
 		{
-			var unsolvedPrereqRetriever = new Mock<IUnsolvedPrereqsRetriever>();
+			var assignmentProgressRetriever = new Mock<IAssignmentProgressRetriever>();
 
-			if (unsolvedPrereqs != null)
-			{
-				var userQuestionData = store.GetUserQuestionData
+			var uqd = store.GetUserQuestionData
+			(
+				store.GetLoadedAssignmentQuestionIds()[0]
+			);
+
+			assignmentProgressRetriever
+				.Setup
 				(
-					store.GetLoadedAssignmentQuestionIds()[0]
-				);
+					m => m.GetAssignmentProgressAsync
+					(
+						uqd.AssignmentQuestion.AssignmentId,
+						uqd.AssignmentQuestionId,
+						uqd.UserId
+					)
+				).ReturnsAsync(assignmentProgress);
 
-				unsolvedPrereqRetriever
-					.Setup(m => m.GetUnsolvedPrereqsAsync(userQuestionData))
-					.ReturnsAsync(unsolvedPrereqs);
-			}
-			else
-			{
-				unsolvedPrereqRetriever
-					.Setup(m => m.GetUnsolvedPrereqsAsync(It.IsAny<UserQuestionData>()))
-					.ReturnsAsync(new List<AssignmentQuestion>());
-			}
-
-			return unsolvedPrereqRetriever.Object;
+			return assignmentProgressRetriever.Object;
 		}
 
 		/// <summary>
@@ -803,7 +832,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 			IQuestionResolverFactory questionResolverFactory = null,
 			IQuestionGraderFactory questionGraderFactory = null,
 			IQuestionScoreCalculator questionScoreCalculator = null,
-			IUnsolvedPrereqsRetriever unsolvedPrereqsRetriever = null,
+			IAssignmentProgressRetriever assignmentProgressRetriever = null,
 			IJsonSerializer jsonSerializer = null)
 		{
 			return new QuestionSolver
@@ -811,7 +840,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions.QuestionSolving
 				questionResolverFactory,
 				questionGraderFactory,
 				questionScoreCalculator,
-				unsolvedPrereqsRetriever,
+				assignmentProgressRetriever,
 				jsonSerializer
 			);
 		}

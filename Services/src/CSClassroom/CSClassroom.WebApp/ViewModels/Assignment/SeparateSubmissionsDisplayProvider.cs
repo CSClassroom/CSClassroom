@@ -32,12 +32,16 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Assignment
 		}
 
 		/// <summary>
-		/// Returns the URL to link to for this assignment
-		/// (or null if no such URL should be linked to).
+		/// Returns the URL to link to for this assignment.
 		/// </summary>
 		public override string GetAssignmentUrl()
 		{
-			return null;
+			return AssignmentUrlProvider.GetQuestionUrl
+			(
+				_result.AssignmentId,
+				_result.QuestionResults.First().QuestionId,
+				_result.UserId
+			);
 		}
 
 		/// <summary>

@@ -68,10 +68,9 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 		public IList<DateTime> PastSubmissions { get; }
 
 		/// <summary>
-		/// The list of unsolved pre-requisite question IDs that must be solved
-		/// before this question, if any.
+		/// The progress for questions in this assignment.
 		/// </summary>
-		public IList<AssignmentQuestion> UnsolvedPrerequisites { get; }
+		public AssignmentProgress AssignmentProgress { get; }
 
 		/// <summary>
 		/// Constructor.
@@ -87,7 +86,7 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 			int numAttempts,
 			int? numAttemptsRemaining,
 			IList<DateTime> pastSubmissions,
-			IList<AssignmentQuestion> unsolvedPrerequisites)
+			AssignmentProgress assignmentProgress)
 		{
 			AssignmentQuestionId = assignmentQuestionId;
 			Name = name;
@@ -99,7 +98,7 @@ namespace CSC.CSClassroom.Model.Questions.ServiceResults
 			NumAttempts = numAttempts;
 			NumAttemptsRemaining = numAttemptsRemaining;
 			PastSubmissions = pastSubmissions;
-			UnsolvedPrerequisites = unsolvedPrerequisites;
+			AssignmentProgress = assignmentProgress;
 		}
 	}
 }

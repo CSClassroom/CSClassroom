@@ -18,8 +18,8 @@
     <br />
 }
 
-<h2>@Model.Name</h2>
-<h4>@Assignment.Name</h4>
+<h2>@Assignment.Name</h2>
+<h4>@Model.Name</h4>
 @if (!Model.Interactive && Assignment.MaxAttempts.HasValue && Assignment.MaxAttempts.Value > 0 && Model.AnyAttemptsRemaining)
 {
     <h5 style="color: blue">Attempt @(Model.NumAttempts + 1) / @Assignment.MaxAttempts</h5>
@@ -34,14 +34,17 @@
 {
     <span>You have made the maximum number of submissions for this question.</span>
 }
-else if (Model.UnsolvedPrerequisites?.Any() ?? false)
+else if (Assignment.AnswerInOrder && Model.AssignmentProgress.GetUnsolvedPriorQuestions().Any())
 {
     <span>You must solve the following questions before working on this question:</span>
     <ul>
-        @foreach (var unsolvedPrereq in Model.UnsolvedPrerequisites)
+        @foreach (var unsolvedPrereq in Model.AssignmentProgress.GetUnsolvedPriorQuestions())
         {
             <li>
-                @Html.ActionLink(unsolvedPrereq.Name, "Solve", new { id = unsolvedPrereq.Id })
+                @Html.ActionLink(
+                    unsolvedPrereq.AssignmentQuestionName,
+                    "Solve",
+                    new { id = unsolvedPrereq.AssignmentQuestionId })
             </li>
         }
     </ul>
@@ -92,6 +95,15 @@ else
                     if (!limitedAttempts || attemptsRemaining > 0) {
                         $("#submit").prop("disabled", false);
                     }
+                    var curQuestion = $("#currentQuestion");
+                    var isIndeterminate = curQuestion.prop("indeterminate");
+                    var isChecked = curQuestion.prop("checked");
+                    if (obj.score > 0.0 && obj.score < 1.0 && !isIndeterminate && !isChecked) {
+                        curQuestion.prop("indeterminate", true);
+                    } else if (obj.score >= 1.0) {
+                        curQuestion.prop("indeterminate", false);
+                        curQuestion.prop("checked", true);
+                    }
                     $("#progress").hide();
                 },
                 error: function(obj) {
@@ -100,8 +112,6 @@ else
                     $("#progress").hide();
                 }
             });
-
-            keepAuthenticatedSessionAlive();
         </script>
     }
     else
@@ -125,6 +135,13 @@ else
 {
     @Html.Partial("_PastSubmissions", Model.PastSubmissions)
 }
+
+<hr/>
+@Html.Partial("_AssignmentProgress", Model.AssignmentProgress)
+
+<script>
+    keepAuthenticatedSessionAlive();
+</script>
 
 @section Scripts {
     <environment names="Development">

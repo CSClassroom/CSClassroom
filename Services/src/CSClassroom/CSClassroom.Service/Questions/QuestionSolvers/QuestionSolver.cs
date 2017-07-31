@@ -37,9 +37,9 @@ namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
 		private readonly IQuestionScoreCalculator _questionScoreCalculator;
 
 		/// <summary>
-		/// Retrieve any unsolved prerequisite questions for a given question.
+		/// Retrieves the progress for a questions in an assignment.
 		/// </summary>
-		private readonly IUnsolvedPrereqsRetriever _unsolvedPrereqsRetriever;
+		private readonly IAssignmentProgressRetriever _assignmentProgressRetriever;
 
 		/// <summary>
 		/// The json serializer.
@@ -53,13 +53,13 @@ namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
 			IQuestionResolverFactory questionResolverFactory,
 			IQuestionGraderFactory questionGraderFactory,
 			IQuestionScoreCalculator questionScoreCalculator,
-			IUnsolvedPrereqsRetriever unsolvedPrereqsRetriever,
+			IAssignmentProgressRetriever assignmentProgressRetriever,
 			IJsonSerializer jsonSerializer)
 		{
 			_questionResolverFactory = questionResolverFactory;
 			_questionGraderFactory = questionGraderFactory;
 			_questionScoreCalculator = questionScoreCalculator;
-			_unsolvedPrereqsRetriever = unsolvedPrereqsRetriever;
+			_assignmentProgressRetriever = assignmentProgressRetriever;
 			_jsonSerializer = jsonSerializer;
 		}
 
@@ -73,9 +73,7 @@ namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
 			var userQuestionData = userQuestionDataStore
 				.GetUserQuestionData(assignmentQuestionId);
 
-			var unsolvedPrereqs = await _unsolvedPrereqsRetriever
-				.GetUnsolvedPrereqsAsync(userQuestionData);
-
+			var assignmentProgress = await GetAssignmentProgressAsync(userQuestionData);
 			var lastSubmission = GetLastQuestionAttempt(userQuestionData);
 			var seed = GetSeedToDisplay(userQuestionData);
 			var pastSubmissions = GetPastSubmissions(userQuestionData);
@@ -93,7 +91,7 @@ namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
 				userQuestionData.NumAttempts,
 				userQuestionData.NumAttemptsRemaining,
 				pastSubmissions,
-				unsolvedPrereqs
+				assignmentProgress
 			);
 		}
 
@@ -161,6 +159,7 @@ namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
 				submission
 			);
 
+			var assignmentProgress = await GetAssignmentProgressAsync(userQuestionData);
 			var seed = GetSeedToDisplay(userQuestionData);
 			var pastSubmissions = GetPastSubmissions(userQuestionData);
 			var submissionContents = _jsonSerializer
@@ -186,7 +185,7 @@ namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
 					submission.UserQuestionData.NumAttempts,
 					userQuestionData.NumAttemptsRemaining,
 					pastSubmissions,
-					unsolvedPrerequisites: null
+					assignmentProgress
 				),
 				scoredQuestionResult.Result,
 				GetSubmissionScore(submission, dueDate, withLateness: false),
@@ -264,6 +263,27 @@ namespace CSC.CSClassroom.Service.Questions.QuestionSolvers
 			return await _questionResolverFactory
 				.CreateQuestionResolver(userQuestionData)
 				.ResolveSolvedQuestionAsync(userQuestionSubmission);
+		}
+		
+		/// <summary>
+		/// Returns the progress for the assignment, for assignments that do
+		/// not support combined submissions. (For assignments with combined
+		/// submissions, progress information is redundant.)
+		/// </summary>
+		private async Task<AssignmentProgress> GetAssignmentProgressAsync(
+			UserQuestionData userQuestionData)
+		{
+			if (userQuestionData.AssignmentQuestion.Assignment.CombinedSubmissions)
+			{
+				return null;
+			}
+
+			return await _assignmentProgressRetriever.GetAssignmentProgressAsync
+			(
+				userQuestionData.AssignmentQuestion.AssignmentId,
+				userQuestionData.AssignmentQuestionId,
+				userQuestionData.UserId
+			);
 		}
 
 		/// <summary>

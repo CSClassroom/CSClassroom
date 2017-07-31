@@ -563,7 +563,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Questions
 				numAttempts: 0,
 				numAttemptsRemaining: remaining,
 				pastSubmissions: null,
-				unsolvedPrerequisites: null
+				assignmentProgress: null
 			);
 		}
 

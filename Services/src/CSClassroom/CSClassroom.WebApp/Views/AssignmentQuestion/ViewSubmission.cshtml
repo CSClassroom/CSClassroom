@@ -10,15 +10,15 @@
 @model CSC.CSClassroom.Model.Questions.ServiceResults.SubmissionResult
 
 <style>
-    thead {
+    .table thead {
         border: lightgray 1px solid;
     }
 
-    tbody {
+    .table tbody {
         border: lightgray 1px solid;
     }
 
-    td {
+    .table td {
         border: lightgray 1px solid;
     }
 </style>
@@ -33,8 +33,8 @@
     <br />
 }
 
-<h2>@Model.QuestionSubmitted.Name</h2>
-<h4>@Assignment.Name</h4>
+<h2>@Assignment.Name</h2>
+<h4>@Model.QuestionSubmitted.Name</h4>
 <h5 style="color: blue">Submitted on @Model.SubmissionDate.FormatLongDateTime(TimeZoneProvider)</h5>
 
 @if (ClassroomRole >= ClassroomRole.Admin)
@@ -61,6 +61,9 @@
 {
     @Html.Partial("_PastSubmissions", Model.QuestionSubmitted.PastSubmissions)
 }
+
+<hr />
+@Html.Partial("_AssignmentProgress", Model.QuestionSubmitted.AssignmentProgress)
 
 @section Scripts {
     <environment names="Development">

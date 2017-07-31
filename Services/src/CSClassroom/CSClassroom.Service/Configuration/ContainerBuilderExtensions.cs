@@ -127,6 +127,7 @@ namespace CSC.CSClassroom.Service.Configuration
 		private static void RegisterQuestionComponents(ContainerBuilder builder)
 		{
 			builder.RegisterType<AssignmentDueDateRetriever>().As<IAssignmentDueDateRetriever>();
+			builder.RegisterType<AssignmentProgressRetriever>().As<IAssignmentProgressRetriever>();
 			builder.RegisterType<GeneratedQuestionSeedGenerator>().As<IGeneratedQuestionSeedGenerator>();
 			builder.RegisterType<JavaCodeGenerationFactory>().As<IJavaCodeGenerationFactory>();
 			builder.RegisterType<QuestionDuplicatorFactory>().As<IQuestionDuplicatorFactory>();
@@ -137,7 +138,6 @@ namespace CSC.CSClassroom.Service.Configuration
 			builder.RegisterType<QuestionResolverFactory>().As<IQuestionResolverFactory>();
 			builder.RegisterType<QuestionSolver>().As<IQuestionSolver>();
 			builder.RegisterType<QuestionUpdaterFactory>().As<IQuestionUpdaterFactory>();
-			builder.RegisterType<UnsolvedPrereqsRetriever>().As<IUnsolvedPrereqsRetriever>();
 			builder.RegisterType<RandomlySelectedQuestionSelector>().As<IRandomlySelectedQuestionSelector>();
 			builder.RegisterType<UserQuestionDataLoaderFactory>().As<IUserQuestionDataLoaderFactory>();
 			builder.RegisterType<UserQuestionDataUpdaterFactory>().As<IUserQuestionDataUpdaterFactory>();
