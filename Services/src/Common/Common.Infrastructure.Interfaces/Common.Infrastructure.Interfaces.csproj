@@ -10,7 +10,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <RootNamespace>CSC.Common.Infrastructure.Interfaces</RootNamespace>
+    <RootNamespace>CSC.Common.Infrastructure</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

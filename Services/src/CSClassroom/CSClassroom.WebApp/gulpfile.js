@@ -27,15 +27,15 @@ gulp.task("createCssBundles", function () {
     return getBundleTasks(bundles.cssBundles, cssmin);
 });
 
-gulp.task("copyImages", function () {
-    return merge(bundles.imageBundles.map(function (bundle) {
+gulp.task("copyFiles", function () {
+    return merge(bundles.filesToCopy.map(function (bundle) {
         return gulp.src(bundle.inputFiles)
             .pipe(changed(bundle.targetFolder))
             .pipe(gulp.dest(bundle.targetFolder));
     }));
 });
 
-gulp.task("default", ["createJsBundles", "createCssBundles", "copyImages"]);
+gulp.task("default", ["createJsBundles", "createCssBundles", "copyFiles"]);
 
 gulp.task("clean", function () {
     return del("./wwwroot");

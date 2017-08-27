@@ -1,0 +1,40 @@
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@model Announcement
+@inject ITimeZoneProvider TimeZoneProvider
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h2>Are you sure you want to delete this announcement?</h2>
+
+<div>
+
+    <div class="panel-group" style="max-width: 700px">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <span class="panel-title">@Model.Title</span>
+            </div>
+            <div class="panel-body" style="padding-bottom: 2px; padding-top: 10px">
+                @Html.Raw(Model.Contents)
+                <hr style="line-height: 5px; margin-bottom: 2px; margin-top: 10px" />
+                <span style="font-size: x-small; font-weight: bold">Posted by @Model.User.PubliclyDisplayedName on @Model.DatePosted.FormatLongDateTime(TimeZoneProvider)</span>
+                @if (Classroom.Sections.Count > 0)
+                {
+                    var sections = Model.Sections.Select(s => s.Section.Name).OrderBy(n => n).ToList();
+                    <br />
+                    <span style="font-size: x-small; font-weight: bold">Sections: @string.Join("  |  ", sections)</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Delete">
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            <a asp-action="Index">Back to List</a>
+        </div>
+    </form>
+
+</div>

@@ -39,6 +39,12 @@ namespace CSC.CSClassroom.Model.Users
 		public string LastName { get; set; }
 
 		/// <summary>
+		/// The name shown to the public when posting.
+		/// </summary>
+		[Display(Name = "Publicly Displayed Name")]
+		public string PublicName { get; set; }
+
+		/// <summary>
 		/// The contact e-mail address for the user.
 		/// </summary>
 		[Display(Name = "E-mail Address")]
@@ -81,5 +87,11 @@ namespace CSC.CSClassroom.Model.Users
 		public bool IsActivated =>
 			   EmailAddressConfirmed
 			&& (ClassroomMemberships?.All(m => m.InGitHubOrganization) ?? true);
+
+		/// <summary>
+		/// Returns the user's publicly displayed name if present,
+		/// or the user's first and last name if not.
+		/// </summary>
+		public string PubliclyDisplayedName => PublicName ?? $"{FirstName} {LastName}";
 	}
 }

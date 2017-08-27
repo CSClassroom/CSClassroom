@@ -61,6 +61,10 @@
                 {
                     @:initData: @Html.Raw(Model.InitData.ToString()),
                 }
+                @if (Model.HideButtons != null)
+                {
+                    @:hideButtons: @Html.Raw(Model.HideButtons.ToString()),
+                }
                 @if (Model.SubPanelConfig != null)
                 {
                     @:useSubPanel: true,

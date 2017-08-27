@@ -1,10 +1,10 @@
-﻿@model Classroom
+﻿@model PagingList<Announcement>
 
 @{
-    ViewData["Title"] = $"{Model.DisplayName}";
+    ViewData["Title"] = $"{ViewBag.Classroom.DisplayName}";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-<span>Welcome to @Model.DisplayName! Click a button in the navigation bar above to get started.</span>
+@Html.Partial("~/Views/Announcement/Index.cshtml", Model)
 

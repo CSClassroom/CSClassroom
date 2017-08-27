@@ -169,6 +169,11 @@ namespace CSC.CSClassroom.Service.Identity
 				existingUser.GitHubLogin = user.GitHubLogin;
 			}
 
+			if (user.PublicName != existingUser.PublicName)
+			{
+				existingUser.PublicName = user.PublicName;
+			}
+
 			if (user.EmailAddress != existingUser.EmailAddress)
 			{
 				existingUser.EmailAddress = user.EmailAddress;
@@ -586,9 +591,14 @@ namespace CSC.CSClassroom.Service.Identity
 
 			await _emailProvider.SendMessageAsync
 			(
-				user.EmailAddress,
-				"no-reply@buildci318.com",
-				"CS Classroom",
+				new List<EmailRecipient>()
+				{
+					new EmailRecipient
+					(
+						$"{user.FirstName} {user.LastName}",
+						user.EmailAddress
+					)
+				},
 				"Confirm your e-mail address with CS Classroom",
 				$"Hi {user.FirstName},<br><br>Thank you for registering for CS Classroom. Please <a href=\"{confirmUrl}\">click here</a> to confirm your e-mail address."
 			);

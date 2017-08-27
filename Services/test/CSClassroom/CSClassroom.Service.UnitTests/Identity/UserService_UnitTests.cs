@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Email;
 using CSC.Common.Infrastructure.GitHub;
@@ -419,9 +420,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			(
 				ep => ep.SendMessageAsync
 				(
-					"NewEmailAddress",
-					It.IsAny<string>(),
-					It.IsAny<string>(),
+					It.Is<IList<EmailRecipient>>
+					(
+						to => to.Count == 1 && to[0].EmailAddress == "NewEmailAddress"
+					),
 					It.IsAny<string>(),
 					It.IsAny<string>()
 				),
@@ -472,14 +474,52 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			(
 				ep => ep.SendMessageAsync
 				(
-					"User1Email",
-					It.IsAny<string>(),
-					It.IsAny<string>(),
+					It.Is<IList<EmailRecipient>>
+					(
+						to => to.Count == 1 && to[0].EmailAddress == "User1Email"
+					),
 					It.IsAny<string>(),
 					It.IsAny<string>()
 				),
 				Times.Never
 			);
+		}
+
+		/// <summary>
+		/// Ensures that UpdateUserAsync will update the user's public name if it 
+		/// has changed.
+		/// </summary>
+		[Fact]
+		public async Task UpdateUserAsync_PublicNameUpdated_ChangeSaved()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddSection("Class1", "Section1")
+				.AddStudent("User1", "LastName", "FirstName", "Class1", "Section1")
+				.Build();
+
+			var user = database.Context.Users.Single();
+			user.EmailAddressConfirmed = true;
+			database.Context.SaveChanges();
+			database.Reload();
+
+			user.PublicName = "NewPublicName";
+
+			var modelErrors = new MockErrorCollection();
+			var userService = GetUserService(database.Context);
+
+			var result = await userService.UpdateUserAsync
+			(
+				user,
+				"ConfirmationUrlBuilder",
+				modelErrors
+			);
+
+			database.Reload();
+			user = database.Context.Users.Single();
+
+			Assert.True(result);
+			Assert.Equal(user.PubliclyDisplayedName, "NewPublicName");
 		}
 
 		/// <summary>
@@ -1032,9 +1072,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			(
 				ep => ep.SendMessageAsync
 				(
-					"EmailAddress",
-					It.IsAny<string>(),
-					It.IsAny<string>(),
+					It.Is<IList<EmailRecipient>>
+					(
+						to => to.Count == 1 && to[0].EmailAddress == "EmailAddress"
+					),
 					It.IsAny<string>(),
 					It.IsAny<string>()
 				),
@@ -1387,9 +1428,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			(
 				ep => ep.SendMessageAsync
 				(
-					"User1Email",
-					It.IsAny<string>(),
-					It.IsAny<string>(),
+					It.Is<IList<EmailRecipient>>
+					(
+						to => to.Count == 1 && to[0].EmailAddress == "User1Email"
+					),
 					It.IsAny<string>(),
 					It.IsAny<string>()
 				),
@@ -1949,9 +1991,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 				(
 					ep => ep.SendMessageAsync
 					(
-						emailAddress,
-						It.IsAny<string>(),
-						It.IsAny<string>(),
+						It.Is<IList<EmailRecipient>>
+						(
+							to => to.Count == 1 && to[0].EmailAddress == emailAddress
+						),
 						It.IsAny<string>(),
 						It.IsAny<string>()
 					)

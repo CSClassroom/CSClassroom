@@ -32,6 +32,10 @@ namespace CSC.CSClassroom.Service.Classrooms
 		public async Task<Section> GetSectionAsync(string classroomName, string sectionName)
 		{
 			var classroom = await LoadClassroomAsync(classroomName);
+			if (classroom == null)
+			{
+				return null;
+			}
 
 			return await _dbContext.Sections
 				.Where(section => section.ClassroomId == classroom.Id)

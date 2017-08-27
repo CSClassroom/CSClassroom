@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Communications;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Users;
 using Microsoft.EntityFrameworkCore;
@@ -234,6 +235,16 @@ namespace CSC.CSClassroom.Repository
 		public DbSet<SectionGradebook> SectionGradebooks { get; set; }
 
 		/// <summary>
+		/// The announcements table.
+		/// </summary>
+		public DbSet<Announcement> Announcements { get; set; }
+
+		/// <summary>
+		/// The announcement sections table.
+		/// </summary>
+		public DbSet<AnnouncementSection> AnnouncementSections { get; set; }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public DatabaseContext(DbContextOptions<DatabaseContext> options)
@@ -284,6 +295,7 @@ namespace CSC.CSClassroom.Repository
 			SetupIndex<ClassroomGradebook>(builder, g => new {g.ClassroomId, g.Name});
 			SetupIndex<SectionGradebook>(builder, g => new {g.ClassroomGradebookId, g.SectionId});
 			SetupIndex<CheckpointTestClass>(builder, tc => new {tc.CheckpointId, tc.TestClassId});
+			SetupIndex<Announcement>(builder, a => a.DatePosted);
 		}
 
 		/// <summary>

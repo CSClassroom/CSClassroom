@@ -399,7 +399,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				"Project1",
 				"Checkpoint2",
 				"Period1",
-				"FromEmail",
 				submission => "UrlMarkAsRead"
 			);
 
@@ -429,7 +428,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				"Project1",
 				"Checkpoint1",
 				"Period1",
-				"FromEmail",
 				submission => "UrlMarkAsRead"
 			);
 
@@ -458,7 +456,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				"Project1",
 				"Checkpoint2",
 				"Period1",
-				"FromEmail",
 				submissionWithFeedback => "UrlMarkAsRead"
 			);
 
@@ -494,7 +491,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				"Project1",
 				"Checkpoint1",
 				"Period1",
-				"FromEmail",
 				submissionWithFeedback => "UrlMarkAsRead"
 			);
 
@@ -941,9 +937,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			{
 				return ep => ep.SendMessageAsync
 				(
-					"Student2Email",
-					"FromEmail",
-					"CS Classroom",
+					It.Is<IList<EmailRecipient>>
+					(
+						to => to.Count == 1 && to[0].EmailAddress == "Student2Email"
+					),
 					$"Project1 Checkpoint2 DisplayName Feedback",
 					It.Is<string>
 					(
@@ -957,9 +954,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			{
 				return ep => ep.SendMessageAsync
 				(
-					It.IsAny<string>(),
-					It.IsAny<string>(),
-					It.IsAny<string>(),
+					It.IsAny<IList<EmailRecipient>>(),
 					It.IsAny<string>(),
 					It.IsAny<string>()
 				);

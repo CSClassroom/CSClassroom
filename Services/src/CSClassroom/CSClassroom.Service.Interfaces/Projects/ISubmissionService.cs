@@ -86,7 +86,6 @@ namespace CSC.CSClassroom.Service.Projects
 			string projectName,
 			string checkpointName,
 			string sectionName,
-			string fromAddress,
 			Func<Submission, string> viewFeedbackUrlBuilder);
 
 		/// <summary>

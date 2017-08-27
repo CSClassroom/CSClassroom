@@ -101,3 +101,7 @@ tr.shown td.details-control {
     font-weight: bold;
     text-shadow: 1px 1px 0 #fff;
 }
+
+ul.pagination {
+    margin: 0px 0 !important
+}

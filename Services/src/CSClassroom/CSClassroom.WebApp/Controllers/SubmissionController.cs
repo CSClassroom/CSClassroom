@@ -38,11 +38,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		private readonly WebAppHost _webAppHost;
 
 		/// <summary>
-		/// The e-mail address of the web app.
-		/// </summary>
-		private readonly WebAppEmail _webAppEmail;
-
-		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public SubmissionController(
@@ -52,14 +47,12 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			ICheckpointService checkpointService,
 			ISubmissionService submissionService,
 			IUserService userService,
-			WebAppHost webAppHost,
-			WebAppEmail webAppEmail)
+			WebAppHost webAppHost)
 			: base(args, classroomService, projectService, checkpointService)
 		{
 			SubmissionService = submissionService;
 			UserService = userService;
 			_webAppHost = webAppHost;
-			_webAppEmail = webAppEmail;
 		}
 
 		/// <summary>
@@ -370,7 +363,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				ProjectName,
 				CheckpointName,
 				sectionName,
-				_webAppEmail.EmailAddress,
 				submission => $"{_webAppHost.HostName}" +
 					Url.Action
 					(

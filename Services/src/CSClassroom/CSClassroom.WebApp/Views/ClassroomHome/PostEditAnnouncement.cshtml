@@ -1,0 +1,111 @@
+@using CSC.CSClassroom.Model.Assignments
+@using CSC.CSClassroom.WebApp.ViewModels.Shared
+@model Announcement
+
+@{
+    ViewData["Title"] = $"{ViewBag.OperationType} Announcement";
+    var action = $"{ViewBag.OperationType}Announcement";
+}
+
+<h2>@ViewBag.OperationType Announcement</h2>
+
+<form asp-action="@action">
+    @if (Model != null && Model.Id > 0)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
+    <div class="form-horizontal">
+        <hr/>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="Title" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="Title" class="form-control"/>
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Contents" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Contents" class="form-control-static"></p>
+                <textarea id="contents" name="Contents">
+                    @if (Model != null)
+                    {
+                        @Html.Raw(Model.Contents)
+                    }
+                </textarea>
+                <span asp-validation-for="Contents" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Sections" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Sections" class="form-control-static"></p>
+                <table id="sections" class="equal-width"></table>
+                <span asp-validation-for="Sections" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="@ViewBag.OperationType" class="btn btn-default"/>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<script>
+// Initialize the app
+    initTinyMce(
+        '#contents',
+        {
+            setup: function(editor) {
+                editor.on('change',
+                    function() {
+                        editor.save();
+                    });
+            }
+        });
+
+</script>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <environment names="Development">
+        <script src="~/js/tinymceBundle.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/js/tinymceBundle.min.js" asp-append-version="true"></script>
+    </environment>
+}
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "sections",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Announcement.Sections)),
+        properties = new[]
+        {
+            nameof(AnnouncementSection.SectionId),
+        },
+        orderByProp = nameof(AnnouncementSection.SectionId),
+        startMinRows = 0,
+        textAreas = false,
+        hideButtons = new List<string>() { "removeLast", "insert", "moveUp", "moveDown", "rowDrag" },
+        dropDownLists = new List<DropDownList>()
+        {
+            new DropDownList
+            (
+                nameof(AnnouncementSection.SectionId),
+                Classroom.Sections.Cast<object>().ToList(),
+                (Func<object, DropDownListItem>)(section => new DropDownListItem(((Section)section).DisplayName, ((Section)section).Id))
+            )
+        }
+    })

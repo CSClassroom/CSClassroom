@@ -1,0 +1,70 @@
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@model PagingList<Announcement>
+@inject ITimeZoneProvider TimeZoneProvider
+@{
+    ViewData["Title"] = "Announcements";
+}
+
+@if (Model.Count == 0)
+{
+    <h2>AP Computer Science</h2>
+
+    <span>Welcome to AP Computer Science! Click a button in the navigation bar above to get started.</span>
+    <p></p>
+}
+else
+{
+    <h2>Announcements</h2>
+}
+@if (ClassroomRole >= ClassroomRole.Admin)
+{
+    @Html.ActionLink("Post an announcement", "PostAnnouncement")
+    <p></p>
+}
+
+<div class="panel-group" style="max-width: 700px">
+    @foreach (var announcement in Model)
+    {
+        var panelStyle = (announcement == Model.Last() ? "margin-bottom:0px" : "margin-bottom: 20px");
+        <div class="panel panel-primary" style="@panelStyle">
+            <div class="panel-heading">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <span class="panel-title">
+                            @announcement.Title
+                        </span>
+                    </div>
+                    @if (ClassroomRole >= ClassroomRole.Admin)
+                    {
+                        <div>
+                            <a href="@Url.Action("EditAnnouncement", new { announcementId = announcement.Id })" style="color: inherit; text-decoration: none;">
+                                <span class="glyphicon glyphicon-pencil panel-title" style="vertical-align: middle"></span>
+                            </a>
+                            &nbsp;
+                            <a href="@Url.Action("DeleteAnnouncement", new { announcementId = announcement.Id })" style="color: inherit; text-decoration: none;">
+                                <span class="glyphicon glyphicon-trash panel-title" style="vertical-align: middle"></span>
+                            </a>
+                        </div>
+                    }
+                </div>
+        
+            </div>
+            <div class="panel-body" style="padding-bottom: 3px; padding-top: 10px">
+                @Html.Raw(announcement.Contents)
+                <hr style="line-height: 5px; margin-bottom: 2px; margin-top: 10px"/>
+                <span style="font-size: x-small; font-weight: bold">Posted by @announcement.User.PubliclyDisplayedName on @announcement.DatePosted.FormatLongDateTime(TimeZoneProvider)</span>
+                @if (ClassroomRole >= ClassroomRole.Admin && Classroom.Sections.Count > 1)
+                {
+                    var sections = announcement.Sections.Select(s => s.Section.Name).OrderBy(n => n).ToList();
+                    <br />
+                    <span style="font-size: x-small; font-weight: bold">Sections: @string.Join("  |  ", sections)</span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<nav aria-label="Suppliers navigation example">
+    <vc:pager paging-list="@Model" />
+</nav>

@@ -40,6 +40,7 @@ namespace CSC.CSClassroom.WebApp.ViewComponents.Shared
 		/// <param name="hiddenValues">Hidden values that should be included with the properties.</param>
 		/// <param name="orderByProp">The property to order the rows by.</param>
 		/// <param name="textAreas">Whether to render the properties in multi-line text areas.</param>
+		/// <param name="hideButtons">The list of buttons to hide, if any.</param>
 		/// <param name="startMinRows">The minimum number of rows in the table to start with.</param>
 		/// <param name="defaultValues">The default values for each column, if any.</param>
 		/// <param name="dropDownLists">The drop down lists to use, if any.</param>
@@ -52,6 +53,7 @@ namespace CSC.CSClassroom.WebApp.ViewComponents.Shared
 			string orderByProp,
 			int startMinRows,
 			bool textAreas,
+			IList<string> hideButtons,
 			IDictionary<string, object> defaultValues,
 			IList<DropDownList> dropDownLists,
 			SubPanelConfig subPanelConfig)
@@ -84,6 +86,16 @@ namespace CSC.CSClassroom.WebApp.ViewComponents.Shared
 				initDataProperties
 			);
 
+			var hideButtonsObj = hideButtons == null
+				? null
+				: new JObject
+					(
+						hideButtons.Select
+						(
+							buttonName => new JProperty(buttonName, true)
+						)
+					);
+
 			return View
 			(
 				new DynamicTableConfig
@@ -93,7 +105,8 @@ namespace CSC.CSClassroom.WebApp.ViewComponents.Shared
 					columns, 
 					initData, 
 					startMinRows, 
-					textAreas, 
+					textAreas,
+					hideButtonsObj,
 					dropDownLists,
 					subPanelConfig
 				)

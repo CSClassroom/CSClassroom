@@ -18,6 +18,7 @@ using CSC.CSClassroom.Service.Assignments.QuestionUpdaters;
 using CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders;
 using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 using CSC.CSClassroom.Service.Assignments.Validators;
+using CSC.CSClassroom.Service.Communications;
 using Microsoft.Extensions.Configuration;
 
 namespace CSC.CSClassroom.Service.Configuration
@@ -38,6 +39,7 @@ namespace CSC.CSClassroom.Service.Configuration
 			RegisterClassroomComponents(builder);
 			RegisterAssignmentComponents(builder);
 			RegisterProjectComponents(builder);
+			RegisterCommunicationsComponents(builder);
 		}
 
 		/// <summary>
@@ -194,6 +196,31 @@ namespace CSC.CSClassroom.Service.Configuration
 			builder.RegisterType<SubmissionDownloader>().As<ISubmissionDownloader>();
 			builder.RegisterType<SubmissionArchiveBuilder>().As<ISubmissionArchiveBuilder>();
 			builder.RegisterType<SubmissionFileTransformer>().As<ISubmissionFileTransformer>();
+		}
+
+		/// <summary>
+		/// Registers components related to communications.
+		/// </summary>
+		private static void RegisterCommunicationsComponents(ContainerBuilder builder)
+		{
+			RegisterCommunicationServices(builder);
+			RegisterAnnouncementComponents(builder);
+		}
+
+		/// <summary>
+		/// Registers services related to communications.
+		/// </summary>
+		private static void RegisterCommunicationServices(ContainerBuilder builder)
+		{
+			builder.RegisterType<AnnouncementService>().As<IAnnouncementService>();
+		}
+
+		/// <summary>
+		/// Registers components related to announcements.
+		/// </summary>
+		private static void RegisterAnnouncementComponents(ContainerBuilder builder)
+		{
+			builder.RegisterType<AnnouncementValidator>().As<IAnnouncementValidator>();
 		}
 	}
 }

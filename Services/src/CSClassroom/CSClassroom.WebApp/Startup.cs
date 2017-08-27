@@ -28,6 +28,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using ReflectionIT.Mvc.Paging;
 using Serilog.Events;
 
 namespace CSC.CSClassroom.WebApp
@@ -85,12 +86,14 @@ namespace CSC.CSClassroom.WebApp
 			builder.RegisterCSClassroomService(GetSection("CSClassroom"));
 			builder.RegisterGitHubClients(GetSection("GitHub"));
 			builder.RegisterRemoteBuildService(GetSection("BuildService"));
-			builder.RegisterSendGridMailProvider(GetSection("SendGrid"));
+			builder.RegisterSendGridMailProvider(GetSection("SendGrid"), GetSection("CSClassroom"));
 			builder.RegisterJobQueueClient();
+			builder.RegisterSecurity();
 			builder.RegisterSystem();
 			builder.RegisterOperationRunner();
 			services.AddCSClassroomDatabase(DatabaseConnectionString);
 			services.AddHangfireQueue(DatabaseConnectionString, _loggerFactory);
+			services.AddPaging();
 
 			builder.Populate(services);
 			_container = builder.Build();

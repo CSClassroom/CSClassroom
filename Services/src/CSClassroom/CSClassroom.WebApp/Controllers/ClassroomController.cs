@@ -2,12 +2,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CSC.CSClassroom.Model.Classrooms;
+using CSC.CSClassroom.Model.Communications;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Classrooms;
+using CSC.CSClassroom.Service.Communications;
 using CSC.CSClassroom.Service.Identity;
 using CSC.CSClassroom.WebApp.Filters;
 using CSC.CSClassroom.WebApp.ViewModels.Shared;
 using Microsoft.AspNetCore.Mvc;
+using ReflectionIT.Mvc.Paging;
 
 namespace CSC.CSClassroom.WebApp.Controllers
 {
@@ -26,17 +29,25 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// </summary>
 		private IUserService UserService { get; }
 
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		public ClassroomController(
+	    /// <summary>
+	    /// The classroom service.
+	    /// </summary>
+	    private IAnnouncementService AnnouncementService { get; }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public ClassroomController(
 			BaseControllerArgs args, 
 			IClassroomService classroomService,
-			IUserService userService) 
+			IUserService userService,
+            IAnnouncementService announcementService) 
 				: base(args)
 		{
 			ClassroomService = classroomService;
 			UserService = userService;
+		    AnnouncementService = announcementService;
+
 		}
 
 		/// <summary>
@@ -49,36 +60,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			var classrooms = await ClassroomService.GetClassroomsAsync();
 
 			return View(classrooms);
-		}
-
-		/// <summary>
-		/// The home page for a given classroom.
-		/// </summary>
-		[Route("Classes/{className}")]
-		[Authorization(RequiredAccess.Registered)]
-		public async Task<IActionResult> Home(string className)
-		{
-			var classroom = await ClassroomService.GetClassroomAsync(className);
-
-			if (classroom == null)
-			{
-				return NotFound();
-			}
-
-			var membership = User.ClassroomMemberships
-				.SingleOrDefault(cm => cm.Classroom == classroom);
-
-			if (membership == null && !User.SuperUser)
-			{
-				return Forbid();
-			}
-
-			ViewBag.Classroom = classroom;
-			ViewBag.ClassroomRole = User.SuperUser
-				? ClassroomRole.Admin
-				: membership?.Role ?? ClassroomRole.Admin;
-
-			return View(classroom);
 		}
 
 		/// <summary>

@@ -48,13 +48,8 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[Route("SignedOut")]
 		public IActionResult SignedOut()
 		{
-			if (HttpContext.User.Identity.IsAuthenticated)
-			{
-				// Redirect to home page if the user is authenticated.
-				return RedirectToAction(nameof(HomeController.Index), "Home");
-			}
-
-			return View();
+			// Redirect to home page.
+			return RedirectToAction(nameof(HomeController.Index), "Home");
 		}
 
 		/// <summary>

@@ -398,7 +398,6 @@ namespace CSC.CSClassroom.Service.Projects
 			string projectName,
 			string checkpointName,
 			string sectionName,
-			string fromAddress,
 			Func<Submission, string> viewFeedbackUrlBuilder)
 		{
 			var section = await LoadSectionAsync(classroomName, sectionName);
@@ -443,7 +442,7 @@ namespace CSC.CSClassroom.Service.Projects
 
 			var tasks = submissionsWithFeedback.Select
 			(
-				swf => SendSubmissionFeedbackAsync(swf, fromAddress, viewFeedbackUrlBuilder)
+				swf => SendSubmissionFeedbackAsync(swf, viewFeedbackUrlBuilder)
 			).ToList();
 
 			await Task.WhenAll(tasks);
@@ -649,16 +648,14 @@ namespace CSC.CSClassroom.Service.Projects
 		/// </summary>
 		private async Task<Tuple<Submission, bool>> SendSubmissionFeedbackAsync(
 			Submission submission,
-			string fromAddress,
 			Func<Submission, string> markReadUrlBuilder)
 		{
+			var user = submission.Commit.User;
 			try
 			{
 				await _emailProvider.SendMessageAsync
 				(
-					submission.Commit.User.EmailAddress,
-					fromAddress,
-					"CS Classroom",
+					new List<EmailRecipient>() { new EmailRecipient($"{user.FirstName} {user.LastName}", user.EmailAddress) },
 					$"{submission.Checkpoint.Project.Name} {submission.Checkpoint.DisplayName} Feedback",
 					$"{submission.Feedback.Replace("\n", "<br>")}<br><br><a href=\"{markReadUrlBuilder(submission)}\">Click here</a> to mark this feedback as read."
 				);

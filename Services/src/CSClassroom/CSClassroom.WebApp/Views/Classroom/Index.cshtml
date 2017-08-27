@@ -37,7 +37,7 @@
                 @Html.DisplayFor(modelItem => item.IsActive)
             </td>
             <td>
-                <a asp-action="Home" asp-route-className="@item.Name">Home</a> |
+                <a asp-action="Index" asp-controller="ClassroomHome" asp-route-className="@item.Name">Home</a> |
                 <a asp-action="Admins" asp-controller="Admin" asp-route-className="@item.Name">Admins</a> |
                 <a asp-action="Edit" asp-route-className="@item.Name">Edit</a> |
                 <a asp-action="Archive" asp-route-className="@item.Name">Archive</a> |

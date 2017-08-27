@@ -5,6 +5,7 @@ using CSC.Common.Infrastructure.Async;
 using CSC.Common.Infrastructure.Email;
 using CSC.Common.Infrastructure.GitHub;
 using CSC.Common.Infrastructure.Queue;
+using CSC.Common.Infrastructure.Security;
 using CSC.Common.Infrastructure.Serialization;
 using CSC.Common.Infrastructure.System;
 using Microsoft.Extensions.Configuration;
@@ -56,19 +57,35 @@ namespace CSC.Common.Infrastructure.Configuration
 		}
 
 		/// <summary>
+		/// Registers security-related dependencies.
+		/// </summary>
+		public static void RegisterSecurity(this ContainerBuilder builder)
+		{
+			builder.RegisterType<HtmlSanitizer>().As<IHtmlSanitizer>().InstancePerLifetimeScope();
+		}
+
+		/// <summary>
 		/// Registers dependencies for interacting with GitHub.
 		/// </summary>
-		public static void RegisterSendGridMailProvider(this ContainerBuilder builder, IConfigurationSection sendGridSettings)
+		public static void RegisterSendGridMailProvider(
+			this ContainerBuilder builder, 
+			IConfigurationSection sendGridSettings,
+			IConfigurationSection csClassroomSettings)
 		{
-			builder.RegisterInstance(CreateSendGridMailProvider(sendGridSettings)).As<IEmailProvider>();
+			builder.RegisterInstance
+			(
+				CreateSendGridMailProvider(sendGridSettings, csClassroomSettings)
+			).As<IEmailProvider>();
 		}
 
 		/// <summary>
 		/// Creates a new SendGrid mail provider.
 		/// </summary>
-		private static IEmailProvider CreateSendGridMailProvider(IConfigurationSection sendGridSettings)
+		private static IEmailProvider CreateSendGridMailProvider(
+			IConfigurationSection sendGridSettings,
+			IConfigurationSection csClassroomSettings)
 		{
-			return new SendGridEmailProvider(sendGridSettings?["ApiKey"]);
+			return new SendGridEmailProvider(sendGridSettings?["ApiKey"], csClassroomSettings["EmailAddress"]);
 		}
 
 		/// <summary>

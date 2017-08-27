@@ -30,9 +30,16 @@
             </div>
         </div>
         <div class="form-group">
+            <label asp-for="PublicName" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <span>Enter a name that will be displayed to other users.</span>
+                <input asp-for="PublicName" class="form-control"/>
+                <span asp-validation-for="PublicName" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
             <label asp-for="EmailAddress" class="col-md-2 control-label"></label>
             <div class="col-md-10">
-                <p asp-description-for="EmailAddress" class="form-control-static"></p>
                 <input asp-for="EmailAddress" class="form-control" />
                 <span asp-validation-for="EmailAddress" class="text-danger"></span>
             </div>
@@ -40,7 +47,6 @@
         <div class="form-group">
             <label asp-for="GitHubLogin" class="col-md-2 control-label"></label>
             <div class="col-md-10">
-                <p asp-description-for="GitHubLogin" class="form-control-static"></p>
                 <input asp-for="GitHubLogin" class="form-control" />
                 <span asp-validation-for="GitHubLogin" class="text-danger"></span>
             </div>

@@ -39,6 +39,11 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Shared
 		public bool TextAreas { get; }
 
 		/// <summary>
+		/// The buttons to hide (if any).
+		/// </summary>
+		public JObject HideButtons { get; }
+
+		/// <summary>
 		/// The drop down lists.
 		/// </summary>
 		public IList<DropDownList> DropDownLists { get; }
@@ -58,6 +63,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Shared
 			JArray initData, 
 			int startMinRows,
 			bool textAreas,
+			JObject hideButtons,
 			IList<DropDownList> dropDownLists,
 			SubPanelConfig subPanelConfig)
 		{
@@ -67,6 +73,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Shared
 			InitData = initData;
 			StartMinRows = startMinRows;
 			TextAreas = textAreas;
+			HideButtons = hideButtons;
 			DropDownLists = dropDownLists;
 			SubPanelConfig = subPanelConfig;
 		}

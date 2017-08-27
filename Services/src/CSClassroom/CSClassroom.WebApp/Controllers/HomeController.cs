@@ -45,14 +45,15 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			}
 
 			var classroomMembership = User.ClassroomMemberships
-					?.FirstOrDefault(c => c.Role >= ClassroomRole.General);
+				?.OrderBy(cm => !cm.Classroom.IsActive)
+				?.FirstOrDefault(c => c.Role >= ClassroomRole.General);
 
 			if (classroomMembership != null)
 			{
 				return RedirectToAction
 				(
-					"Home",
-					"Classroom",
+					"Index",
+					"ClassroomHome",
 					new { className = classroomMembership.Classroom.Name }
 				);
 			}

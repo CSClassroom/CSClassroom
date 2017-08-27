@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Communications;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
 using CSC.CSClassroom.Model.Users;
@@ -195,6 +196,7 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 				UserName = userName,
 				FirstName = firstName,
 				LastName = lastName,
+				EmailAddress = $"{userName}Email",
 				SuperUser = superUser,
 				GitHubLogin = gitHubLogin,
 				ClassroomMemberships = new List<ClassroomMembership>()
@@ -770,6 +772,48 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 					DateFeedbackSaved = feedback != null ? (DateTime?)submissionDate : null,
 					FeedbackSent = sentFeedback,
 					DateFeedbackRead = readFeedback ? (DateTime?)submissionDate : null
+				}
+			);
+
+			_buildContext.SaveChanges();
+
+			return this;
+		}
+
+		public TestDatabaseBuilder AddAnnouncement(
+			string classroomName,
+			string userName,
+			string title,
+			string contents,
+			DateTime datePosted,
+			IList<string> sectionNames)
+		{
+			var classroom = _buildContext.Classrooms
+				.Include(c => c.Sections)
+				.Single(c => c.Name == classroomName);
+
+			var user = _buildContext.Users
+				.Single(u => u.UserName == userName);
+
+			_buildContext.Announcements.Add
+			(
+				new Announcement()
+				{
+					ClassroomId = classroom.Id,
+					Classroom = classroom,
+					User = user,
+					UserId = user.Id,
+					Title = title,
+					Contents = contents,
+					DatePosted = datePosted,
+					Sections = sectionNames
+						.Select
+						(
+							sn => new AnnouncementSection()
+							{
+								Section = classroom.Sections.Single(s => s.Name == sn)
+							}
+						).ToList()
 				}
 			);
 

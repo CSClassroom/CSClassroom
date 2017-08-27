@@ -10,7 +10,7 @@
     <UserSecretsId>aspnet-CSClassroom-a2fee68c-e90e-4167-a7a7-9fc8d0e5f5db</UserSecretsId>
     <RuntimeFrameworkVersion>1.1.2</RuntimeFrameworkVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;dnxcore50;portable-net45+win8</PackageTargetFallback>
-    <MvcRazorCompileOnPublish>true</MvcRazorCompileOnPublish>
+    <MvcRazorCompileOnPublish>false</MvcRazorCompileOnPublish>
     <DockerComposeProjectPath>..\..\..\vsdocker\docker-compose.dcproj</DockerComposeProjectPath>
     <RootNamespace>CSC.CSClassroom.WebApp</RootNamespace>
     <ApplicationIcon />
@@ -66,6 +66,7 @@
     </PackageReference>
     <PackageReference Include="morelinq" Version="2.6.0" />
     <PackageReference Include="NodaTime" Version="2.0.3" />
+    <PackageReference Include="ReflectionIT.Mvc.Paging" Version="1.7.0" />
     <PackageReference Include="SendGrid.NetCore" Version="1.0.0-rtm-00002" />
     <PackageReference Include="Serilog" Version="2.5.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="1.4.0" />

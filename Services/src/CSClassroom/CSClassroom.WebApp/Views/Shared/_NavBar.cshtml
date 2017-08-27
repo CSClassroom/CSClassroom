@@ -11,7 +11,7 @@
             </button>
             @if (ViewBag.Classroom != null)
             {
-                <a asp-controller="Classroom" asp-action="Home" class="navbar-brand">@ViewBag.Classroom.DisplayName</a>}
+                <a asp-controller="ClassroomHome" asp-action="Index" class="navbar-brand">@ViewBag.Classroom.DisplayName</a>}
             else
             {
                 <a asp-controller="Home" asp-action="Index" class="navbar-brand">CS Classroom</a>
