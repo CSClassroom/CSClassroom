@@ -98,7 +98,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.PushEvents
 				"BuildResultCallbackUrl"
 			);
 
-			Assert.Equal(result, "BuildJobId");
+			Assert.Equal("BuildJobId", result);
 			projectRunnerService.Verify(GetExecuteProjectJobExpression(), Times.Once);
 		}
 

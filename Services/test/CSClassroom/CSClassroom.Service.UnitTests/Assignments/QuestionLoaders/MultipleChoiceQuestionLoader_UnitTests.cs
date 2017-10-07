@@ -25,7 +25,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionLoaders
 
 			await loader.LoadQuestionAsync();
 
-			Assert.Equal(1, question.Choices.Count);
+			Assert.Single(question.Choices);
 			Assert.Equal("Choice1", question.Choices[0].Value);
 		}
 

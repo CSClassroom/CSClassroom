@@ -187,7 +187,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 			Assert.Equal(assignments[5], results[0].ElementAt(2));
 
 			Assert.Equal("Group3", results[1].Key);
-			Assert.Equal(1, results[1].Count());
+			Assert.Single(results[1]);
 			Assert.Equal(assignments[4], results[1].ElementAt(0));
 
 			Assert.Equal("Group1", results[2].Key);

@@ -1,6 +1,6 @@
-FROM csclassroom/buildservice.endpoint.base:1.0
-ARG source=.
+FROM csclassroom/buildservice.endpoint.base:2.0
+ARG source
 WORKDIR /app
 EXPOSE 80
-COPY $source .
+COPY ${source:-obj/Docker/publish} .
 ENTRYPOINT ["dotnet", "BuildService.Endpoint.dll"]

@@ -564,12 +564,12 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			Assert.Equal(12345, result.QuestionSubmitted.Seed);
 			Assert.Equal(user, result.QuestionSubmitted.User);
 			Assert.Equal(submission, result.QuestionSubmitted.LastSubmission);
-			Assert.Equal(false, result.QuestionSubmitted.Interactive);
+			Assert.False(result.QuestionSubmitted.Interactive);
 			Assert.Equal(1, result.QuestionSubmitted.NumAttempts);
 			Assert.Equal(1, result.QuestionSubmitted.NumAttemptsRemaining);
 			Assert.Equal(1, result.QuestionSubmitted.PastSubmissions.Count);
 			Assert.Equal(SubmissionDate, result.QuestionSubmitted.PastSubmissions[0]);
-			Assert.Equal(null, result.QuestionSubmitted.AssignmentProgress);
+			Assert.Null(result.QuestionSubmitted.AssignmentProgress);
 			Assert.Equal(questionResult, result.QuestionResult);
 			Assert.Equal(1.0, result.QuestionPoints);
 			Assert.Equal(SubmissionDate, result.SubmissionDate);

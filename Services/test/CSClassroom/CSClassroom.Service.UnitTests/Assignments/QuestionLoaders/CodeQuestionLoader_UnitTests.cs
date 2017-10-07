@@ -26,7 +26,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionLoaders
 
 			await loader.LoadQuestionAsync();
 
-			Assert.Equal(1, question.ImportedClasses.Count);
+			Assert.Single(question.ImportedClasses);
 			Assert.Equal("Imported", question.ImportedClasses[0].ClassName);
 		}
 
@@ -42,7 +42,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionLoaders
 
 			await loader.LoadQuestionAsync();
 
-			Assert.Equal(1, question.CodeConstraints.Count);
+			Assert.Single(question.CodeConstraints);
 			Assert.Equal("Regex", question.CodeConstraints[0].Regex);
 		}
 

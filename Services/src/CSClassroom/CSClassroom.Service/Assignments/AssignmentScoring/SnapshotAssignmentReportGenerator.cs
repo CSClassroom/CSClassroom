@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CSC.Common.Infrastructure.Interfaces.Extensions;
+using CSC.Common.Infrastructure.Extensions;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Model.Assignments.ServiceResults;

@@ -244,7 +244,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 
 			Assert.Equal(1.0, result.Score);
-			Assert.Equal(0, codeQuestionResult.Errors.Count);
+			Assert.Empty(codeQuestionResult.Errors);
 		}
 
 		/// <summary>
@@ -458,7 +458,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var testResult = codeQuestionResult.TestResults.Single();
 
 			Assert.Equal(1.0, result.Score);
-			Assert.Equal(0, codeQuestionResult.Errors.Count);
+			Assert.Empty(codeQuestionResult.Errors);
 			Assert.Equal("Description", testResult.Description);
 		}
 

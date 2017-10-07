@@ -191,10 +191,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			Assert.Equal("TestClass3", testClasses[1].ClassName);
 			Assert.Equal(1, testClasses[1].Order);
 
-			Assert.Equal(1, project.ImmutableFilePaths.Count);
+			Assert.Single(project.ImmutableFilePaths);
 			Assert.Equal("Immutable2", project.ImmutableFilePaths[0].Path);
 
-			Assert.Equal(1, project.PrivateFilePaths.Count);
+			Assert.Single(project.PrivateFilePaths);
 			Assert.Equal("Private2", project.PrivateFilePaths[0].Path);
 		}
 
@@ -254,7 +254,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			var repoPopulator = GetMockRepositoryPopulator
 			(
 				createResults: expectedResult,
-				overwriteIfSafe: false
+				overwriteIfSafe: overwriteIfSafe
 			);
 
 			var projectService = GetProjectService
@@ -269,7 +269,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				"Project1",
 				"Section1",
 				"WebhookUrl",
-				overwriteIfSafe: false
+				overwriteIfSafe: overwriteIfSafe
 			);
 
 			Assert.Equal(expectedResult, result);

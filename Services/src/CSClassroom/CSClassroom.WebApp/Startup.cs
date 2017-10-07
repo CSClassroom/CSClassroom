@@ -75,7 +75,10 @@ namespace CSC.CSClassroom.WebApp
 		/// </summary>
 		public IServiceProvider ConfigureServices(IServiceCollection services)
 		{
-			services.AddAuthentication(SetupAuthentication);
+			services
+				.AddAuthentication(SetupAuthentication)
+				.AddCookie(SetupCookieAuthentication)
+				.AddOpenIdConnect(SetupOpenIdConnectAuthentication);
 			services.AddTelemetry(Configuration, typeof(CSClassroomTelemetryInitializer));
 			services.AddMvc(SetupMvc);
 
@@ -114,8 +117,7 @@ namespace CSC.CSClassroom.WebApp
 			app.UseStatusCodePages();
 			app.UseExceptionHandler("/Error");
 			app.UseForwardedHeaders(GetForwardedHeadersOptions());
-			app.UseCookieAuthentication(GetCookieAuthenticationOptions());
-			app.UseOpenIdConnectAuthentication(GetOpenIdConnectOptions());
+			app.UseAuthentication();
 			app.UseMvc();
 			app.UseHangfireQueueDashboard(_container);
 		}
@@ -147,11 +149,49 @@ namespace CSC.CSClassroom.WebApp
 		}
 
 		/// <summary>
-		/// Sets up authentication.
+		/// Sets up authentication schemes.
 		/// </summary>
-		private static void SetupAuthentication(SharedAuthenticationOptions authOptions)
+		private void SetupAuthentication(AuthenticationOptions options)
 		{
-			authOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+			options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+			options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+		}
+
+		/// <summary>
+		/// Sets up cookie authentication.
+		/// </summary>
+		private void SetupCookieAuthentication(CookieAuthenticationOptions options)
+		{
+			options.ExpireTimeSpan = TimeSpan.FromHours(8);
+		}
+
+		/// <summary>
+		/// Sets up OpenId Connect authentication.
+		/// </summary>
+		private void SetupOpenIdConnectAuthentication(OpenIdConnectOptions options)
+		{
+			options.ClientId = Configuration["Authentication:AzureAd:ClientId"];
+			options.Authority = Configuration["Authentication:AzureAd:AADInstance"] + "Common";
+			options.CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"];
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ValidateIssuer = false,
+			};
+			options.Events = new OpenIdConnectEvents
+			{
+				OnTicketReceived = (context) =>
+				{
+					context.Properties.ExpiresUtc = null;
+
+					return Task.FromResult(0);
+				},
+				OnAuthenticationFailed = (context) =>
+				{
+					context.Response.Redirect("/Home/Error");
+					context.HandleResponse(); // Suppress the exception
+					return Task.FromResult(0);
+				},
+			};
 		}
 
 		/// <summary>
@@ -246,51 +286,6 @@ namespace CSC.CSClassroom.WebApp
 			return new ForwardedHeadersOptions
 			{
 				ForwardedHeaders = ForwardedHeaders.XForwardedProto
-			};
-		}
-
-		/// <summary>
-		/// Returns options for cookie authentication.
-		/// </summary>
-		private static CookieAuthenticationOptions GetCookieAuthenticationOptions()
-		{
-			return new CookieAuthenticationOptions()
-			{
-				ExpireTimeSpan = TimeSpan.FromHours(8)
-			};
-		}
-
-		/// <summary>
-		/// Returns options for OpenId Connect authentication.
-		/// </summary>
-		/// <returns></returns>
-		private OpenIdConnectOptions GetOpenIdConnectOptions()
-		{
-			return new OpenIdConnectOptions()
-			{
-				ClientId = Configuration["Authentication:AzureAd:ClientId"],
-				Authority = Configuration["Authentication:AzureAd:AADInstance"] + "Common",
-				CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"],
-
-				TokenValidationParameters = new TokenValidationParameters
-				{
-					ValidateIssuer = false,
-				},
-				Events = new OpenIdConnectEvents
-				{
-					OnTicketReceived = (context) =>
-					{
-						context.Ticket.Properties.ExpiresUtc = null;
-
-						return Task.FromResult(0);
-					},
-					OnAuthenticationFailed = (context) =>
-					{
-						context.Response.Redirect("/Home/Error");
-						context.HandleResponse(); // Suppress the exception
-						return Task.FromResult(0);
-					},
-				}
 			};
 		}
 	}

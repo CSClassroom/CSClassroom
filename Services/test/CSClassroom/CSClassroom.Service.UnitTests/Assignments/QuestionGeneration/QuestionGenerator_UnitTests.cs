@@ -315,8 +315,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGeneration
 			);
 
 			Assert.NotNull(result.Error);
-			Assert.True(result.Error.Contains("Error1"));
-			Assert.True(result.Error.Contains("Error2"));
+			Assert.Contains("Error1", result.Error);
+			Assert.Contains("Error2", result.Error);
 			Assert.Null(result.SerializedQuestion);
 		}
 
@@ -490,8 +490,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGeneration
 			);
 
 			Assert.NotNull(result.Error);
-			Assert.True(result.Error.Contains("Error1"));
-			Assert.True(result.Error.Contains("Error2"));
+			Assert.Contains("Error1", result.Error);
+			Assert.Contains("Error2", result.Error);
 			Assert.Null(result.SerializedQuestion);
 		}
 
@@ -527,7 +527,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGeneration
 			);
 
 			Assert.NotNull(result.Error);
-			Assert.True(result.Error.Contains("TestException"));
+			Assert.Contains("TestException", result.Error);
 			Assert.Null(result.SerializedQuestion);
 		}
 
@@ -580,9 +580,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGeneration
 			);
 
 			Assert.Null(result.Error);
-			Assert.True(result.FullGeneratorFileContents.Contains("GeneratorContents"));
-			Assert.True(result.FullGeneratorFileContents.Contains("MethodQuestion"));
-			Assert.True(result.FullGeneratorFileContents.Contains("ClassQuestion"));
+			Assert.Contains("GeneratorContents", result.FullGeneratorFileContents);
+			Assert.Contains("MethodQuestion", result.FullGeneratorFileContents);
+			Assert.Contains("ClassQuestion", result.FullGeneratorFileContents);
 			Assert.Equal(-4, result.FullGeneratorFileLineOffset);
 		}
 

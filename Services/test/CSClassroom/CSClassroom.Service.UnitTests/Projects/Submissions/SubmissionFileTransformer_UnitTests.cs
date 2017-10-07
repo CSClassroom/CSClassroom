@@ -96,7 +96,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 								?.Value == "org.eclipse.jdt.junit.JUNIT_CONTAINER/4"
 				).ToList();
 
-			Assert.Equal(1, junitNodes.Count);
+			Assert.Single(junitNodes);
 		}
 		
 		/// <summary>
@@ -128,7 +128,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 								?.Value == "org.eclipse.jdt.junit.JUNIT_CONTAINER/4"
 				).ToList();
 
-			Assert.Equal(1, junitNodes.Count);
+			Assert.Single(junitNodes);
 		}
 
 		/// <summary>

@@ -69,7 +69,12 @@ namespace CSC.Common.Infrastructure.GitHub
 			Team team, 
 			string userName)
 		{
-			await _client.Organization.Team.AddMembership(team.Id, userName);
+			await _client.Organization.Team.AddOrEditMembership
+			(
+				team.Id, 
+				userName, 
+				new UpdateTeamMembership(TeamRole.Member)
+			);
 		}
 
 

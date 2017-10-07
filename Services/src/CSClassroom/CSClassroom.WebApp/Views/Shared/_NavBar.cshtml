@@ -21,11 +21,11 @@
             <ul class="nav navbar-nav">
                 @if (ViewBag.Classroom != null)
                 {
-                    @if (((User)ViewBag.User).SuperUser)
+                    if (((User)ViewBag.User).SuperUser)
                     {
                         <li><a asp-controller="Classroom" asp-action="Index">Classes</a></li>
                     }
-                    @if (ViewBag.ClassroomRole >= ClassroomRole.Admin)
+                    if (ViewBag.ClassroomRole >= ClassroomRole.Admin)
                     {
                         <li><a asp-controller="Section" asp-action="Index">Sections</a></li>
                     }

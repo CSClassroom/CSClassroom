@@ -28,7 +28,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionDuplicators
 			var duplicator = GetCodeQuestionDuplicator(database, question);
 			var result = (CodeQuestion)duplicator.DuplicateQuestion();
 
-			Assert.Equal(1, result.ImportedClasses.Count);
+			Assert.Single(result.ImportedClasses);
 			Assert.True(question.ImportedClasses[0] != result.ImportedClasses[0]);
 			Assert.Equal("Imported", result.ImportedClasses[0].ClassName);
 			Assert.Equal(0, result.ImportedClasses[0].Id);
@@ -48,7 +48,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionDuplicators
 			var duplicator = GetCodeQuestionDuplicator(database, question);
 			var result = (CodeQuestion)duplicator.DuplicateQuestion();
 
-			Assert.Equal(1, result.CodeConstraints.Count);
+			Assert.Single(result.CodeConstraints);
 			Assert.True(question.CodeConstraints[0] != result.CodeConstraints[0]);
 			Assert.Equal("Regex", result.CodeConstraints[0].Regex);
 			Assert.Equal(0, result.CodeConstraints[0].Id);

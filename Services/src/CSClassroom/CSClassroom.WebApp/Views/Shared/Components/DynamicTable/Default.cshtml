@@ -10,7 +10,7 @@
             {
                 @:var @(dropDownList.PropertyName)groupOptions =
                 @:{
-                    @foreach (var groupItem in dropDownList.Choices.Select(dropDownList.GroupFilter).Distinct())
+                    foreach (var groupItem in dropDownList.Choices.Select(dropDownList.GroupFilter).Distinct())
                     {
                         @:@(groupItem.Value): [
                             @Html.Raw(string.Join(", ",
@@ -21,7 +21,7 @@
                                     .Select(i => $"{{name:\"{i.Name}\", value:\"{i.Value}\"}}")));
                         @:],
                     }
-                @:}
+                @:};
 
                 @:function handle@(dropDownList.GroupColumnName)Changed(evt, rowIndex)
                 @:{
@@ -75,11 +75,11 @@
                 {
                     @:rowDataLoaded: function(caller, record, rowIndex, uniqueIndex)
                     @:{
-                        @if (Model.SubPanelConfig != null)
+                        if (Model.SubPanelConfig != null)
                         {
                             @($"{Model.SubPanelConfig.LoadedFunctionName}(caller, record, rowIndex, uniqueIndex);")
                         }
-                        @if (Model.DropDownLists != null)
+                        if (Model.DropDownLists != null)
                         {
                             foreach(var dropDownList in Model.DropDownLists)
                             {

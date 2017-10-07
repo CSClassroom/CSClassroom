@@ -27,7 +27,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionDuplicators
 			var duplicator = new MultipleChoiceQuestionDuplicator(database.Context, question);
 			var result = (MultipleChoiceQuestion)duplicator.DuplicateQuestion();
 
-			Assert.Equal(1, question.Choices.Count);
+			Assert.Single(question.Choices);
 			Assert.True(question.Choices[0] != result.Choices[0]);
 			Assert.Equal("Choice", result.Choices[0].Value);
 			Assert.Equal(0, result.Choices[0].Id);

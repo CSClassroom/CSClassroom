@@ -550,7 +550,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 			Assert.Equal("Class1", question.QuestionCategory.Classroom.Name);
 			Assert.Equal("Category1", question.QuestionCategory.Name);
 			Assert.Equal("Question1", question.Name);
-			Assert.Equal(true, question.AllowPartialCredit);
+			Assert.True(question.AllowPartialCredit);
 		}
 
 		/// <summary>
@@ -741,7 +741,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 			Assert.Equal("Question1 (generated)", generatedQuestion.Name);
 			Assert.Equal("Generated Question Template", generatedQuestion.Description);
 			Assert.Equal(originalQuestion.QuestionCategoryId, generatedQuestion.QuestionCategoryId);
-			Assert.Equal(1, generatedQuestion.ImportedClasses.Count);
+			Assert.Single(generatedQuestion.ImportedClasses);
 			Assert.Equal("java.util.*", generatedQuestion.ImportedClasses[0].ClassName);
 
 			var expectedContents =

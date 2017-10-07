@@ -25,7 +25,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionLoaders
 
 			await loader.LoadQuestionAsync();
 
-			Assert.Equal(1, question.Blanks.Count);
+			Assert.Single(question.Blanks);
 			Assert.Equal("Blank1", question.Blanks[0].Name);
 		}
 

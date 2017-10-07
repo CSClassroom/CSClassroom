@@ -60,8 +60,8 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		{
 			return RedirectToAction
 			(
-				"Home", 
-				"Classroom", 
+				"Index", 
+				"ClassroomHome", 
 				new { classroomName = ClassroomName }
 			);
 		}

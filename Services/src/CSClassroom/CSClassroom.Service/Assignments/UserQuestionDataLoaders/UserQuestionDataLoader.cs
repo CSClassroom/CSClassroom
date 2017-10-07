@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using CSC.Common.Infrastructure.Interfaces.Extensions;
+using CSC.Common.Infrastructure.Extensions;
 using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Assignments.QuestionLoaders;

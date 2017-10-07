@@ -54,7 +54,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.PushEvents
 
 			var results = await pushEventRetriever.GetAllPushEventsAsync(project, students);
 
-			Assert.Equal(results.Count, 1);
+			Assert.Single(results);
 			Assert.Equal(students[0], results[0].Student);
 			Assert.Equal(pushEvents, results[0].PushEvents);
 		}

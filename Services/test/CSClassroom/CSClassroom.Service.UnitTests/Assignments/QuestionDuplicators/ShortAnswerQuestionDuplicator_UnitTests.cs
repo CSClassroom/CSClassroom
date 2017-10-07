@@ -27,7 +27,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionDuplicators
 			var duplicator = new ShortAnswerQuestionDuplicator(database.Context, question);
 			var result = (ShortAnswerQuestion)duplicator.DuplicateQuestion();
 
-			Assert.Equal(1, result.Blanks.Count);
+			Assert.Single(result.Blanks);
 			Assert.True(question.Blanks[0] != result.Blanks[0]);
 			Assert.Equal(0, result.Blanks[0].Id);
 		}

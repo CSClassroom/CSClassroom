@@ -39,7 +39,7 @@
             <a href="@Model.Submission.GitHubUrl" target="_blank">Show on GitHub</a>
         </td>
         <td>
-            @Html.ActionLink("Build result", "BuildResult", new { buildId = Model.Submission.BuildId }, new { target = "_blank" })<span> (@Model.Submission.PassingTests passing)</span>
+            @Html.ActionLink("Build result", "BuildResult", "Build", new { buildId = Model.Submission.BuildId }, new { target = "_blank" })<span> (@Model.Submission.PassingTests passing)</span>
         </td>
         <td>
             @Model.Submission.CommitMessage

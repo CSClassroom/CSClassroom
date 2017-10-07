@@ -79,7 +79,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				)
 			);
 
-			Assert.Equal(1, result.Count);
+			Assert.Single(result);
 			Assert.Equal(student, result[0].Student);
 			Assert.Equal(studentRepo.Contents, result[0].Contents);
 		}
@@ -120,7 +120,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				)
 			);
 
-			Assert.Equal(1, result.Count);
+			Assert.Single(result);
 			Assert.Equal(student, result[0].Student);
 			Assert.Equal(studentRepo.Contents, result[0].Contents);
 		}

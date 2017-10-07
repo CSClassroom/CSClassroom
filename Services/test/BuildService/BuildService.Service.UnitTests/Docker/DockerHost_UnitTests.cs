@@ -153,7 +153,7 @@ namespace CSC.BuildService.Service.UnitTests.Docker
 				new Dictionary<string, string>()
 			);
 
-			Assert.True(processRunner.Launches[0].Args.Contains($"--name ContainerName"));
+			Assert.Contains(processRunner.Launches[0].Args, s => s == "--name ContainerName");
 		}
 
 		/// <summary>
@@ -175,7 +175,7 @@ namespace CSC.BuildService.Service.UnitTests.Docker
 
 			var expectedMountPoint = "/HostTempFolder/ContainerName:MountPoint";
 
-			Assert.True(processRunner.Launches[0].Args.Contains($"-v {expectedMountPoint}"));
+			Assert.Contains(processRunner.Launches[0].Args, s => s == $"-v {expectedMountPoint}");
 		}
 
 		/// <summary>
@@ -199,8 +199,8 @@ namespace CSC.BuildService.Service.UnitTests.Docker
 			var requestVar = "REQUEST_FILE_PATH=MountPoint/RequestFileName";
 			var responseVar = "RESPONSE_FILE_PATH=MountPoint/ResponseFileName";
 
-			Assert.True(processRunner.Launches[0].Args.Contains($"-e \"{requestVar}\""));
-			Assert.True(processRunner.Launches[0].Args.Contains($"-e \"{responseVar}\""));
+			Assert.Contains(processRunner.Launches[0].Args, s => s == $"-e \"{requestVar}\"");
+			Assert.Contains(processRunner.Launches[0].Args, s => s == $"-e \"{responseVar}\"");
 		}
 
 
@@ -224,8 +224,8 @@ namespace CSC.BuildService.Service.UnitTests.Docker
 				}
 			);
 
-			Assert.True(processRunner.Launches[0].Args.Contains($"-e \"Var1=Var1Value\""));
-			Assert.True(processRunner.Launches[0].Args.Contains($"-e \"Var2=Var2Value\""));
+			Assert.Contains(processRunner.Launches[0].Args, s => s == $"-e \"Var1=Var1Value\"");
+			Assert.Contains(processRunner.Launches[0].Args, s => s == $"-e \"Var2=Var2Value\"");
 		}
 
 		/// <summary>
@@ -320,7 +320,7 @@ namespace CSC.BuildService.Service.UnitTests.Docker
 				new Dictionary<string, string>()
 			);
 
-			Assert.True(processRunner.Launches[0].Args.Contains($"--rm"));
+			Assert.Contains(processRunner.Launches[0].Args, s => s == "--rm");
 		}
 
 		/// <summary>
@@ -351,7 +351,7 @@ namespace CSC.BuildService.Service.UnitTests.Docker
 
 			Assert.Equal(2, processRunner.Launches.Count);
 			Assert.Equal("DockerLib", processRunner.Launches[1].ProcessPath);
-			Assert.Equal(1, processRunner.Launches[1].Args.Length);
+			Assert.Single(processRunner.Launches[1].Args);
 			Assert.Equal("rm -f ContainerName", processRunner.Launches[1].Args[0]);
 		}
 

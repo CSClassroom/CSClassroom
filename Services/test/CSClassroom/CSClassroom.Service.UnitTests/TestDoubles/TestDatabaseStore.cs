@@ -24,7 +24,7 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 				.BuildServiceProvider();
 
 			var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-			optionsBuilder.UseInMemoryDatabase()
+			optionsBuilder.UseInMemoryDatabase("TestDatabase")
 				.UseInternalServiceProvider(serviceProvider);
 
 			Options = optionsBuilder.Options;

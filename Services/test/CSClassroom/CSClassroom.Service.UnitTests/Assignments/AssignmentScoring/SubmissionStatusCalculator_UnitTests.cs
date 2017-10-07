@@ -183,55 +183,55 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 		[Theory]
 		[InlineData
 		(
-			/*anyNotStarted*/ 0,
-			/*anyInProgress*/ 0,
-			/*anyCompleted*/ 5,
-			/*anyLate*/ 0,
+			/*anyNotStarted*/ false,
+			/*anyInProgress*/ false,
+			/*anyCompleted*/ true,
+			/*anyLate*/ false,
 			/*expectedCompletion*/ Completion.Completed,
 			/*expectedIsLate*/ false
 		)]
 		[InlineData
 		(
-			/*anyNotStarted*/ 0,
-			/*anyInProgress*/ 0,
-			/*anyCompleted*/ 5,
-			/*anyLate*/ 1,
+			/*anyNotStarted*/ false,
+			/*anyInProgress*/ false,
+			/*anyCompleted*/ true,
+			/*anyLate*/ true,
 			/*expectedCompletion*/ Completion.Completed,
 			/*expectedIsLate*/ true
 		)]
 		[InlineData
 		(
-			/*anyNotStarted*/ 4,
-			/*anyInProgress*/ 1,
-			/*anyCompleted*/ 0,
-			/*anyLate*/ 0,
+			/*anyNotStarted*/ true,
+			/*anyInProgress*/ true,
+			/*anyCompleted*/ false,
+			/*anyLate*/ false,
 			/*expectedCompletion*/ Completion.InProgress,
 			/*expectedIsLate*/ false
 		)]
 		[InlineData
 		(
-			/*anyNotStarted*/ 4,
-			/*anyInProgress*/ 1,
-			/*anyCompleted*/ 0,
-			/*anyLate*/ 1,
+			/*anyNotStarted*/ true,
+			/*anyInProgress*/ true,
+			/*anyCompleted*/ false,
+			/*anyLate*/ true,
 			/*expectedCompletion*/ Completion.InProgress,
 			/*expectedIsLate*/ true
 		)]
 		[InlineData
 		(
-			/*anyNotStarted*/ 5,
-			/*anyInProgress*/ 0,
-			/*anyCompleted*/ 0,
-			/*anyLate*/ 0,
+			/*anyNotStarted*/ true,
+			/*anyInProgress*/ false,
+			/*anyCompleted*/ false,
+			/*anyLate*/ false,
 			/*expectedCompletion*/ Completion.NotStarted,
 			/*expectedIsLate*/ false
 		)]
 		[InlineData
 		(
-			/*anyNotStarted*/ 5,
-			/*anyInProgress*/ 0,
-			/*anyCompleted*/ 0,
-			/*anyLate*/ 1,
+			/*anyNotStarted*/ true,
+			/*anyInProgress*/ false,
+			/*anyCompleted*/ false,
+			/*anyLate*/ true,
 			/*expectedCompletion*/ Completion.NotStarted,
 			/*expectedIsLate*/ true
 		)]

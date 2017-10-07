@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CSC.Common.Infrastructure.Interfaces.Extensions
+namespace CSC.Common.Infrastructure.Extensions
 {
 	/// <summary>
 	/// Extension methods for a dictionary.

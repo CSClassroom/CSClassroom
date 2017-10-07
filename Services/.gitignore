@@ -245,3 +245,6 @@ ModelManifest.xml
 
 # Environment-specific settings
 appsettings.*.json
+
+# IDEA settings
+.idea

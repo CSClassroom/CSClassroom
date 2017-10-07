@@ -896,7 +896,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Classrooms
 				.ToList();
 
 			Assert.True(oldCollection.Count > 0);
-			Assert.Equal(0, newCollection.Count);
+			Assert.Empty(newCollection);
 		}
 
 		/// <summary>

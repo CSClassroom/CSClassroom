@@ -15,7 +15,6 @@ using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using MoreLinq;
 using Xunit;
 
 namespace CSC.CSClassroom.Service.UnitTests.Communications
@@ -133,22 +132,22 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 			Assert.Equal("Admin1", announcements[0].User.UserName);
 			Assert.Equal(PostDate1, announcements[0].DatePosted);
 			Assert.Equal(2, announcements[0].Sections.Count);
-			Assert.True(announcements[0].Sections.Any(s => s.Section.Name == "Section1"));
-			Assert.True(announcements[0].Sections.Any(s => s.Section.Name == "Section2"));
+			Assert.Contains(announcements[0].Sections, s => s.Section.Name == "Section1");
+			Assert.Contains(announcements[0].Sections, s => s.Section.Name == "Section2");
 
 			Assert.Equal("Title2", announcements[1].Title);
 			Assert.Equal("Contents2", announcements[1].Contents);
 			Assert.Equal("Admin1", announcements[1].User.UserName);
 			Assert.Equal(PostDate2, announcements[1].DatePosted);
 			Assert.Equal(1, announcements[1].Sections.Count);
-			Assert.True(announcements[1].Sections.Any(s => s.Section.Name == "Section1"));
+			Assert.Contains(announcements[1].Sections, s => s.Section.Name == "Section1");
 
 			Assert.Equal("Title3", announcements[2].Title);
 			Assert.Equal("Contents3", announcements[2].Contents);
 			Assert.Equal("Admin1", announcements[2].User.UserName);
 			Assert.Equal(PostDate3, announcements[2].DatePosted);
 			Assert.Equal(1, announcements[2].Sections.Count);
-			Assert.True(announcements[2].Sections.Any(s => s.Section.Name == "Section2"));
+			Assert.Contains(announcements[2].Sections, s => s.Section.Name == "Section2");
 		}
 
 		/// <summary>

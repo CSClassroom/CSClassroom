@@ -23,14 +23,14 @@
         }
         @if (User.ClassroomMemberships != null)
         {
-            @foreach (var membership in User.ClassroomMemberships)
-             {
-                 @if (!membership.InGitHubOrganization)
-                  {
-                      <li>You have not yet joined the GitHub organization for @membership.Classroom.DisplayName.
-                          @Html.Link(Url.GitHub().Invitation(membership.Classroom.GitHubOrganization), "Click here") to see the invitation.</li>
-                 }
-             }
+            foreach (var membership in User.ClassroomMemberships)
+            {
+                if (!membership.InGitHubOrganization)
+                {
+                    <li>You have not yet joined the GitHub organization for @membership.Classroom.DisplayName.
+                        @Html.Link(Url.GitHub().Invitation(membership.Classroom.GitHubOrganization), "Click here") to see the invitation.</li>
+                }
+            }
         }
     </ul>
 }

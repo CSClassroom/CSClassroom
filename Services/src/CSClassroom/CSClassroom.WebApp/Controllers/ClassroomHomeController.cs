@@ -56,7 +56,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				ClassroomRole >= ClassroomRole.Admin
 			);
 
-			var announcements = await PagingList<Announcement>.CreateAsync
+			var announcements = await PagingList.CreateAsync
 			(
 				announcementsQuery,
 				pageSize: 5,
@@ -71,7 +71,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// </summary>
 		[Route("PostAnnouncement")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public async Task<IActionResult> PostAnnouncement()
+		public IActionResult PostAnnouncement()
 		{
 			ViewBag.OperationType = "Post";
 			return View("PostEditAnnouncement");

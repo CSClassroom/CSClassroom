@@ -49,13 +49,13 @@ namespace CSC.CSClassroom.WebApp.ModelBinders
 				? $"{bindingContext.ModelName}."
 				: "";
 
-			var typeName = (string)bindingContext.ValueProvider
-				.GetValue($"{typeFieldNamePrefix}{_baseType.Name}Type")
-				.ConvertTo(typeof(string));
+			var typeNameResult = bindingContext.ValueProvider
+				.GetValue($"{typeFieldNamePrefix}{_baseType.Name}Type");
 
-			if (typeName == null)
+			if (typeNameResult == null || typeNameResult.Count() != 1)
 				return;
-			
+
+			var typeName = typeNameResult.First();
 			var derivedModelBinderKvp = _derivedModelBinders.First(kvp => kvp.Key.Name == typeName);
 			var derivedModelType = derivedModelBinderKvp.Key;
 			var derivedModelBinder = derivedModelBinderKvp.Value;

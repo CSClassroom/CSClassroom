@@ -36,7 +36,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 				.ToList();
 			
 			Assert.Equal(0.0, result.Score);
-			Assert.Equal(1, noSubmissionErrors.Count);
+			Assert.Single(noSubmissionErrors);
 		}
 
 		/// <summary>
@@ -93,7 +93,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 				.ToList();
 
 			Assert.Equal(0.0, result.Score);
-			Assert.Equal(1, diagnosticErrors.Count);
+			Assert.Single(diagnosticErrors);
 			Assert.Equal("Job Failed", diagnosticErrors.Single().DiagnosticOutput);
 		}
 
@@ -118,7 +118,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 				.ToList();
 
 			Assert.Equal(0.0, result.Score);
-			Assert.Equal(1, timeoutErrors.Count);
+			Assert.Single(timeoutErrors);
 		}
 
 		/// <summary>
@@ -242,10 +242,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			Assert.Equal(2, testsCompilationErrors.Count);
 			Assert.Null(testsCompilationErrors[0].LineNumber);
 			Assert.Null(testsCompilationErrors[0].LineErrorText);
-			Assert.True(testsCompilationErrors[0].FullErrorText.Contains("FullError1"));
+			Assert.Contains("FullError1", testsCompilationErrors[0].FullErrorText);
 			Assert.Null(testsCompilationErrors[1].LineNumber);
 			Assert.Null(testsCompilationErrors[1].LineErrorText);
-			Assert.True(testsCompilationErrors[1].FullErrorText.Contains("FullError2"));
+			Assert.Contains("FullError2", testsCompilationErrors[1].FullErrorText);
 		}
 
 		/// <summary>
@@ -285,7 +285,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 
 			Assert.Equal(1.0, result.Score);
-			Assert.Equal(0, codeQuestionResult.Errors.Count);
+			Assert.Empty(codeQuestionResult.Errors);
 		}
 
 		/// <summary>
@@ -325,7 +325,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 
 			Assert.Equal(0.5, result.Score);
-			Assert.Equal(0, codeQuestionResult.Errors.Count);
+			Assert.Empty(codeQuestionResult.Errors);
 		}
 
 		/// <summary>
@@ -365,7 +365,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 
 			Assert.Equal(0.0, result.Score);
-			Assert.Equal(0, codeQuestionResult.Errors.Count);
+			Assert.Empty(codeQuestionResult.Errors);
 		}
 		
 		/// <summary>
@@ -398,7 +398,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 			var testResults = codeQuestionResult.TestResults;
 
-			Assert.Equal(1, testResults.Count);
+			Assert.Single(testResults);
 			Assert.Equal("test1", testResults[0].Description);
 			Assert.True(testResults[0].Succeeded);
 			Assert.Null(testResults[0].ExceptionText);
@@ -439,7 +439,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 			var testResults = codeQuestionResult.TestResults;
 
-			Assert.Equal(1, testResults.Count);
+			Assert.Single(testResults);
 			Assert.Equal("test1", testResults[0].Description);
 			Assert.False(testResults[0].Succeeded);
 			Assert.Null(testResults[0].ExceptionText);
@@ -480,7 +480,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 			var testResults = codeQuestionResult.TestResults;
 
-			Assert.Equal(1, testResults.Count);
+			Assert.Single(testResults);
 			Assert.Equal("test1", testResults[0].Description);
 			Assert.False(testResults[0].Succeeded);
 			Assert.Null(testResults[0].ExceptionText);
@@ -520,7 +520,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 			var testResults = codeQuestionResult.TestResults;
 
-			Assert.Equal(1, testResults.Count);
+			Assert.Single(testResults);
 			Assert.Equal("test1", testResults[0].Description);
 			Assert.False(testResults[0].Succeeded);
 			Assert.Equal("exception", testResults[0].ExceptionText);

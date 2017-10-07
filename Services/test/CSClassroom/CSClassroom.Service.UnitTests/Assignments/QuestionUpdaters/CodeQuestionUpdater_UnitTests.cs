@@ -46,7 +46,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionUpdaters
 				.First();
 
 			Assert.False(errors.HasErrors);
-			Assert.Equal(1, question.ImportedClasses.Count);
+			Assert.Single(question.ImportedClasses);
 			Assert.Equal("NewImported", question.ImportedClasses[0].ClassName);
 		}
 

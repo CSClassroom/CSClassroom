@@ -1,6 +1,7 @@
-FROM csclassroom/csclassroom.webapp.base:1.0
-ARG source=.
+FROM csclassroom/csclassroom.webapp.base:2.0
+ARG source
 WORKDIR /app
 EXPOSE 80
-COPY $source .
+COPY ${source:-obj/Docker/publish} .
+RUN echo ${source:-obj/Docker/publish}
 ENTRYPOINT ["dotnet", "CSClassroom.WebApp.dll"]

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CSC.Common.Infrastructure.Interfaces.Extensions;
+using CSC.Common.Infrastructure.Extensions;
 using MoreLinq;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Assignments;

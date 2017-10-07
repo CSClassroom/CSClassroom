@@ -468,7 +468,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			database.Reload();
 			user = database.Context.Users.Single();
 			
-			Assert.Equal(user.EmailConfirmationCode, "User1EmailConfirmationCode");
+			Assert.Equal("User1EmailConfirmationCode", user.EmailConfirmationCode);
 			Assert.True(user.EmailAddressConfirmed);
 			emailProvider.Verify
 			(
@@ -519,7 +519,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			user = database.Context.Users.Single();
 
 			Assert.True(result);
-			Assert.Equal(user.PubliclyDisplayedName, "NewPublicName");
+			Assert.Equal("NewPublicName", user.PubliclyDisplayedName);
 		}
 
 		/// <summary>
@@ -1555,7 +1555,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 				.ToList();
 
 			Assert.True(result);
-			Assert.Equal(1, classroomMemberships.Count);
+			Assert.Single(classroomMemberships);
 			Assert.Equal("Class1", classroomMemberships[0].Classroom.Name);
 			Assert.Equal(ClassroomRole.Admin, classroomMemberships[0].Role);
 		}
@@ -1669,7 +1669,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 				.Where(cm => cm.User.UserName == "Admin1")
 				.ToList();
 
-			Assert.Equal(0, classroomMemberships.Count);
+			Assert.Empty(classroomMemberships);
 		}
 
 		/// <summary>
@@ -1702,7 +1702,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 				.OrderBy(cm => cm.Classroom.Name)
 				.ToList();
 
-			Assert.Equal(1, classroomMemberships.Count);
+			Assert.Single(classroomMemberships);
 			Assert.Equal("Class1", classroomMemberships[0].Classroom.Name);
 			Assert.Equal(ClassroomRole.General, classroomMemberships[0].Role);
 		}
@@ -1878,8 +1878,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 
 			Assert.True(result);
 
-			Assert.Equal(1, classroomMemberships.Count);
-			Assert.Equal(1, sectionMemberships.Count);
+			Assert.Single(classroomMemberships);
+			Assert.Single(sectionMemberships);
 
 			Assert.Equal("Class1", classroomMemberships[0].Classroom.Name);
 			Assert.Equal("Section1", sectionMemberships[0].Section.Name);
@@ -1914,7 +1914,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 				.Where(sm => sm.ClassroomMembership.User.UserName == "User1")
 				.ToList();
 
-			Assert.Equal(0, sectionMemberships.Count);
+			Assert.Empty(sectionMemberships);
 		}
 
 		/// <summary>

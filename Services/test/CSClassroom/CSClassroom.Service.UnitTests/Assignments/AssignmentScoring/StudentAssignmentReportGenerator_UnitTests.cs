@@ -9,7 +9,6 @@ using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Assignments.AssignmentScoring;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Moq;
-using MoreLinq;
 using Xunit;
 
 namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring

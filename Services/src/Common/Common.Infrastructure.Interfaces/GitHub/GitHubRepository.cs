@@ -8,7 +8,7 @@
 		/// <summary>
 		/// The repository ID.
 		/// </summary>
-		public int Id { get; }
+		public long Id { get; }
 
 		/// <summary>
 		/// The owner.
@@ -23,7 +23,7 @@
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public GitHubRepository(int id, string owner, string name)
+		public GitHubRepository(long id, string owner, string name)
 		{
 			Id = id;
 			Owner = owner;
