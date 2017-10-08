@@ -8,6 +8,7 @@ using CSC.Common.Infrastructure.Async;
 using CSC.Common.Infrastructure.Extensions;
 using CSC.Common.Infrastructure.System;
 using Octokit;
+using System.Net;
 
 namespace CSC.Common.Infrastructure.GitHub
 {
@@ -255,40 +256,63 @@ namespace CSC.Common.Infrastructure.GitHub
 		/// <summary>
 		/// Adds a push webhook for the repository.
 		/// </summary>
-		public async Task EnsurePushWebhookAsync(GitHubRepository repository, string url)
+		public Task EnsurePushWebhookAsync(GitHubRepository repository, string url)
 		{
-			var webhooks = await _client.Repository.Hooks.GetAll
+			return RetryGitHubOperationIfNeededAsync
 			(
-				repository.Owner, 
-				repository.Name
-			);
-
-			if (!webhooks.Any(webhook => webhook.Config["url"] == url))
-			{
-				await RetryGitHubOperationIfNeededAsync
-				(
-					() => _client.Repository.Hooks.Create
+				async () =>
+				{
+					var webhooks = await _client.Repository.Hooks.GetAll
 					(
 						repository.Owner,
-						repository.Name,
-						new NewRepositoryHook
+						repository.Name
+					);
+
+					if (!webhooks.Any(webhook => webhook.Config["url"] == url))
+					{
+						await RetryGitHubOperationIfNeededAsync
 						(
-							"web",
-							new Dictionary<string, string>()
-							{
-								{"url", url},
-								{"content_type", "json"},
-								{"secret", _webhookSecret.Value},
-								{"insecure_ssl", "0"}
-							}
-						)
+							() => _client.Repository.Hooks.Create
+							(
+								repository.Owner,
+								repository.Name,
+								new NewRepositoryHook
+								(
+									"web",
+									new Dictionary<string, string>()
+									{
+										{"url", url},
+										{"content_type", "json"},
+										{"secret", _webhookSecret.Value},
+										{"insecure_ssl", "0"}
+									}
+								)
+								{
+									Active = true,
+									Events = new[] { "push" }
+								}
+							)
+						);
+
+						webhooks = await _client.Repository.Hooks.GetAll
+						(
+							repository.Owner,
+							repository.Name
+						);
+
+						if (!webhooks.Any(webhook => webhook.Config["url"] == url))
 						{
-							Active = true,
-							Events = new[] {"push"}
+							throw new ApiException
+							(
+								$"Webhook not found for repository {repository.Name}",
+								HttpStatusCode.NotFound
+							);
 						}
-					)
-				);
-			}
+					}
+
+					return true;
+				}
+			);
 		}
 
 		/// <summary>
@@ -300,8 +324,21 @@ namespace CSC.Common.Infrastructure.GitHub
 				.Events
 				.GetAllForRepository(orgName, repoName);
 
-			return Enumerable.Select
-				(allEvents.Where(activity => activity.Type == "PushEvent"), activity => new
+			var allCommits = await _client.Repository.Commit.GetAll(orgName, repoName);
+
+			var commitOrder = allCommits.Reverse()
+				.Select((c, i) => new {c.Sha, Order = i})
+				.ToDictionary(c => c.Sha, c => c.Order);
+
+			return Enumerable.
+				Select
+				(
+					allEvents.Where
+					(
+						   activity => activity.Type == "PushEvent"
+						&& activity.Payload is PushEventPayload
+					), 
+					activity => new
 					{
 						activity.CreatedAt,
 						Payload = (PushEventPayload)activity.Payload
@@ -323,6 +360,7 @@ namespace CSC.Common.Infrastructure.GitHub
 						After = activity.Payload.Head,
 						Commits = activity.Payload
 							.Commits
+							.OrderBy(c => commitOrder.GetValueOrDefault(c.Sha))
 							.Select
 							(
 								(commit, index) => new GitHubPushEventCommit()

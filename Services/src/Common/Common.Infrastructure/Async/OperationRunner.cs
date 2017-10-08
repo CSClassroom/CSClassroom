@@ -62,6 +62,31 @@ namespace CSC.Common.Infrastructure.Async
 			return results;
 		}
 
+
+		/// <summary>
+		/// Executes an operation, retrying the operation if needed.
+		/// </summary>
+		public Task RetryOperationIfNeededAsync(
+			Func<Task> operation,
+			Func<Exception, bool> shouldRetry,
+			int numAttempts,
+			TimeSpan delayBetweenRetries,
+			bool defaultResultIfFailed)
+		{
+			return RetryOperationIfNeededAsync
+			(
+				async () =>
+				{
+					await operation();
+					return true;
+				},
+				shouldRetry,
+				numAttempts,
+				delayBetweenRetries,
+				defaultResultIfFailed
+			);
+		}
+
 		/// <summary>
 		/// Executes an operation, retrying the operation if needed.
 		/// </summary>

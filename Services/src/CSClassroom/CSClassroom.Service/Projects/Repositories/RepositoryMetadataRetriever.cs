@@ -33,6 +33,19 @@ namespace CSC.CSClassroom.Service.Projects.Repositories
 			IList<ClassroomMembership> students)
 		{
 			var orgName = project.Classroom.GitHubOrganization;
+			if (students.Count == 1)
+			{
+				var student = students.Single();
+				return new Dictionary<ClassroomMembership, GitHubRepository>()
+				{
+					[student] = await _repoClient.GetRepositoryAsync
+					(
+						orgName,
+						GetRepoName(project, student)
+					)
+				};
+			}
+
 			var repoList = await _repoClient.GetAllRepositoriesAsync(orgName);
 			var repoDictionary = repoList.ToDictionary
 			(

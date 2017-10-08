@@ -32,6 +32,31 @@ namespace CSC.Common.TestDoubles
 		/// <summary>
 		/// Executes an operation, retrying the operation if needed.
 		/// </summary>
+		public async Task RetryOperationIfNeededAsync(
+			Func<Task> operation, 
+			Func<Exception, bool> shouldRetry, 
+			int numAttempts, 
+			TimeSpan delayBetweenRetries,
+			bool ignoreFailures)
+		{
+			try
+			{
+				await operation();
+			}
+			catch (Exception)
+			{
+				if (ignoreFailures)
+				{
+					return;
+				}
+
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// Executes an operation, retrying the operation if needed.
+		/// </summary>
 		public async Task<TResult> RetryOperationIfNeededAsync<TResult>(
 			Func<Task<TResult>> operation,
 			Func<Exception, bool> shouldRetry,

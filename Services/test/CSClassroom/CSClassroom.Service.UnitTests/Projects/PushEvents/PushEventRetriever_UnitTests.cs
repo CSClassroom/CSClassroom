@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.GitHub;
+using CSC.Common.TestDoubles;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Projects.PushEvents;
 using CSC.CSClassroom.Service.Projects.Repositories;
-using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
 using Moq;
 using Xunit;

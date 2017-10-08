@@ -139,7 +139,8 @@ namespace CSC.CSClassroom.Service.Projects.Repositories
 							repositories,
 							templateContents
 						)
-					)
+					),
+					maxSimultaneous: 2
 				);
 			}
 		}
@@ -236,6 +237,8 @@ namespace CSC.CSClassroom.Service.Projects.Repositories
 					}
 				}
 
+				await _repoClient.EnsurePushWebhookAsync(repository, webhookUrl);
+
 				await _repoClient.OverwriteRepositoryAsync
 				(
 					repository,
@@ -244,8 +247,6 @@ namespace CSC.CSClassroom.Service.Projects.Repositories
 					entry => project.GetFileType(entry) != FileType.Private,
 					entry => project.GetFileType(entry) == FileType.Immutable
 				);
-
-				await _repoClient.EnsurePushWebhookAsync(repository, webhookUrl);
 
 				return repositoryAlreadyExisted
 					? CreateAndPushResult.Overwritten
