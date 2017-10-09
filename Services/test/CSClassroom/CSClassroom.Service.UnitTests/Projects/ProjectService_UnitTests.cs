@@ -622,6 +622,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			Assert.Equal("FirstName", results.FirstName);
 			Assert.Equal(userId, results.UserId);
 			Assert.Equal(1, results.ProjectStatus.Count);
+			Assert.Equal("Project1_LastNameFirstName", results.ProjectStatus[0].RepoName);
 			Assert.Equal("Project1", results.ProjectStatus[0].ProjectName);
 			Assert.Equal(lastBuildSucceeded, results.ProjectStatus[0].LastBuildSucceeded);
 			Assert.Equal(SecondPushDate, results.ProjectStatus[0].LastCommitDate);

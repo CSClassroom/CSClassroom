@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 
 namespace CSC.CSClassroom.Model.Projects.ServiceResults
 {
@@ -12,6 +14,11 @@ namespace CSC.CSClassroom.Model.Projects.ServiceResults
 		/// The project name.
 		/// </summary>
 		public string ProjectName { get; }
+
+		/// <summary>
+		/// The repository name.
+		/// </summary>
+		public string RepoName { get; }
 
 		/// <summary>
 		/// The last commit date.
@@ -33,11 +40,13 @@ namespace CSC.CSClassroom.Model.Projects.ServiceResults
 		/// </summary>
 		public ProjectStatus(
 			string projectName,
+			string repoName,
 			DateTime lastCommitDate,
 			bool lastBuildSucceeded,
 			IList<BuildTestCount> buildTestCounts)
 		{
 			ProjectName = projectName;
+			RepoName = repoName;
 			LastCommitDate = lastCommitDate;
 			LastBuildSucceeded = lastBuildSucceeded;
 			BuildTestCounts = buildTestCounts;

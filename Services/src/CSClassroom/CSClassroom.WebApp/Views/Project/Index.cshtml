@@ -18,11 +18,20 @@
 .table-curved td { border-left: 1px solid black; border-bottom: 1px solid black }
 
 </style>
+<script>
+    function copyToClipboard(link) {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val(link).select();
+        document.execCommand("copy");
+        $temp.remove();
+    }
+</script>
 <h2>Projects</h2>
 <h4 style="color: blue">Student: @Model.FirstName @Model.LastName</h4>
 @if (ClassroomRole >= ClassroomRole.Admin)
 {
-    @Html.ActionLink("Edit Projects", "Admin")
+    @Html.ActionLink("Manage Projects", "Admin")
     <br />
 }
 <br />
@@ -41,6 +50,15 @@
                         <br />
                     }
                     <table class="table table-curved">
+                        <tr>
+                            <th style="text-align: left; border-top: none">
+                                Import
+                            </th>
+                            <td>
+                                @{var projectLink = $"https://github.com/{Classroom.GitHubOrganization}/{projectStatus.RepoName}"; }
+                                <button onclick="copyToClipboard('@projectLink')">Copy Project Link</button>
+                            </td>
+                        </tr>
                         <tr>
                             <th style="text-align: left; border-top: none">
                                 Last Commit Date

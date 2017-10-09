@@ -18,6 +18,11 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Project
 		public string ProjectName { get; }
 
 		/// <summary>
+		/// The name of the repository for the project.
+		/// </summary>
+		public string RepoName { get; }
+
+		/// <summary>
 		/// The last commit date.
 		/// </summary>
 		public string LastCommitDate { get; }
@@ -40,6 +45,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Project
 			ITimeZoneProvider timeZoneProvider)
 		{
 			ProjectName = projectStatus.ProjectName;
+			RepoName = projectStatus.RepoName;
 			LastCommitDate = projectStatus.LastCommitDate.FormatLongDateTime(timeZoneProvider);
 			LastBuildSucceeded = projectStatus.LastBuildSucceeded;
 			TestTrend = new TestTrendViewModel

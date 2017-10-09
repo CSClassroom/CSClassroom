@@ -122,7 +122,12 @@ namespace CSC.CSClassroom.Service.Projects
 		{
 			var user = await _dbContext.Users
 				.Where(u => u.Id == userId)
+				.Include(u => u.ClassroomMemberships)
+					.ThenInclude(cm => cm.Classroom)
 				.SingleOrDefaultAsync();
+
+			var classroomMembership = user.ClassroomMemberships
+				.Single(cm => cm.Classroom.Name == classroomName);
 
 			var testCountData = await _dbContext.Builds
 				.Where(build => build.Commit.Project.Classroom.Name == classroomName)
@@ -178,6 +183,7 @@ namespace CSC.CSClassroom.Service.Projects
 					project => new ProjectStatus
 					(
 						project.ProjectName,
+						$"{project.ProjectName}_{classroomMembership.GitHubTeam}",
 						project.LastBuild.PushDate,
 						project.LastBuild.BuildStatus == BuildStatus.Completed,
 						project.CompletedBuilds.Select
