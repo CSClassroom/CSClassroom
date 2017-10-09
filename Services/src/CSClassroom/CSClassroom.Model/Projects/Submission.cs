@@ -67,7 +67,7 @@ namespace CSC.CSClassroom.Model.Projects
 		/// <summary>
 		/// Returns the number of days late a given submission is.
 		/// </summary>
-		public int GetDaysLate(Section section)
+		public int GetDaysLate(Section section, DateTime dateTime)
 		{
 			var dueDate = Checkpoint
 				.SectionDates
@@ -78,7 +78,7 @@ namespace CSC.CSClassroom.Model.Projects
 			(
 				Math.Max
 				(
-					(Commit.PushDate - dueDate).TotalDays,
+					(dateTime - dueDate).TotalDays,
 					0.0
 				)
 			);

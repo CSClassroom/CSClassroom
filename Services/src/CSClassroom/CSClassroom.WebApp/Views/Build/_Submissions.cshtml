@@ -9,7 +9,7 @@
             Checkpoint
         </th>
         <th>
-            Submission
+            Turned In
         </th>
         <th>
         </th>
@@ -23,9 +23,9 @@
                 @checkpointStatus.CheckpointDisplayName
             </td>
             <td>
-                @if (checkpointStatus.SubmissionCommitDate != null)
+                @if (checkpointStatus.SubmissionDate != null)
                 {
-                    <span>@checkpointStatus.SubmissionCommitDate</span>
+                    <span>@checkpointStatus.SubmissionDate</span>
                 }
                 else
                 {
@@ -33,13 +33,13 @@
                 }
             </td>
             <td>
-                @if (checkpointStatus.SubmissionCommitDate != null)
+                @if (checkpointStatus.SubmissionDate != null)
                 {
                     @Html.ActionLink("Change submission...", "Submit", "Submission", new {checkpointName = checkpointStatus.CheckpointName, userId = Model.User.Id}, htmlAttributes: null)
                 }
                 else
                 {
-                    @Html.ActionLink("Submit...", "Submit", "Submission", new {checkpointName = checkpointStatus.CheckpointName, userId = Model.User.Id}, htmlAttributes: null)
+                    @Html.ActionLink("Turn in...", "Submit", "Submission", new {checkpointName = checkpointStatus.CheckpointName, userId = Model.User.Id}, htmlAttributes: null)
                 }
             </td>
             <td>

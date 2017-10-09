@@ -30,14 +30,14 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		public int SubmissionId { get; }
 
 		/// <summary>
-		/// The commit date and build link.
+		/// The commit date and build link/status.
 		/// </summary>
-		public string CommitDate { get; }
+		public string Committed { get; }
 
 		/// <summary>
-		/// The number of days the submission is late.
+		/// The submission date and status.
 		/// </summary>
-		public string SubmissionStatus { get; }
+		public string Submitted { get; }
 
 		/// <summary>
 		/// The pull request link.
@@ -84,14 +84,21 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 			FirstName = result.FirstName;
 			SubmissionId = result.SubmissionId;
 
-			CommitDate = GetLink
+			Committed = GetStatus
 			(
+				result.CommitDate, 
+				result.CommitDaysLate, 
 				buildUrlBuilder(result.Build.Id),
-				result.CommitDate.FormatShortDateTime(timeZoneProvider),
-				preventWrapping: true
+				timeZoneProvider
 			);
 
-			SubmissionStatus = GetSubmissionStatus(result.DaysLate);
+			Submitted = GetStatus
+			(
+				result.SubmissionDate, 
+				result.SubmissionDaysLate, 
+				null /*buildUrl*/, 
+				timeZoneProvider
+			);
 
 			PullRequest = GetLink
 			(

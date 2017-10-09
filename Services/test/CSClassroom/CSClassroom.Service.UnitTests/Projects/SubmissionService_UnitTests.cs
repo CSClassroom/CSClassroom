@@ -130,12 +130,16 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			Assert.Equal("First1", results[0].FirstName);
 			Assert.Equal(users[0].Id, results[0].UserId);
 			Assert.Null(results[0].Commit);
+			Assert.Null(results[0].CommitDate);
+			Assert.Null(results[0].SubmissionDate);
 			Assert.Null(results[0].PullRequestNumber);
 
 			Assert.Equal("Last2", results[1].LastName);
 			Assert.Equal("First2", results[1].FirstName);
 			Assert.Equal(users[1].Id, results[1].UserId);
 			Assert.Equal("Commit4", results[1].Commit.Sha);
+			Assert.Equal(CommitDates[3], results[1].CommitDate);
+			Assert.Equal(SubmissionDates[3], results[1].SubmissionDate);
 			Assert.Equal(3, results[1].PullRequestNumber);
 			Assert.NotNull(results[1].Commit.Build);
 		}
@@ -259,14 +263,18 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			Assert.Equal("First1", results[0].FirstName);
 			Assert.NotNull(results[0].Build.TestResults);
 			Assert.Equal(CommitDates[2], results[0].CommitDate);
+			Assert.Equal(SubmissionDates[2], results[0].SubmissionDate);
 			Assert.True(results[0].RequiredTestsPassed);
-			Assert.Equal(2, results[0].DaysLate);
+			Assert.Equal(2, results[0].CommitDaysLate);
+			Assert.Equal(6, results[0].SubmissionDaysLate);
 			Assert.Null(results[0].Feedback);
 			Assert.False(results[0].FeedbackSent);
 			Assert.Equal(1, results[0].PastSubmissions.Count);
 			Assert.Equal("Checkpoint1 DisplayName", results[0].PastSubmissions[0].CheckpointDisplayName);
 			Assert.Equal(CommitDates[0], results[0].PastSubmissions[0].CommitDate);
-			Assert.Equal(0, results[0].PastSubmissions[0].DaysLate);
+			Assert.Equal(SubmissionDates[0], results[0].PastSubmissions[0].SubmitDate);
+			Assert.Equal(0, results[0].PastSubmissions[0].CommitDaysLate);
+			Assert.Equal(4, results[0].PastSubmissions[0].SubmitDaysLate);
 			Assert.Equal("Feedback1", results[0].PastSubmissions[0].Feedback);
 			Assert.NotNull(results[0].PastSubmissions[0].Build.TestResults);
 
@@ -274,14 +282,18 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			Assert.Equal("First2", results[1].FirstName);
 			Assert.NotNull(results[1].Build.TestResults);
 			Assert.Equal(CommitDates[2], results[1].CommitDate);
+			Assert.Equal(SubmissionDates[2], results[1].SubmissionDate);
 			Assert.True(results[1].RequiredTestsPassed);
-			Assert.Equal(2, results[1].DaysLate);
+			Assert.Equal(2, results[1].CommitDaysLate);
+			Assert.Equal(6, results[1].SubmissionDaysLate);
 			Assert.Equal("Feedback3", results[1].Feedback);
 			Assert.True(results[1].FeedbackSent);
 			Assert.Equal(1, results[1].PastSubmissions.Count);
 			Assert.Equal("Checkpoint1 DisplayName", results[1].PastSubmissions[0].CheckpointDisplayName);
 			Assert.Equal(CommitDates[0], results[1].PastSubmissions[0].CommitDate);
-			Assert.Equal(0, results[1].PastSubmissions[0].DaysLate);
+			Assert.Equal(SubmissionDates[0], results[1].PastSubmissions[0].SubmitDate);
+			Assert.Equal(0, results[1].PastSubmissions[0].CommitDaysLate);
+			Assert.Equal(4, results[1].PastSubmissions[0].SubmitDaysLate);
 			Assert.Equal("Feedback1", results[1].PastSubmissions[0].Feedback);
 			Assert.NotNull(results[1].PastSubmissions[0].Build.TestResults);
 		}
@@ -311,8 +323,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			Assert.Equal("First2", results[0].FirstName);
 			Assert.NotNull(results[0].Build.TestResults);
 			Assert.Equal(CommitDates[3], results[0].CommitDate);
+			Assert.Equal(SubmissionDates[3], results[0].SubmissionDate);
 			Assert.False(results[0].RequiredTestsPassed);
-			Assert.Equal(0, results[0].DaysLate);
+			Assert.Equal(0, results[0].CommitDaysLate);
+			Assert.Equal(4, results[0].SubmissionDaysLate);
 			Assert.Equal("Feedback4", results[0].Feedback);
 			Assert.False(results[0].FeedbackSent);
 
@@ -320,13 +334,17 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 
 			Assert.Equal("Checkpoint1 DisplayName", results[0].PastSubmissions[0].CheckpointDisplayName);
 			Assert.Equal(CommitDates[2], results[0].PastSubmissions[0].CommitDate);
-			Assert.Equal(2, results[0].PastSubmissions[0].DaysLate);
+			Assert.Equal(SubmissionDates[2], results[0].PastSubmissions[0].SubmitDate);
+			Assert.Equal(2, results[0].PastSubmissions[0].CommitDaysLate);
+			Assert.Equal(6, results[0].PastSubmissions[0].SubmitDaysLate);
 			Assert.Equal("Feedback3", results[0].PastSubmissions[0].Feedback);
 			Assert.NotNull(results[0].PastSubmissions[0].Build.TestResults);
 
 			Assert.Equal("Checkpoint1 DisplayName", results[0].PastSubmissions[1].CheckpointDisplayName);
 			Assert.Equal(CommitDates[0], results[0].PastSubmissions[1].CommitDate);
-			Assert.Equal(0, results[0].PastSubmissions[1].DaysLate);
+			Assert.Equal(SubmissionDates[0], results[0].PastSubmissions[1].SubmitDate);
+			Assert.Equal(0, results[0].PastSubmissions[1].CommitDaysLate);
+			Assert.Equal(4, results[0].PastSubmissions[1].SubmitDaysLate);
 			Assert.Equal("Feedback1", results[0].PastSubmissions[1].Feedback);
 			Assert.NotNull(results[0].PastSubmissions[1].Build.TestResults);
 		}
@@ -781,15 +799,15 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				.AddCommit("Class1", "Project1", "Student2", "Commit2", CommitDates[1], GetFailedBuild())
 				.AddCommit("Class1", "Project1", "Student2", "Commit3", CommitDates[2], GetSuccessfulBuild())
 				.AddCommit("Class1", "Project1", "Student2", "Commit4", CommitDates[3], GetSuccessfulBuild())
-				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student1", "Commit1", CommitDates[0], 
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student1", "Commit1", SubmissionDates[0], 
 					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
-				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student1", "Commit3", CommitDates[2], 
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student1", "Commit3", SubmissionDates[2], 
 					2 /*pullRequest*/, feedback: null, sentFeedback: false, readFeedback: false)
-				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student2", "Commit1", CommitDates[0],
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student2", "Commit1", SubmissionDates[0],
 					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
-				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student2", "Commit3", CommitDates[2],
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student2", "Commit3", SubmissionDates[2],
 					2 /*pullRequest*/, "Feedback3", sentFeedback: true, readFeedback: false)
-				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student2", "Commit4", CommitDates[3],
+				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student2", "Commit4", SubmissionDates[3],
 					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false);
 		}
 
@@ -993,6 +1011,17 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			new DateTime(2016, 1, 2),
 			new DateTime(2016, 1, 3),
 			new DateTime(2016, 1, 4)
+		);
+
+		/// <summary>
+		/// The date of commit 1.
+		/// </summary>
+		private static readonly IList<DateTime> SubmissionDates = Collections.CreateList
+		(
+			new DateTime(2016, 1, 5),
+			new DateTime(2016, 1, 6),
+			new DateTime(2016, 1, 7),
+			new DateTime(2016, 1, 8)
 		);
 	}
 }

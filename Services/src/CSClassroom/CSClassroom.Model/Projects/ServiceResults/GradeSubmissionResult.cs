@@ -32,9 +32,19 @@ namespace CSC.CSClassroom.Model.Projects.ServiceResults
 		public DateTime CommitDate { get; }
 
 		/// <summary>
+		/// The submission date.
+		/// </summary>
+		public DateTime SubmissionDate { get; }
+
+		/// <summary>
+		/// The number of days the commit is late.
+		/// </summary>
+		public int CommitDaysLate { get; }
+
+		/// <summary>
 		/// The number of days the submission is late.
 		/// </summary>
-		public int DaysLate { get; }
+		public int SubmissionDaysLate { get; }
 
 		/// <summary>
 		/// The pull request number.
@@ -79,7 +89,9 @@ namespace CSC.CSClassroom.Model.Projects.ServiceResults
 			FirstName = user.FirstName;
 			SubmissionId = currentSubmission.Id;
 			CommitDate = currentSubmission.Commit.PushDate;
-			DaysLate = currentSubmission.GetDaysLate(section);
+			SubmissionDate = currentSubmission.DateSubmitted;
+			CommitDaysLate = currentSubmission.GetDaysLate(section, currentSubmission.Commit.PushDate);
+			SubmissionDaysLate = currentSubmission.GetDaysLate(section, currentSubmission.DateSubmitted);
 			PullRequestNumber = currentSubmission.PullRequestNumber;
 			Feedback = currentSubmission.Feedback;
 			FeedbackSent = currentSubmission.FeedbackSent;

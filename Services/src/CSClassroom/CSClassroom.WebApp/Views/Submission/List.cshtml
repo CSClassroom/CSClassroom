@@ -27,6 +27,9 @@
                 @Html.DisplayNameFor(model => model.CommitDate)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.SubmissionDate)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.BuildId)
             </th>
             <th>
@@ -55,6 +58,12 @@
                 else
                 {
                     @:No Submission
+                }
+            </td>
+            <td>
+                @if (item.SubmissionDate != null)
+                {
+                    <span>@item.SubmissionDate.Value.FormatLongDateTime(TimeZoneProvider)</span>
                 }
             </td>
             <td>

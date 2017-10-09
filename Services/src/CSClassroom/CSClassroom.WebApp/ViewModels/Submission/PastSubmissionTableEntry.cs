@@ -17,20 +17,20 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// <summary>
 		/// The checkpoint name.
 		/// </summary>
-		[TableColumn("Checkpoint Name")]
+		[TableColumn("Checkpoint")]
 		public string CheckpointName { get; set; }
 
 		/// <summary>
-		/// The date of the submission.
+		/// The status of the commit.
 		/// </summary>
-		[TableColumn("Date Committed")]
-		public string DateCommitted { get; set; }
+		[TableColumn("Committed")]
+		public string Committed { get; set; }
 
 		/// <summary>
 		/// The status of the submission.
 		/// </summary>
-		[TableColumn("Submission Status")]
-		public string SubmissionStatus { get; }
+		[TableColumn("Submitted")]
+		public string Submitted { get; }
 
 		/// <summary>
 		/// The date of the submission.
@@ -41,7 +41,6 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// <summary>
 		/// The feedback for the submission.
 		/// </summary>
-		[TableOptions(ShowHeader = false)]
 		[SubTable(typeof(PastSubmissionFeedback))]
 		[JsonProperty(PropertyName = "childTableData")]
 		public List<PastSubmissionFeedback> PastSubmissionFeedback { get; set; }
@@ -55,16 +54,29 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 			Func<Commit, int, string> pullRequestUrlBuilder,
 			ITimeZoneProvider timeZoneProvider)
 		{
-			CheckpointName = result.CheckpointDisplayName;
-
-			DateCommitted = GetLink
+			CheckpointName = GetColoredText
 			(
-				buildUrlBuilder(result.Build.Id),
-				result.CommitDate.FormatShortDateTime(timeZoneProvider),
+				"black",
+				result.CheckpointDisplayName,
+				bold: false,
 				preventWrapping: true
 			);
 
-			SubmissionStatus = GetSubmissionStatus(result.DaysLate);
+			Committed = GetStatus
+			(
+				result.CommitDate,
+				result.CommitDaysLate,
+				buildUrlBuilder(result.Build.Id),
+				timeZoneProvider
+			);
+
+			Submitted = GetStatus
+			(
+				result.SubmitDate,
+				result.SubmitDaysLate,
+				null /*buildUrl*/,
+				timeZoneProvider
+			);
 
 			PullRequest = GetLink
 			(

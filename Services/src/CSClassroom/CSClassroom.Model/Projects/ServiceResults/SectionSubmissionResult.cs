@@ -33,6 +33,12 @@ namespace CSC.CSClassroom.Model.Projects.ServiceResults
 		public DateTime? CommitDate { get; }
 
 		/// <summary>
+		/// The submission date.
+		/// </summary>
+		[Display(Name = "Submission Date")]
+		public DateTime? SubmissionDate { get; }
+
+		/// <summary>
 		/// The pull request number.
 		/// </summary>
 		[Display(Name = "Pull Request")]
@@ -60,6 +66,7 @@ namespace CSC.CSClassroom.Model.Projects.ServiceResults
 			FirstName = user.FirstName;
 			UserId = user.Id;
 			CommitDate = submission?.Commit?.PushDate;
+			SubmissionDate = submission?.DateSubmitted;
 			PullRequestNumber = submission?.PullRequestNumber;
 			BuildId = submission?.Commit?.Build?.Id;
 			Commit = submission?.Commit;

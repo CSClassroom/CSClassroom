@@ -17,15 +17,15 @@
             <thead>
             <tr>
                 <th style="text-align: center">Commit Date</th>
-                <th style="text-align: center">Submission Status</th>
+                <th style="text-align: center">Submit Date</th>
                 <th style="text-align: center">Pull Request</th>
                 <th style="text-align: center">Required Tests</th>
             </tr>
             </thead>
             <tbody>
             <tr style="text-align: center">
-                <td style="text-align: center">@Html.Raw(viewModel.CommitDate)</td>
-                <td style="text-align: center">@Html.Raw(viewModel.SubmissionStatus)</td>
+                <td style="text-align: center">@Html.Raw(viewModel.Committed)</td>
+                <td style="text-align: center">@Html.Raw(viewModel.Submitted)</td>
                 <td style="text-align: center">@Html.Raw(viewModel.PullRequest)</td>
                 <td style="text-align: center">@Html.Raw(viewModel.RequiredTests)</td>
             </tr>
@@ -59,12 +59,12 @@
     var testClassColumns = @Html.Raw(Json.Serialize(new TableInfo(typeof(TestClassTableEntry), showHeader: true)));
     var allTestClassData = @Html.Raw(Json.Serialize(Model.Select(viewModel => viewModel.TestClassResults).ToList()));
 
-    var pastSubmissionColumns = @Html.Raw(Json.Serialize(new TableInfo(typeof(PastSubmissionTableEntry), showHeader: false)));
+    var pastSubmissionColumns = @Html.Raw(Json.Serialize(new TableInfo(typeof(PastSubmissionTableEntry), showHeader: true)));
     var allPastSubmissionData = @Html.Raw(Json.Serialize(Model.Select(viewModel => viewModel.PastSubmissions).ToList()));
 
     $(document).ready(function () {
         for (var resultIndex = 0; resultIndex < @Model.Count; resultIndex++) {
-            var testResultColumns = { columns: [], childTableInfo: testClassColumns };
+            var testResultColumns = { columns: [], childTableInfos: [ testClassColumns ] };
 
             createNestedTable($("#PastSubmissions-" + submissionIds[resultIndex]), pastSubmissionColumns, allPastSubmissionData[resultIndex], "No past submissions.");
             createNestedTable($("#TestResults-" + submissionIds[resultIndex]), testResultColumns, [{ childTableData: allTestClassData[resultIndex] }], "No submission recorded.");

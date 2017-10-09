@@ -32,9 +32,9 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 		public int? SubmissionId { get; }
 
 		/// <summary>
-		/// The date of the submitted commit, if a submission has been made.
+		/// The date of the submission, if a submission has been made.
 		/// </summary>
-		public string SubmissionCommitDate { get; }
+		public string SubmissionDate { get; }
 
 		/// <summary>
 		/// Whether or not the submission is past due.
@@ -60,11 +60,10 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 
 			SubmissionId = submissionResult.Submission?.Id;
 
-			if (submissionResult.Submission?.Commit?.CommitDate != null)
+			if (submissionResult.Submission?.DateSubmitted != null)
 			{
-				SubmissionCommitDate = submissionResult.Submission
-					.Commit
-					.CommitDate
+				SubmissionDate = submissionResult.Submission
+					.DateSubmitted
 					.FormatLongDateTime(timeZoneProvider);
 			}
 

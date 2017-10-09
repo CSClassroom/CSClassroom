@@ -146,8 +146,8 @@ namespace CSC.CSClassroom.Service.Projects
 			var users = await GetStudentsAsync(section);
 			var checkpoint = await LoadCheckpointAsync
 			(
-				classroomName, 
-				projectName, 
+				classroomName,
+				projectName,
 				checkpointName
 			);
 
@@ -253,16 +253,16 @@ namespace CSC.CSClassroom.Service.Projects
 				(
 					cm => cm.SectionMemberships.Any
 					(
-						sm =>  sm.SectionId == section.Id
-							&& sm.Role == SectionRole.Student
+						sm => sm.SectionId == section.Id
+						      && sm.Role == SectionRole.Student
 					)
 				)
 				.Include(cm => cm.User)
 				.ToListAsync();
 
-			var allCheckpointSubmissions = 
+			var allCheckpointSubmissions =
 				await GetCheckpointSubmissionsQuery(checkpoint, section)
-				.ToListAsync();
+					.ToListAsync();
 
 			var usersWithSubmissions = new HashSet<User>
 			(
@@ -356,13 +356,13 @@ namespace CSC.CSClassroom.Service.Projects
 								group => group.Where
 								(
 									s => (s == group.First() && s.Checkpoint != checkpoint)
-										 || (s != group.First() && !string.IsNullOrEmpty(s.Feedback))
+									     || (s != group.First() && !string.IsNullOrEmpty(s.Feedback))
 								)
 							).ToList()
 					)
 				).ToList();
 		}
-		
+
 		/// <summary>
 		/// Updates submission feedback.
 		/// </summary>
@@ -418,7 +418,7 @@ namespace CSC.CSClassroom.Service.Projects
 							cm => cm.SectionMemberships.Any
 							(
 								sm => sm.SectionId == section.Id
-									  && sm.Role == SectionRole.Student
+								      && sm.Role == SectionRole.Student
 							)
 						)
 				)
@@ -485,8 +485,8 @@ namespace CSC.CSClassroom.Service.Projects
 				.FirstOrDefaultAsync();
 
 			if (submission == null
-				|| submission.CheckpointId != checkpoint.Id
-				|| !submission.FeedbackSent)
+			    || submission.CheckpointId != checkpoint.Id
+			    || !submission.FeedbackSent)
 			{
 				return null;
 			}
@@ -495,7 +495,7 @@ namespace CSC.CSClassroom.Service.Projects
 				.Where
 				(
 					sm => sm.ClassroomMembership.ClassroomId == checkpoint.Project.ClassroomId
-						  && sm.ClassroomMembership.UserId == submission.Commit.UserId
+					      && sm.ClassroomMembership.UserId == submission.Commit.UserId
 				)
 				.Include(sm => sm.Section)
 				.FirstOrDefaultAsync();
@@ -508,8 +508,8 @@ namespace CSC.CSClassroom.Service.Projects
 
 			return new ViewFeedbackResult
 			(
-				sectionMembership?.Section, 
-				submission, 
+				sectionMembership?.Section,
+				submission,
 				checkpoints
 			);
 		}
@@ -581,7 +581,7 @@ namespace CSC.CSClassroom.Service.Projects
 						cm => cm.SectionMemberships.Any
 						(
 							sm => sm.SectionId == section.Id
-								  && sm.Role == SectionRole.Student
+							      && sm.Role == SectionRole.Student
 						)
 					)
 				)
@@ -612,7 +612,7 @@ namespace CSC.CSClassroom.Service.Projects
 							cm => cm.SectionMemberships.Any
 							(
 								sm => sm.SectionId == section.Id
-									  && sm.Role == SectionRole.Student
+								      && sm.Role == SectionRole.Student
 							)
 						)
 				)
@@ -655,7 +655,7 @@ namespace CSC.CSClassroom.Service.Projects
 			{
 				await _emailProvider.SendMessageAsync
 				(
-					new List<EmailRecipient>() { new EmailRecipient($"{user.FirstName} {user.LastName}", user.EmailAddress) },
+					new List<EmailRecipient>() {new EmailRecipient($"{user.FirstName} {user.LastName}", user.EmailAddress)},
 					$"{submission.Checkpoint.Project.Name} {submission.Checkpoint.DisplayName} Feedback",
 					$"{submission.Feedback.Replace("\n", "<br>")}<br><br><a href=\"{markReadUrlBuilder(submission)}\">Click here</a> to mark this feedback as read."
 				);
@@ -666,12 +666,12 @@ namespace CSC.CSClassroom.Service.Projects
 			{
 				_logger.LogError
 				(
-					0, 
-					ex, 
-					"Failed to send e-mail to {emailAddress}", 
+					0,
+					ex,
+					"Failed to send e-mail to {emailAddress}",
 					submission.Commit.User.EmailAddress
 				);
-				
+
 				return new Tuple<Submission, bool>(submission, false);
 			}
 		}
@@ -693,7 +693,7 @@ namespace CSC.CSClassroom.Service.Projects
 							cm => cm.SectionMemberships.Any
 							(
 								sm => sm.SectionId == section.Id
-									  && sm.Role == SectionRole.Student
+								      && sm.Role == SectionRole.Student
 							)
 						)
 				)
@@ -718,8 +718,8 @@ namespace CSC.CSClassroom.Service.Projects
 		/// Loads a checkpoint from the database.
 		/// </summary>
 		private async Task<Checkpoint> LoadCheckpointAsync(
-			string classroomName, 
-			string projectName, 
+			string classroomName,
+			string projectName,
 			string checkpointName)
 		{
 			return await _dbContext.Checkpoints
