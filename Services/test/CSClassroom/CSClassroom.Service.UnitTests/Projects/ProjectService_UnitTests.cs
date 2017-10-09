@@ -452,11 +452,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		}
 
 		/// <summary>
-		/// Ensures that ProcessMissedPushEventsAsync creates a commit for a missing
-		/// push event.
+		/// Ensures that ProcessMissedCommitsForAllStudentsAsync creates a commit 
+		/// for a missing push event.
 		/// </summary>
 		[Fact]
-		public async Task ProcessMissedPushEventsAsync_CommitAdded()
+		public async Task ProcessMissedCommitsForAllStudentsAsync_CommitAdded()
 		{
 			var database = GetDatabaseBuilderWithProjectAndStudent().Build();
 
@@ -471,10 +471,79 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				pushEventProcessor: pushEventProcessor.Object
 			);
 
-			await projectService.ProcessMissedPushEventsAsync
+			await projectService.ProcessMissedCommitsForAllStudentsAsync
 			(
 				"Class1",
 				"Project1",
+				"BuildResultCallbackUrl"
+			);
+
+			database.Reload();
+
+			var newCommit = database.Context.Commits
+				.SingleOrDefault(commit => commit.Sha == "NewCommitSha");
+
+			Assert.NotNull(newCommit);
+		}
+
+		/// <summary>
+		/// Ensures that ProcessMissedCommitsForAllStudentsAsync creates a build 
+		/// job for a missing push event.
+		/// </summary>
+		[Fact]
+		public async Task ProcessMissedCommitsForAllStudentsAsync_BuildJobCreated()
+		{
+			var database = GetDatabaseBuilderWithProjectAndStudent().Build();
+
+			var pushEvent = GetPushEvent("refs/heads/master");
+			var pushEventRetriever = GetMockPushEventRetriever(pushEvent);
+			var pushEventProcessor = GetMockPushEventProcessor(pushEvent);
+
+			var projectService = GetProjectService
+			(
+				database.Context,
+				pushEventRetriever: pushEventRetriever.Object,
+				pushEventProcessor: pushEventProcessor.Object
+			);
+
+			await projectService.ProcessMissedCommitsForAllStudentsAsync
+			(
+				"Class1",
+				"Project1",
+				"BuildResultCallbackUrl"
+			);
+
+			pushEventProcessor.Verify(GetCreateBuildJobExpression(pushEvent), Times.Once);
+		}
+
+		/// <summary>
+		/// Ensures that ProcessMissedPushEventsAsync creates a commit for a missing
+		/// push event.
+		/// </summary>
+		[Fact]
+		public async Task ProcessMissedCommitsForStudentAsync_CommitAdded()
+		{
+			var database = GetDatabaseBuilderWithProjectAndStudent().Build();
+
+			var userId = database.Context.Users.First().Id;
+			database.Reload();
+
+			var pushEvent = GetPushEvent("refs/heads/master");
+			var pushEventRetriever = GetMockPushEventRetriever(pushEvent);
+			var pushEventProcessor = GetMockPushEventProcessor(pushEvent);
+
+			var projectService = GetProjectService
+			(
+				database.Context,
+				pushEventRetriever: pushEventRetriever.Object,
+				pushEventProcessor: pushEventProcessor.Object
+			);
+
+			await projectService.ProcessMissedCommitsForStudentAsync
+			(
+				"Class1",
+				"Project1",
+				userId,
 				"BuildResultCallbackUrl"
 			);
 
@@ -491,9 +560,12 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		/// push event.
 		/// </summary>
 		[Fact]
-		public async Task ProcessMissedPushEventsAsync_BuildJobCreated()
+		public async Task ProcessMissedCommitsForStudentAsync_BuildJobCreated()
 		{
 			var database = GetDatabaseBuilderWithProjectAndStudent().Build();
+
+			var userId = database.Context.Users.First().Id;
+			database.Reload();
 
 			var pushEvent = GetPushEvent("refs/heads/master");
 			var pushEventRetriever = GetMockPushEventRetriever(pushEvent);
@@ -506,15 +578,17 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				pushEventProcessor: pushEventProcessor.Object
 			);
 
-			await projectService.ProcessMissedPushEventsAsync
+			await projectService.ProcessMissedCommitsForStudentAsync
 			(
 				"Class1",
 				"Project1",
+				userId,
 				"BuildResultCallbackUrl"
 			);
 
 			pushEventProcessor.Verify(GetCreateBuildJobExpression(pushEvent), Times.Once);
 		}
+		
 		/// <summary>
 		/// Ensures that GetProjectStatusAsync returns the status of all projects
 		/// for a given student, when there are successful builds.

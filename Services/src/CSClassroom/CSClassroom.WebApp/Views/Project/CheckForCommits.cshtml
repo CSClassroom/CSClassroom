@@ -1,0 +1,29 @@
+@model CheckForCommitsViewModel
+
+@{
+    ViewData["Title"] = "Check for commits";
+}
+
+<h2>Check for commits</h2>
+<h4 style="color: blue; font-weight: bold">Project: @Model.Project.Name</h4>
+
+<div style="max-width: 700px">
+    <p>Normally, you will see progress for your build shortly after you commit. 
+        However, occasionally GitHub has problems that cause builds to be delayed. 
+        If you have commited more than <b>one full minute</b> ago, and are not seeing 
+        build progress for your commit, you can click the button below to check GitHub
+        for your commit (and start your build).</p>
+    <p style="color: red; font-weight: bold">Do NOT click the button below if you
+        have not yet waited a full minute since your commit. All attempts are logged.</p>
+    <div>
+        <form asp-action="CheckForCommitsConfirmed" method="post">
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            <div class="form-actions no-color">
+                <input type="submit" value="Check for commits" class="btn btn-default" />
+                <p></p>
+                <a asp-action="LatestBuildResult" asp-controller="Build" asp-route-userId="@Model.UserId">Back to latest build</a>
+            </div>
+        </form>
+    </div>
+</div>
+

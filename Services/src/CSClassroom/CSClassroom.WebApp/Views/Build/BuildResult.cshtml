@@ -63,3 +63,7 @@ else
 
 <br />
 <h4>@Html.ActionLink("Build History", "History", User != Model.User ? new { userId = Model.User.Id } : null)</h4>
+@if (Model.IsLatestBuild)
+{
+    <h5>@Html.ActionLink("Not your latest commit?", "CheckForCommits", "Project", User != Model.User ? new { userId = Model.User.Id } : null)</h5>
+}

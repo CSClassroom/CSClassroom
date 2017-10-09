@@ -292,6 +292,11 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		public async Task<IActionResult> CreateStudentRepositories(string projectName)
 		{
 			var project = await ProjectService.GetProjectAsync(ClassroomName, projectName);
+			if (project == null)
+			{
+				return NotFound();
+			}
+
 			var fileList = await ProjectService.GetTemplateFileListAsync(ClassroomName, projectName);
 
 			return View
@@ -364,19 +369,109 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		}
 
 		/// <summary>
-		/// Called when a commit is pushed to a GitHub repository
+		/// Called to check GitHub for any commits that did not trigger a
+		/// webhook notification, for a single student.
+		/// </summary>
+		[Route("Projects/{projectName}/CheckForCommits")]
+		[ClassroomAuthorization(ClassroomRole.General)]
+		public async Task<IActionResult> CheckForCommits(string projectName, int? userId)
+		{
+			if (userId == null)
+			{
+				userId = User.Id;
+			}
+
+			if (ClassroomRole < ClassroomRole.Admin && userId != User.Id)
+			{
+				return Forbid();
+			}
+
+			var project = await ProjectService.GetProjectAsync(ClassroomName, projectName);
+			if (project == null)
+			{
+				return NotFound();
+			}
+			
+			return View(new CheckForCommitsViewModel(project, userId.Value));
+		}
+
+		/// <summary>
+		/// Called to check GitHub for any commits that did not trigger a
+		/// webhook notification, for a single student.
 		/// </summary>
 		[HttpPost]
-		[Route("Projects/{projectName}/CheckForMissedPushEvents")]
-		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public async Task<IActionResult> CheckForMissedEvents(string projectName)
+		[Route("Projects/{projectName}/CheckForCommits")]
+		[ClassroomAuthorization(ClassroomRole.General)]
+		public async Task<IActionResult> CheckForCommitsConfirmed(string projectName, int? userId)
 		{
-			await ProjectService.ProcessMissedPushEventsAsync
+			if (userId == null)
+			{
+				userId = User.Id;
+			}
+
+			if (ClassroomRole < ClassroomRole.Admin && userId != User.Id)
+			{
+				return Forbid();
+			}
+
+			var result = await ProjectService.ProcessMissedCommitsForStudentAsync
+			(
+				ClassroomName,
+				projectName,
+				userId.Value,
+				Url.Action("OnBuildCompleted")
+			);
+
+			if (!result)
+			{
+				return NotFound();
+			}
+
+			return RedirectToAction
+			(
+				"LatestBuildResult", 
+				"Build", 
+				userId != User.Id ? new { userId } : null
+			);
+		}
+
+		/// <summary>
+		/// Called to check GitHub for any commits that did not trigger a
+		/// webhook notification.
+		/// </summary>
+		[Route("Projects/{projectName}/CheckForCommitsAllStudents")]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
+		public async Task<IActionResult> CheckForCommitsAllStudents(string projectName)
+		{
+			var project = await ProjectService.GetProjectAsync(ClassroomName, projectName);
+			if (project == null)
+			{
+				return NotFound();
+			}
+
+			return View(project);
+		}
+
+		/// <summary>
+		/// Called to check GitHub for any commits that did not trigger a
+		/// webhook notification.
+		/// </summary>
+		[HttpPost]
+		[Route("Projects/{projectName}/CheckForCommitsAllStudents")]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
+		public async Task<IActionResult> CheckForCommitsAllStudentsConfirmed(string projectName)
+		{
+			var result = await ProjectService.ProcessMissedCommitsForAllStudentsAsync
 			(
 				ClassroomName,
 				projectName,
 				Url.Action("OnBuildCompleted")
 			);
+
+			if (!result)
+			{
+				return NotFound();
+			}
 
 			return RedirectToAction("Admin");
 		}

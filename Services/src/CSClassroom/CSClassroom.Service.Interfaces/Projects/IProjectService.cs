@@ -68,11 +68,22 @@ namespace CSC.CSClassroom.Service.Projects
 			string buildResultCallbackUrl);
 
 		/// <summary>
-		/// Checks for missed push events.
+		/// Checks for missed push events for all students.
+		/// Returns false if the project does not exist.
 		/// </summary>
-		Task ProcessMissedPushEventsAsync(
+		Task<bool> ProcessMissedCommitsForAllStudentsAsync(
 			string classroomName,
 			string projectName,
+			string buildResultCallbackUrl);
+
+		/// <summary>
+		/// Checks for missed push events for a single student.
+		/// Returns false if the project or student does not exist.
+		/// </summary>
+		Task<bool> ProcessMissedCommitsForStudentAsync(
+			string classroomName,
+			string projectName,
+			int userId,
 			string buildResultCallbackUrl);
 
 		/// <summary>

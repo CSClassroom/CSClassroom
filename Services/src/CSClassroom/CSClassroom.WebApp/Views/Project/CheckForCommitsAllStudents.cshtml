@@ -1,0 +1,26 @@
+@model Project
+
+@{
+    ViewData["Title"] = "Check for commits";
+}
+
+<h2>Check for commits</h2>
+<h4 style="color: blue; font-weight: bold">Project: @Model.Name</h4>
+
+<div style="max-width: 700px">
+    <p>
+        This operation will look at all commits for the given project by all 
+        students, and queue up builds for any previously unknown commits. This 
+        is an expensive operation that should rarely be executed.
+    </p>
+    <div>
+        <form asp-action="CheckForCommitsAllStudentsConfirmed" method="post">
+            <div class="form-actions no-color">
+                <input type="submit" value="Check for commits" class="btn btn-default" />
+                <p></p>
+                <a asp-action="Admin">Back to project list</a>
+            </div>
+        </form>
+    </div>
+</div>
+

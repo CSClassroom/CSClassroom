@@ -307,6 +307,20 @@ namespace CSC.CSClassroom.Service.Projects
 		}
 
 		/// <summary>
+		/// Returns a list of students in the given classroom.
+		/// </summary>
+		private async Task<ClassroomMembership> GetStudentAsync(
+			Classroom classroom, 
+			int userId)
+		{
+			return await _dbContext.ClassroomMemberships
+				.Where(cm => cm.ClassroomId == classroom.Id)
+				.Where(cm => cm.UserId == userId)
+				.Include(cm => cm.User)
+				.SingleOrDefaultAsync();
+		}
+
+		/// <summary>
 		/// Verifies that a GitHub webhook payload is correctly signed.
 		/// </summary>
 		public bool VerifyGitHubWebhookPayloadSigned(byte[] content, string signature)
@@ -394,17 +408,72 @@ namespace CSC.CSClassroom.Service.Projects
 		}
 
 		/// <summary>
-		/// Checks for missed push events.
+		/// Checks for missed push events for all students.
+		/// Returns false if the project does not exist.
 		/// </summary>
-		public async Task ProcessMissedPushEventsAsync(
+		public async Task<bool> ProcessMissedCommitsForAllStudentsAsync(
 			string classroomName,
 			string projectName,
 			string buildResultCallbackUrl)
 		{
 			var project = await GetProjectAsync(classroomName, projectName);
+			if (project == null)
+			{
+				return false;
+			}
 
 			var students = await GetStudentsAsync(project.Classroom);
 
+			await ProcessMissedCommitsAsync
+			(
+				buildResultCallbackUrl, 
+				project, 
+				students
+			);
+
+			return true;
+		}
+		
+		/// <summary>
+		/// Checks for missed push events for a single student.
+		/// Returns false if the project or student does not exist.
+		/// </summary>
+		public async Task<bool> ProcessMissedCommitsForStudentAsync(
+			string classroomName,
+			string projectName,
+			int userId,
+			string buildResultCallbackUrl)
+		{
+			var project = await GetProjectAsync(classroomName, projectName);
+			if (project == null)
+			{
+				return false;
+			}
+
+			var student = await GetStudentAsync(project.Classroom, userId);
+			if (student == null)
+			{
+				return false;
+			}
+
+			await ProcessMissedCommitsAsync
+			(
+				buildResultCallbackUrl,
+				project, 
+				new List<ClassroomMembership>() {student}
+			);
+
+			return true;
+		}
+
+		/// <summary>
+		/// Checks for missed push events for a list of students.
+		/// </summary>
+		private async Task ProcessMissedCommitsAsync(
+			string buildResultCallbackUrl, 
+			Project project, 
+			IList<ClassroomMembership> students)
+		{
 			var pushEvents = await _pushEventRetriever
 				.GetAllPushEventsAsync(project, students);
 
@@ -414,7 +483,10 @@ namespace CSC.CSClassroom.Service.Projects
 
 			var existingCommits = new HashSet<CommitDescriptor>
 			(
-				commits.Select(c => new CommitDescriptor(c.Sha, c.ProjectId, c.UserId))
+				commits.Select
+				(
+					c => new CommitDescriptor(c.Sha, c.ProjectId, c.UserId)
+				)
 			);
 
 			await ProcessPushEventsAsync

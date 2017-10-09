@@ -33,9 +33,10 @@
                 @Html.DisplayFor(modelItem => item.ExplicitSubmissionRequired, "YesNo")
             </td>
             <td>
-                <a asp-action="CreateStudentRepositories" asp-route-projectName="@item.Name">Create Student Repositories</a> |
-                <a asp-action="SectionReport" asp-route-projectName="@item.Name">Student Build Status</a> |
+                <a asp-action="CreateStudentRepositories" asp-route-projectName="@item.Name">Create Repositories</a> |
+                <a asp-action="SectionReport" asp-route-projectName="@item.Name">Build Status</a> |
                 <a asp-action="Index" asp-controller="Checkpoint" asp-route-projectName="@item.Name">Checkpoints and Grading</a> |
+                <a asp-action="CheckForCommitsAllStudents" asp-route-projectName="@item.Name">Missed Commits</a> |
                 <a asp-action="Edit" asp-route-projectName="@item.Name">Edit</a> |
                 <a asp-action="Delete" asp-route-projectName="@item.Name">Delete</a>
             </td>
