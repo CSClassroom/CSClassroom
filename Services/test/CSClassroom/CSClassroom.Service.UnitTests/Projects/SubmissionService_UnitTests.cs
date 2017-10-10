@@ -704,7 +704,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 
 			var submissionService = GetSubmissionService(database.Context);
 
-			var results = await submissionService.GetUnreadFeedbackAsync(userId);
+			var results = await submissionService.GetUnreadFeedbackAsync
+			(
+				"Class1", 
+				userId
+			);
 
 			Assert.Equal(1, results.Count);
 			Assert.Equal("Project1", results[0].ProjectName);
@@ -731,7 +735,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 
 			var submissionService = GetSubmissionService(database.Context);
 
-			var results = await submissionService.GetUnreadFeedbackAsync(userId);
+			var results = await submissionService.GetUnreadFeedbackAsync
+			(
+				"Class1",
+				userId
+			);
 
 			Assert.Equal(0, results.Count);
 		}
@@ -777,16 +785,21 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		{
 			return new TestDatabaseBuilder()
 				.AddClassroom("Class1")
+				.AddClassroom("Class2")
 				.AddSection("Class1", "Period1")
+				.AddSection("Class2", "Period2")
 				.AddStudent("Student1", "Last1", "First1", "Class1", "Period1", "GitHubUser")
 				.AddStudent("Student2", "Last2", "First2", "Class1", "Period1", "GitHubUser")
 				.AddProject("Class1", "Project1")
+				.AddProject("Class2", "Project2")
 				.AddProjectTestClass("Class1", "Project1", "TestClass1")
 				.AddProjectTestClass("Class1", "Project1", "TestClass2")
 				.AddCheckpoint("Class1", "Project1", "Checkpoint1")
 				.AddCheckpoint("Class1", "Project1", "Checkpoint2")
+				.AddCheckpoint("Class2", "Project2", "Checkpoint1")
 				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint1", "Period1", CommitDates[0])
 				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint2", "Period1", CommitDates[3])
+				.AddCheckpointDueDate("Class2", "Project2", "Checkpoint1", "Period2", CommitDates[0])
 				.AddCheckpointTestClass("Class1", "Project1", "Checkpoint1", "TestClass1", required: true)
 				.AddCheckpointTestClass("Class1", "Project1", "Checkpoint1", "TestClass2", required: false)
 				.AddCheckpointTestClass("Class1", "Project1", "Checkpoint2", "TestClass1", required: true)
@@ -799,16 +812,19 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				.AddCommit("Class1", "Project1", "Student2", "Commit2", CommitDates[1], GetFailedBuild())
 				.AddCommit("Class1", "Project1", "Student2", "Commit3", CommitDates[2], GetSuccessfulBuild())
 				.AddCommit("Class1", "Project1", "Student2", "Commit4", CommitDates[3], GetSuccessfulBuild())
-				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student1", "Commit1", SubmissionDates[0], 
+				.AddCommit("Class2", "Project2", "Student1", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student1", "Commit1", SubmissionDates[0],
 					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
-				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student1", "Commit3", SubmissionDates[2], 
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student1", "Commit3", SubmissionDates[2],
 					2 /*pullRequest*/, feedback: null, sentFeedback: false, readFeedback: false)
 				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student2", "Commit1", SubmissionDates[0],
 					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
 				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student2", "Commit3", SubmissionDates[2],
 					2 /*pullRequest*/, "Feedback3", sentFeedback: true, readFeedback: false)
 				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student2", "Commit4", SubmissionDates[3],
-					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false);
+					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class2", "Project2", "Checkpoint1", "Student1", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: false);
 		}
 
 		/// <summary>

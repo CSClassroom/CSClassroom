@@ -549,9 +549,12 @@ namespace CSC.CSClassroom.Service.Projects
 		/// <summary>
 		/// Returns all unread feedback for the given user.
 		/// </summary>
-		public async Task<IList<UnreadFeedbackResult>> GetUnreadFeedbackAsync(int userId)
+		public async Task<IList<UnreadFeedbackResult>> GetUnreadFeedbackAsync(
+			string classroomName,
+			int userId)
 		{
 			return await _dbContext.Submissions
+				.Where(s => s.Commit.Project.Classroom.Name == classroomName)
 				.Where(s => s.Commit.UserId == userId)
 				.Where(s => s.FeedbackSent && s.DateFeedbackRead == null)
 				.OrderBy(s => s.DateFeedbackSaved)
@@ -599,14 +602,11 @@ namespace CSC.CSClassroom.Service.Projects
 			Section section,
 			DateTime dueDate)
 		{
-			return await _dbContext.Submissions
+			var submissions = await _dbContext.Submissions
 				.Where
 				(
 					submission =>
 						submission.Checkpoint.ProjectId == checkpoint.ProjectId &&
-						submission.Checkpoint
-							.SectionDates.First(sd => sd.SectionId == section.Id)
-							.DueDate <= dueDate &&
 						submission.Commit.User.ClassroomMemberships.Any
 						(
 							cm => cm.SectionMemberships.Any
@@ -620,6 +620,15 @@ namespace CSC.CSClassroom.Service.Projects
 				.Include(submission => submission.Commit.User.ClassroomMemberships)
 				.Include(submission => submission.Checkpoint.SectionDates)
 				.ToListAsync();
+
+			return submissions
+				.Where
+				(
+					s => s.Checkpoint
+						.SectionDates
+						.First(sd => sd.SectionId == section.Id)
+						.DueDate <= dueDate
+				).ToList();
 		}
 
 		/// <summary>

@@ -110,6 +110,8 @@ namespace CSC.CSClassroom.Service.Projects
 		/// <summary>
 		/// Returns all unread feedback for the given user.
 		/// </summary>
-		Task<IList<UnreadFeedbackResult>> GetUnreadFeedbackAsync(int userId);
+		Task<IList<UnreadFeedbackResult>> GetUnreadFeedbackAsync(
+			string classroomName,
+			int userId);
 	}
 }

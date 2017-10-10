@@ -116,6 +116,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			var unreadFeedback = await SubmissionService.GetUnreadFeedbackAsync
 			(
+				ClassroomName,
 				userId.Value
 			);
 
@@ -173,6 +174,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			var unreadFeedback = await SubmissionService.GetUnreadFeedbackAsync
 			(
+				ClassroomName,
 				buildResult.Build.Commit.UserId
 			);
 
