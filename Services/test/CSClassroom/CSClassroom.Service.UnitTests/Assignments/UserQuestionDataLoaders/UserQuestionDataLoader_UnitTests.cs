@@ -190,6 +190,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataLoaders
 				Assert.NotNull(uqd);
 				Assert.Equal(uqd, results.GetUserQuestionData(assignmentQuestionId));
 				Assert.Equal(database.Context.Users.First().Id, uqd.UserId);
+				Assert.NotNull(uqd.User);
+				Assert.Single(uqd.User.ClassroomMemberships);
+				Assert.NotNull(uqd.User.ClassroomMemberships.First().Classroom);
 			}
 		}
 

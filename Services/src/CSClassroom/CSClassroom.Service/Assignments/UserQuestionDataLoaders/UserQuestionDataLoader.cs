@@ -138,7 +138,9 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders
 				.Where(uqd => uqd.AssignmentQuestion.Assignment.Classroom.Name == _classroomName)
 				.Where(uqd => uqd.AssignmentQuestion.AssignmentId == _assignmentId)
 				.Where(uqd => uqd.UserId == _userId)
-				.Include(uqd => uqd.User);
+				.Include(uqd => uqd.User)
+				.ThenInclude(u => u.ClassroomMemberships)
+				.ThenInclude(cm => cm.Classroom);
 
 			if (includeSubmissions)
 			{
@@ -167,9 +169,15 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders
 
 				if (userQuestionData == null)
 				{
+					var user = await _dbContext.Users
+						.Include(u => u.ClassroomMemberships)
+						.ThenInclude(cm => cm.Classroom)
+						.SingleAsync(u => u.Id == _userId);
+
 					userQuestionData = new UserQuestionData()
 					{
 						UserId = _userId,
+						User = user,
 						AssignmentQuestionId = assignmentQuestion.Id,
 						AssignmentQuestion = assignmentQuestion
 					};
