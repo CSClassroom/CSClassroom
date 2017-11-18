@@ -19,7 +19,8 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 		IList<Assignment> FilterAssignments(
 			IList<Assignment> assignments,
 			Section section,
-			string assignmentGroupName = null);
+			string assignmentGroupName = null,
+			DateTime? maxDueDate = null);
 
 		/// <summary>
 		/// Returns a list of assignment groups for the given section,

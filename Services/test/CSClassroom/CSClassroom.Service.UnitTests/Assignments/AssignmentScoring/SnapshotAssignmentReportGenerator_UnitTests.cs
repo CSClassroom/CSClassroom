@@ -76,7 +76,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 			(
 				section,
 				users,
-				new FilterAssignmentsCall(assignments, filteredAssignments),
+				new FilterAssignmentsCall
+				(
+					assignments, 
+					filteredAssignments, 
+					null /* assignmentGroupName */, 
+					snapshotDate
+				),
 				new FilterSubmissionsCall
 				(
 					submissions,

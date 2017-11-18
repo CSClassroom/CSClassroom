@@ -142,7 +142,7 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 			return newAssignmentResults
 				.Where
 				(
-					assignmentGroupResults => assignmentGroupResults
+					sectionAssignmentResults => sectionAssignmentResults
 						.AssignmentGroupResults
 						.Any(includeResult)
 				)

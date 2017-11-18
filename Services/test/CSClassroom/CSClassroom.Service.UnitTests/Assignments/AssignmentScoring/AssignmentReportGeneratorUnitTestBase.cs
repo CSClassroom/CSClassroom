@@ -38,16 +38,23 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 			public string AssignmentGroupName { get; }
 
 			/// <summary>
+			/// The snapshot date to filter to (if any).
+			/// </summary>
+			public DateTime? SnapshotDate { get; }
+
+			/// <summary>
 			/// Constructor.
 			/// </summary>
 			public FilterAssignmentsCall(
 				IList<Assignment> assignments,
 				IList<Assignment> filteredAssignments,
-				string assignmentGroupName = null)
+				string assignmentGroupName = null,
+				DateTime? snapshotDate = null)
 			{
 				Assignments = assignments;
 				FilteredAssignments = filteredAssignments;
 				AssignmentGroupName = assignmentGroupName;
+				SnapshotDate = snapshotDate;
 			}
 		}
 		
@@ -174,7 +181,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 					(
 						filterAssignmentsCall.Assignments, 
 						section, 
-						filterAssignmentsCall.AssignmentGroupName
+						filterAssignmentsCall.AssignmentGroupName,
+						filterAssignmentsCall.SnapshotDate
 					)
 				).Returns(filterAssignmentsCall.FilteredAssignments);
 

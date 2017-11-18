@@ -115,7 +115,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 			var assignmentFilter = new Mock<IAssignmentFilter>();
 
 			assignmentFilter
-				.Setup(m => m.FilterAssignments(assignments, section, assignmentGroupName))
+				.Setup(m => m.FilterAssignments(assignments, section, assignmentGroupName, null /*maxDueDate*/))
 				.Returns(filteredAssignments);
 
 			assignmentFilter

@@ -50,7 +50,9 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 			var sectionAssignments = _assignmentFilter.FilterAssignments
 			(
 				assignments,
-				section
+				section,
+				assignmentGroupName: null,
+				maxDueDate: snapshotDate
 			);
 
 			var assignmentGroups = _assignmentFilter.GetAssignmentGroups

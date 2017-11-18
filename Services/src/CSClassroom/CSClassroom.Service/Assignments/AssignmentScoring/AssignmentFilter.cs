@@ -17,14 +17,15 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 		public IList<Assignment> FilterAssignments(
 			IList<Assignment> assignments,
 			Section section,
-			string assignmentGroupName = null)
+			string assignmentGroupName = null,
+			DateTime? maxDueDate = null)
 		{
-			return assignments
+			var filteredAssignments = assignments
 				.Where(a => assignmentGroupName == null || a.GroupName == assignmentGroupName)
 				.Where
 				(
 					a => section == null
-						 || (a.DueDates?.Any(d => d.Section == section) ?? false)
+					     || (a.DueDates?.Any(d => d.Section == section) ?? false)
 				)
 				.OrderBy
 				(
@@ -32,6 +33,23 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 				)
 				.ThenBy(a => a.Name, new NaturalComparer())
 				.ToList();
+
+			if (maxDueDate != null)
+			{
+				var assignmentGroupDueDates = assignments
+					.GroupBy(a => a.GroupName)
+					.ToDictionary
+					(
+						g => g.Key,
+						g => g.Max(a => a.DueDates.Single(d => d.Section == section).DueDate)
+					);
+
+				filteredAssignments = filteredAssignments
+					.Where(a => assignmentGroupDueDates[a.GroupName] <= maxDueDate)
+					.ToList();
+			}
+
+			return filteredAssignments;
 		}
 
 		/// <summary>
