@@ -140,7 +140,7 @@ else
 <br />
 @if (Model.PastSubmissions.Any())
 {
-    @Html.Partial("_PastSubmissions", Model.PastSubmissions)
+    @Html.Partial("_PastSubmissions", new PastSubmissions(Model.User.Id, Model.PastSubmissions))
 }
 
 <hr/>

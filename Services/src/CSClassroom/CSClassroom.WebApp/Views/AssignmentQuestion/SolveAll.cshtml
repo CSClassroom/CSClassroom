@@ -71,7 +71,7 @@ else
 
     if (pastSubmissions.Any())
     {
-        @Html.Partial("_PastSubmissions", pastSubmissions)
+        @Html.Partial("_PastSubmissions", new PastSubmissions(Model[0].User.Id, pastSubmissions))
     }
 }
 

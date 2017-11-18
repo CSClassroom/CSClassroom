@@ -58,7 +58,7 @@
 
 @if (Model.QuestionSubmitted.PastSubmissions.Any())
 {
-    @Html.Partial("_PastSubmissions", Model.QuestionSubmitted.PastSubmissions)
+    @Html.Partial("_PastSubmissions", new PastSubmissions(Model.QuestionSubmitted.User.Id, Model.QuestionSubmitted.PastSubmissions))
 }
 
 <hr />

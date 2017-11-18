@@ -1,20 +1,26 @@
 ﻿@using CSC.CSClassroom.WebApp.Extensions
 @using CSC.CSClassroom.WebApp.Providers
 @inject ITimeZoneProvider TimeZoneProvider;
-@model IList<DateTime>
+@model PastSubmissions
+
+@{
+    int? linkUserId = Model.UserId != ViewBag.User.Id
+        ? Model.UserId
+        : (int?) null;
+}
 
 <h4>All submissions:</h4>
 <ul>
-    @foreach (var submissionDate in Model)
+    @foreach (var submissionDate in Model.SubmissionTimes)
     {
         <li>
             @if (ViewBag.Assignment.CombinedSubmissions)
             {
-                @Html.ActionLink(submissionDate.FormatLongDateTime(TimeZoneProvider), "ViewAllSubmissions", new {submissionDate = submissionDate.ToEpoch()})
+                @Html.ActionLink(submissionDate.FormatLongDateTime(TimeZoneProvider), "ViewAllSubmissions", new {submissionDate = submissionDate.ToEpoch(), userId = linkUserId})
             }
             else
             {
-                @Html.ActionLink(submissionDate.FormatLongDateTime(TimeZoneProvider), "ViewSubmission", new {submissionDate = submissionDate.ToEpoch()})
+                @Html.ActionLink(submissionDate.FormatLongDateTime(TimeZoneProvider), "ViewSubmission", new {submissionDate = submissionDate.ToEpoch(), userId = linkUserId })
             }
         </li>
     }
