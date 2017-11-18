@@ -60,7 +60,7 @@
 <h3>Total Score: @Math.Round(Model.Sum(result => result.ScoreWithLateness), 1, MidpointRounding.AwayFromZero) / @Model.Sum(result => result.QuestionPoints)</h3>
 @if (Model[0].QuestionSubmitted.User.Id == User.Id)
 {
-    if (Model.Any(result => result.QuestionSubmitted.AnyAttemptsRemaining && result.ScoreWithoutLateness < result.QuestionPoints))
+    if (Model.Any(result => result.QuestionSubmitted.Status.AllowNewAttempt && result.ScoreWithoutLateness < result.QuestionPoints))
     {
         <h3>@Html.ActionLink("Try Again", "SolveAll")</h3>
     }

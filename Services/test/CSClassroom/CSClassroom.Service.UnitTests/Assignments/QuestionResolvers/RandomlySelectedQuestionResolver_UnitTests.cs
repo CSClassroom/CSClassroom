@@ -19,33 +19,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 	public class RandomlySelectedQuestionResolver_UnitTests : QuestionResolverUnitTestBase
 	{
 		/// <summary>
-		/// Ensures that ResolveUnsolvedQuestionAsync returns null if no attempts
-		/// are remaining.
-		/// </summary>
-		[Fact]
-		public async Task ResolveUnsolvedQuestionAsync_NoAttemptsRemaining_ReturnsNull()
-		{
-			var userQuestionData = CreateUserQuestionData(attemptsRemaining: false);
-
-			var resolver = new RandomlySelectedQuestionResolver
-			(
-				userQuestionData,
-				dbContext: null,
-				questionLoaderFactory: null
-			);
-
-			var result = await resolver.ResolveUnsolvedQuestionAsync();
-
-			Assert.Null(result);
-		}
-
-		/// <summary>
 		/// Ensures that ResolveUnsolvedQuestionAsync loads the question whose
-		/// ID is equal to the seed stored in the UserQuestionData object,
-		/// when there are attempts remaining.
+		/// ID is equal to the seed stored in the UserQuestionData object.
 		/// </summary>
 		[Fact]
-		public async Task ResolveUnsolvedQuestionAsync_AttemptsRemaining_ReturnsCachedGeneratedQuestion()
+		public async Task ResolveUnsolvedQuestionAsync_ReturnsCachedGeneratedQuestion()
 		{
 			var database = GetDatabase().Build();
 
@@ -83,15 +61,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 		}
 
 		/// <summary>
-		/// Ensures that ResolveUnsolvedQuestionAsync loads the question whose
-		/// ID is equal to the seed stored in the user's submission, regardless
-		/// of whether or not there are attempts remaining.
+		/// Ensures that ResolveSolvedQuestionAsync loads the question whose
+		/// ID is equal to the seed stored in the user's submission.
 		/// </summary>
-		[Theory]
-		[InlineData(true)]
-		[InlineData(false)]
-		public async Task ResolveSolvedQuestionAsync_ReturnsCachedGeneratedQuestion(
-			bool attemptsRemaining)
+		[Fact]
+		public async Task ResolveSolvedQuestionAsync_ReturnsCachedGeneratedQuestion()
 		{
 			var database = GetDatabase().Build();
 
@@ -102,7 +76,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 
 			var userQuestionData = CreateUserQuestionData
 			(
-				attemptsRemaining,
+				attemptsRemaining: true,
 				seed: 12345
 			);
 

@@ -32,6 +32,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 			var implFactory = new UserQuestionDataUpdaterImplFactory
 			(
 				dbContext: null,
+				questionStatusCalculator: null,
 				questionGenerator: null,
 				seedGenerator: null,
 				questionSelector: null,

@@ -16,31 +16,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 	public class GeneratedQuestionTemplateResolver_UnitTests : QuestionResolverUnitTestBase
 	{
 		/// <summary>
-		/// Ensures that ResolveUnsolvedQuestionAsync returns null if no attempts
-		/// are remaining.
-		/// </summary>
-		[Fact]
-		public async Task ResolveUnsolvedQuestionAsync_NoAttemptsRemaining_ReturnsNull()
-		{
-			var userQuestionData = CreateUserQuestionData(attemptsRemaining: false);
-
-			var resolver = new GeneratedQuestionTemplateResolver
-			(
-				userQuestionData,
-				jsonSerializer: null
-			);
-
-			var result = await resolver.ResolveUnsolvedQuestionAsync();
-
-			Assert.Null(result);
-		}
-
-		/// <summary>
 		/// Ensures that ResolveUnsolvedQuestionAsync deserializes and returns
-		/// the cached generated question, when the user has attempts remaining.
+		/// the cached generated question.
 		/// </summary>
 		[Fact]
-		public async Task ResolveUnsolvedQuestionAsync_AttemptsRemaining_ReturnsCachedGeneratedQuestion()
+		public async Task ResolveUnsolvedQuestionAsync_ReturnsCachedGeneratedQuestion()
 		{
 			var userQuestionData = CreateUserQuestionData
 			(
@@ -74,7 +54,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 		[Theory]
 		[InlineData(true)]
 		[InlineData(false)]
-		public async Task ResolveSolvedQuestionAsync_AttemptsRemaining_ReturnsCachedGeneratedQuestion(
+		public async Task ResolveSolvedQuestionAsync_ReturnsCachedGeneratedQuestion(
 			bool attemptsRemaining)
 		{
 			var userQuestionData = CreateUserQuestionData

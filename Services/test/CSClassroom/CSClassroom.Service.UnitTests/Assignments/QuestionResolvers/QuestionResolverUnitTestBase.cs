@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Classrooms;
+using CSC.CSClassroom.Model.Users;
+using CSC.CSClassroom.Service.UnitTests.Utilities;
 
 namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 {
@@ -20,7 +23,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 			int templateQuestionId = 1,
 			string cachedQuestionData = null,
 			int? seed = null,
-			Question question = null)
+			Question question = null,
+			Classroom classroom = null,
+			User user = null)
 		{
 			return new UserQuestionData()
 			{
@@ -30,14 +35,16 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 					{
 						MaxAttempts = attemptsRemaining
 							? (int?)null
-							: 1
+							: 1,
+						Classroom = classroom
 					},
 					QuestionId = templateQuestionId,
 					Question = question
 				},
 				NumAttempts = 1,
 				CachedQuestionData = cachedQuestionData,
-				Seed = seed
+				Seed = seed,
+				User = user
 			};
 		}
 

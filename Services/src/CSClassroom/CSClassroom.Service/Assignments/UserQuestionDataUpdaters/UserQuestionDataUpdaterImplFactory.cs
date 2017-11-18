@@ -6,6 +6,7 @@ using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
+using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
 
 namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 {
@@ -36,6 +37,7 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 		/// </summary>
 		public UserQuestionDataUpdaterImplFactory(
 			DatabaseContext dbContext,
+			IQuestionStatusCalculator questionStatusCalculator,
 			IQuestionGenerator questionGenerator,
 			IGeneratedQuestionSeedGenerator seedGenerator,
 			IRandomlySelectedQuestionSelector questionSelector,
@@ -43,6 +45,7 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 		{
 			_generatedUserQuestionDataUpdater = new GeneratedUserQuestionDataUpdater
 			(
+				questionStatusCalculator,
 				questionGenerator,
 				seedGenerator,
 				timeProvider
@@ -51,6 +54,7 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 			_randomlySelectedUserQuestionDataUpdater = new RandomlySelectedUserQuestionDataUpdater
 			(
 				dbContext,
+				questionStatusCalculator,
 				questionSelector
 			);
 

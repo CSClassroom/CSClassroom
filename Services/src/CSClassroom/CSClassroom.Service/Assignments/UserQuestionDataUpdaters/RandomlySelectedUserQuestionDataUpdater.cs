@@ -7,6 +7,7 @@ using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Assignments.QuestionLoaders;
+using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
@@ -28,6 +29,11 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 		private readonly IList<UserQuestionData> _userQuestionDatas;
 
 		/// <summary>
+		/// The user question status calculator.
+		/// </summary>
+		private readonly IQuestionStatusCalculator _questionStatusCalculator;
+
+		/// <summary>
 		/// The random number provider.
 		/// </summary>
 		private readonly IRandomlySelectedQuestionSelector _randomlySelectedQuestionSelector;
@@ -37,9 +43,11 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 		/// </summary>
 		public RandomlySelectedUserQuestionDataUpdater(
 			DatabaseContext dbContext,
+			IQuestionStatusCalculator questionStatusCalculator,
 			IRandomlySelectedQuestionSelector randomlySelectedQuestionSelector)
 		{
 			_dbContext = dbContext;
+			_questionStatusCalculator = questionStatusCalculator;
 			_randomlySelectedQuestionSelector = randomlySelectedQuestionSelector;
 			_userQuestionDatas = new List<UserQuestionData>();
 		}
@@ -97,7 +105,10 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 		/// </summary>
 		private bool NewQuestionNeededForNextAttempt(UserQuestionData userQuestionData)
 		{
-			return userQuestionData.Seed == null && userQuestionData.AnyAttemptsRemaining;
+			var status = _questionStatusCalculator
+				.GetQuestionStatus(userQuestionData);
+
+			return userQuestionData.Seed == null && status.AllowNewAttempt;
 		}
 
 		/// <summary>

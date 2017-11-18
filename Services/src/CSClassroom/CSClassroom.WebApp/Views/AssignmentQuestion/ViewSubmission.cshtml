@@ -1,12 +1,13 @@
 ﻿@using System.Runtime.InteropServices.ComTypes
 @using System.Threading.Tasks
 @using CSC.Common.Infrastructure.Serialization
+@using CSC.CSClassroom.Model.Assignments.ServiceResults
 @using CSC.CSClassroom.WebApp.Extensions
 @using CSC.CSClassroom.WebApp.Providers
 @using CSC.CSClassroom.WebApp.ViewModels.Shared
 @using CSC.CSClassroom.Model.Users
 @inject ITimeZoneProvider TimeZoneProvider;
-@model CSC.CSClassroom.Model.Assignments.ServiceResults.SubmissionResult
+@model SubmissionResult
 
 <style>
     .table thead {
@@ -29,7 +30,6 @@
 @if (Model.QuestionSubmitted.User.Id != User.Id)
 {
     <h2 style="color: blue">Submission from @Model.QuestionSubmitted.User.FirstName @Model.QuestionSubmitted.User.LastName</h2>
-    <br />
 }
 
 <h2>@Assignment.Name</h2>
@@ -49,7 +49,7 @@
 </form>
 @Html.Partial($"_QuestionScore", Model)
 
-@if (Model.QuestionSubmitted.AnyAttemptsRemaining && Model.ScoreWithoutLateness < Model.QuestionPoints)
+@if (Model.QuestionSubmitted.Status.AllowNewAttempt && Model.ScoreWithoutLateness < Model.QuestionPoints)
 {
     <h4>@Html.ActionLink("Try Again", "Solve", new { id = Model.QuestionSubmitted.AssignmentQuestionId })</h4>
 }

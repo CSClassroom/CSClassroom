@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Serialization;
 using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Service.Assignments.QuestionResolvers;
 using Moq;
 using Xunit;
@@ -16,30 +17,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 	public class DefaultQuestionResolver_UnitTests : QuestionResolverUnitTestBase
 	{
 		/// <summary>
-		/// Ensures that ResolveUnsolvedQuestionAsync returns null if no attempts
-		/// are remaining.
+		/// Ensures that ResolveUnsolvedQuestionAsync returns the actual question.
 		/// </summary>
 		[Fact]
-		public async Task ResolveUnsolvedQuestionAsync_NoAttemptsRemaining_ReturnsNull()
-		{
-			var userQuestionData = CreateUserQuestionData
-			(
-				attemptsRemaining: false,
-				question: new MultipleChoiceQuestion()
-			);
-
-			var resolver = new DefaultQuestionResolver(userQuestionData);
-			var result = await resolver.ResolveUnsolvedQuestionAsync();
-
-			Assert.Null(result);
-		}
-
-		/// <summary>
-		/// Ensures that ResolveUnsolvedQuestionAsync returns the actual question,
-		/// if there are attempts remaining.
-		/// </summary>
-		[Fact]
-		public async Task ResolveUnsolvedQuestionAsync_AttemptsRemaining_ReturnsCachedGeneratedQuestion()
+		public async Task ResolveUnsolvedQuestionAsync_ReturnsCachedGeneratedQuestion()
 		{
 			var resolvedQuestion = new MultipleChoiceQuestion();
 			var userQuestionData = CreateUserQuestionData
@@ -55,13 +36,12 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 		}
 
 		/// <summary>
-		/// Ensures that ResolveSolvedQuestionAsync returns the actual question,
-		/// regardless of whether or not there are attempts remaining.
+		/// Ensures that ResolveSolvedQuestionAsync returns the actual question.
 		/// </summary>
 		[Theory]
 		[InlineData(true)]
 		[InlineData(false)]
-		public async Task ResolveSolvedQuestionAsync_AttemptsRemaining_ReturnsCachedGeneratedQuestion(
+		public async Task ResolveSolvedQuestionAsync_ReturnsCachedGeneratedQuestion(
 			bool attemptsRemaining)
 		{
 			var resolvedQuestion = new MultipleChoiceQuestion();

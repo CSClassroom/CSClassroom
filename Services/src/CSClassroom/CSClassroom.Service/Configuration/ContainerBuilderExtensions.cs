@@ -139,6 +139,7 @@ namespace CSC.CSClassroom.Service.Configuration
 			builder.RegisterType<QuestionModelFactory>().As<IQuestionModelFactory>();
 			builder.RegisterType<QuestionResolverFactory>().As<IQuestionResolverFactory>();
 			builder.RegisterType<QuestionSolver>().As<IQuestionSolver>();
+			builder.RegisterType<QuestionStatusCalculator>().As<IQuestionStatusCalculator>();
 			builder.RegisterType<QuestionUpdaterFactory>().As<IQuestionUpdaterFactory>();
 			builder.RegisterType<RandomlySelectedQuestionSelector>().As<IRandomlySelectedQuestionSelector>();
 			builder.RegisterType<UserQuestionDataLoaderFactory>().As<IUserQuestionDataLoaderFactory>();

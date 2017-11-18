@@ -5,7 +5,11 @@ using System.Threading.Tasks;
 using CSC.Common.Infrastructure.System;
 using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
+using CSC.CSClassroom.Model.Classrooms;
+using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
+using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
 using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 using Moq;
 using Xunit;
@@ -29,10 +33,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		[Fact]
 		public void AddToBatch_NotGeneratedQuestionTemplate_Throws()
 		{
-			var userQuestionData = CreateUserQuestionData(attemptsRemaining: true);
+			var userQuestionData = CreateUserQuestionData();
 			userQuestionData.AssignmentQuestion.Question = new MethodQuestion();
 
-			var updater = CreateUserQuestionDataUpdater();
+			var statusCalculator = GetMockQuestionStatusCalculator(userQuestionData);
+			var updater = CreateUserQuestionDataUpdater(statusCalculator);
 
 			Assert.Throws<InvalidOperationException>
 			(
@@ -47,8 +52,15 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		[Fact]
 		public async Task UpdateAllAsync_CurrentSeedIsNullAndNoAttemptsRemaining_QuestionNotRegenerated()
 		{
-			var userQuestionData = CreateUserQuestionData(attemptsRemaining: false);
-			var updater = CreateUserQuestionDataUpdater();
+			var userQuestionData = CreateUserQuestionData();
+
+			var statusCalculator = GetMockQuestionStatusCalculator
+			(
+				userQuestionData, 
+				attemptsRemaining: false
+			);
+			
+			var updater = CreateUserQuestionDataUpdater(statusCalculator);
 
 			updater.AddToBatch(userQuestionData);
 			await updater.UpdateAllAsync();
@@ -68,13 +80,18 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		{
 			var userQuestionData = CreateUserQuestionData
 			(
-				attemptsRemaining: attemptsRemaining,
 				previouslyUsedSeed: 100,
 				dateTemplateModified: DateTime.MinValue,
 				dateGenerated: DateTime.MaxValue
 			);
 
-			var updater = CreateUserQuestionDataUpdater();
+			var statusCalculator = GetMockQuestionStatusCalculator
+			(
+				userQuestionData, 
+				attemptsRemaining
+			);
+			
+			var updater = CreateUserQuestionDataUpdater(statusCalculator);
 			updater.AddToBatch(userQuestionData);
 
 			await updater.UpdateAllAsync();
@@ -85,16 +102,20 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		/// <summary>
 		/// Ensures that UpdateAllAsync regenerates a question when the current
 		/// seed is null (indicating the question must be regenerated), if there
-		/// are attempts remaining.
+		/// are attempts remaining (or if the user is an admin).
 		/// </summary>
 		[Fact]
 		public async Task UpdateAllAsync_CurrentSeedIsNullAndAttemptsRemaining_QuestionRegenerated()
 		{
 			var userQuestionData = CreateUserQuestionData
 			(
-				attemptsRemaining: true,
-				templateId: 1,
 				numSeeds: 100
+			);
+
+			var statusCalculator = GetMockQuestionStatusCalculator
+			(
+				userQuestionData, 
+				attemptsRemaining: true
 			);
 
 			var questionGenerator = CreateMockQuestionGenerator();
@@ -107,6 +128,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 
 			var updater = CreateUserQuestionDataUpdater
 			(
+				statusCalculator,
 				questionGenerator,
 				seedGenerator
 			);
@@ -130,12 +152,16 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		{
 			var userQuestionData = CreateUserQuestionData
 			(
-				attemptsRemaining: true,
-				templateId: 1,
 				numSeeds: 100,
 				previouslyUsedSeed: 150,
 				dateTemplateModified: DateTime.MaxValue,
 				dateGenerated: DateTime.MinValue
+			);
+
+			var statusCalculator = GetMockQuestionStatusCalculator
+			(
+				userQuestionData, 
+				attemptsRemaining: true
 			);
 
 			var questionGenerator = CreateMockQuestionGenerator();
@@ -148,6 +174,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 
 			var updater = CreateUserQuestionDataUpdater
 			(
+				statusCalculator,
 				questionGenerator,
 				seedGenerator
 			);
@@ -171,17 +198,22 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		{
 			var userQuestionData = CreateUserQuestionData
 			(
-				attemptsRemaining: true,
-				templateId: 1,
 				numSeeds: 100,
 				previouslyUsedSeed: 75,
 				dateTemplateModified: DateTime.MaxValue,
 				dateGenerated: DateTime.MinValue
 			);
 
+			var statusCalculator = GetMockQuestionStatusCalculator
+			(
+				userQuestionData, 
+				attemptsRemaining: true
+			);
+			
 			var questionGenerator = CreateMockQuestionGenerator();
 			var updater = CreateUserQuestionDataUpdater
 			(
+				statusCalculator,
 				questionGenerator
 			);
 
@@ -203,11 +235,15 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		{
 			var userQuestionData = CreateUserQuestionData
 			(
-				attemptsRemaining: true,
-				templateId: 1,
 				numSeeds: 100
 			);
 
+			var statusCalculator = GetMockQuestionStatusCalculator
+			(
+				userQuestionData, 
+				attemptsRemaining: true
+			);
+			
 			var questionGenerator = CreateMockQuestionGenerator(fails: true);
 			var seedGenerator = CreateMockSeedGenerator
 			(
@@ -218,6 +254,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 
 			var updater = CreateUserQuestionDataUpdater
 			(
+				statusCalculator,
 				questionGenerator,
 				seedGenerator
 			);
@@ -234,8 +271,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		/// Creates a new UserQuestionData object.
 		/// </summary>
 		private UserQuestionData CreateUserQuestionData(
-			int templateId = 1,
-			bool attemptsRemaining = true,
 			int? previouslyUsedSeed = null,
 			int? numSeeds = null,
 			DateTime? dateTemplateModified = null,
@@ -243,18 +278,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		{
 			return new UserQuestionData()
 			{
-				NumAttempts = 1,
 				Seed = previouslyUsedSeed,
 				CachedQuestionDataTime = dateGenerated,
 				LastQuestionSubmission = "LastQuestionSubmission",
 				AssignmentQuestion = new AssignmentQuestion()
 				{
-					Assignment = new Assignment
-					{
-						MaxAttempts = attemptsRemaining
-							? 2
-							: 1
-					},
 					Question = new GeneratedQuestionTemplate()
 					{
 						Id = 1,
@@ -264,6 +292,29 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 					}
 				}
 			};
+		}
+
+		/// <summary>
+		/// Returns a mock QuestionStatusCalculator.
+		/// </summary>
+		private IQuestionStatusCalculator GetMockQuestionStatusCalculator(
+			UserQuestionData userQuestionData,
+			bool attemptsRemaining = true)
+		{
+			var statusCalculator = new Mock<IQuestionStatusCalculator>();
+			statusCalculator
+				.Setup(m => m.GetQuestionStatus(userQuestionData))
+				.Returns
+				(
+					new UserQuestionStatus
+					(
+						numAttempts: 0, 
+						answeredCorrectly: false, 
+						numAttemptsRemaining: attemptsRemaining ? (int?)null : 0
+					)
+				);
+			
+			return statusCalculator.Object;
 		}
 
 		/// <summary>
@@ -323,6 +374,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		/// Creates a new GeneratedUserQuestionDataUpdater.
 		/// </summary>
 		private GeneratedUserQuestionDataUpdater CreateUserQuestionDataUpdater(
+			IQuestionStatusCalculator questionStatusCalculator = null,
 			IQuestionGenerator questionGenerator = null,
 			IGeneratedQuestionSeedGenerator seedGenerator = null)
 		{
@@ -333,6 +385,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 
 			return new GeneratedUserQuestionDataUpdater
 			(
+				questionStatusCalculator,
 				questionGenerator,
 				seedGenerator,
 				mockTimeProvider.Object

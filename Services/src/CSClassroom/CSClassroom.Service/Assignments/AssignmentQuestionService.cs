@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
 using CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders;
 
@@ -124,7 +125,7 @@ namespace CSC.CSClassroom.Service.Assignments
 					assignmentQuestionId
 				);
 
-				if (questionToSolve.AnyAttemptsRemaining)
+				if (questionToSolve.Status.AllowNewAttempt)
 				{
 					questionsToSolve.Add(questionToSolve);
 				}

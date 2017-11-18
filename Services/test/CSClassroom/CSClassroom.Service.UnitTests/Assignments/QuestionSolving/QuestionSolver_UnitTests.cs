@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Serialization;
 using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Model.Assignments.ServiceResults;
+using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Assignments.AssignmentScoring;
 using CSC.CSClassroom.Service.Assignments.QuestionGraders;
@@ -45,11 +46,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			(
 				assignmentQuestionId: 1,
 				assignmentQuestionName: "Question 1",
-				user: user,
-				numAttempts: 1,
-				numAttemptsRemaining: 1
+				user: user
 			);
 
+			var status = CreateUserQuestionStatus();
+			var statusCalculator = GetMockQuestionStatusCalculator(store, status);
 			var resolvedQuestion = new MethodQuestion();
 			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever(store);
 			var resolverFactory = GetMockQuestionResolverFactory
@@ -61,6 +62,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
+				questionStatusCalculator: statusCalculator,
 				assignmentProgressRetriever: assignmentProgressRetriever
 			);
 
@@ -74,8 +76,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			Assert.Equal("Question 1", result.Name);
 			Assert.Equal(resolvedQuestion, result.Question);
 			Assert.Equal(user, result.User);
-			Assert.Equal(1, result.NumAttempts);
-			Assert.Equal(1, result.NumAttemptsRemaining);
+			Assert.Equal(status, result.Status);
 		}
 
 		/// <summary>
@@ -89,12 +90,14 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			bool isInteractive)
 		{
 			var store = GetUserQuestionDataStore(interactive: isInteractive);
+			var statusCalculator = GetMockQuestionStatusCalculator(store);
 			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever(store);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
 
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
+				questionStatusCalculator: statusCalculator,
 				assignmentProgressRetriever: assignmentProgressRetriever
 			);
 
@@ -120,12 +123,14 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 		{
 			var expectedSeed = generated ? 1 : (int?)null;
 			var store = GetUserQuestionDataStore(generated: generated, seed: 1);
+			var statusCalculator = GetMockQuestionStatusCalculator(store);
 			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever(store);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
 
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
+				questionStatusCalculator: statusCalculator,
 				assignmentProgressRetriever: assignmentProgressRetriever
 			);
 
@@ -147,6 +152,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 		public async Task GetQuestionToSolveAsync_SeparateSubmissions_ReturnsAssignmentProgress()
 		{
 			var store = GetUserQuestionDataStore(interactive: true);
+			var statusCalculator = GetMockQuestionStatusCalculator(store);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
 			var assignmentProgress = new AssignmentProgress
 			(
@@ -164,6 +170,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
+				questionStatusCalculator: statusCalculator,
 				assignmentProgressRetriever: assignmentProgressRetriever
 			);
 
@@ -186,9 +193,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 		{
 			var store = GetUserQuestionDataStore(interactive: false);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
+			var statusCalculator = GetMockQuestionStatusCalculator(store);
 			var questionSolver = GetQuestionSolver
 			(
-				questionResolverFactory: resolverFactory
+				questionResolverFactory: resolverFactory,
+				questionStatusCalculator: statusCalculator
 			);
 
 			var result = await questionSolver.GetQuestionToSolveAsync
@@ -216,6 +225,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 				: null;
 
 			var store = GetUserQuestionDataStore(lastSubmission: "LastSubmission");
+			var statusCalculator = GetMockQuestionStatusCalculator(store);
 			var serializer = GetMockJsonSerializer("LastSubmission", lastSubmission);
 			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever(store);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
@@ -223,6 +233,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
+				questionStatusCalculator: statusCalculator,
 				assignmentProgressRetriever: assignmentProgressRetriever,
 				jsonSerializer: serializer
 			);
@@ -269,12 +280,14 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 				pastSubmissions: GetPastSubmissions(actualPastSubmissions)
 			);
 			
+			var statusCalculator = GetMockQuestionStatusCalculator(store);
 			var assignmentProgressRetriever = GetMockAssignmentProgressRetriever(store);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
 
 			var questionSolver = GetQuestionSolver
 			(
 				questionResolverFactory: resolverFactory,
+				questionStatusCalculator: statusCalculator,
 				assignmentProgressRetriever: assignmentProgressRetriever
 			);
 
@@ -293,15 +306,16 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 		[Fact]
 		public async Task GradeSubmissionAsync_NoAttemptsRemaining_Throws()
 		{
-			var store = GetUserQuestionDataStore
-			(
-				numAttempts: 1,
-				numAttemptsRemaining: 0
-			);
-
+			var store = GetUserQuestionDataStore();
+			var status = CreateUserQuestionStatus(attemptsRemaining: false);
+			var statusCalculator = GetMockQuestionStatusCalculator(store, status);
 			var submission = CreateQuestionSubmission(assignmentQuestionId: 1);
 			var resolverFactory = GetMockQuestionResolverFactory(store);
-			var questionSolver = GetQuestionSolver(resolverFactory);
+			var questionSolver = GetQuestionSolver
+			(
+				resolverFactory, 
+				questionStatusCalculator: statusCalculator
+			);
 
 			await Assert.ThrowsAsync<InvalidOperationException>
 			(
@@ -315,23 +329,26 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 		}
 
 		/// <summary>
-		/// Ensures that GradeSubmissionAsync throws if no attempts are remaining.
+		/// Ensures that GradeSubmissionAsync updates the user's stored results if
+		/// they have attempts remaining.
 		/// </summary>
 		[Theory]
-		[InlineData(false)]
 		[InlineData(true)]
+		[InlineData(false)]
 		public async Task GradeSubmissionAsync_AttemptsRemaining_UserQuestionDataUpdated(
 			bool isInteractive)
 		{
 			var store = GetUserQuestionDataStore
 			(
 				numAttempts: 1,
-				numAttemptsRemaining: 2,
+				numAttemptsRemaining: 1,
 				interactive: isInteractive,
 				cachedQuestionData: "Cached",
 				seed: 12345
 			);
 
+			var status = CreateUserQuestionStatus(attemptsRemaining: true);
+			var statusCalculator = GetMockQuestionStatusCalculator(store, status);
 			var submission = CreateQuestionSubmission(assignmentQuestionId: 1);
 			var resolvedQuestion = new MethodQuestion();
 			var resolverFactory = GetMockQuestionResolverFactory(store, resolvedQuestion);
@@ -347,6 +364,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			(
 				questionResolverFactory: resolverFactory, 
 				questionGraderFactory: graderFactory,
+				questionStatusCalculator: statusCalculator,
 				jsonSerializer: serializer
 			);
 
@@ -389,6 +407,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 				interactive: true
 			);
 
+			var status = CreateUserQuestionStatus(attemptsRemaining: true);
+			var statusCalculator = GetMockQuestionStatusCalculator(store, status);
 			var submission = CreateQuestionSubmission(assignmentQuestionId: 1);
 			var resolvedQuestion = new MethodQuestion();
 			var scoredQuestionResult = new ScoredQuestionResult(result: null, score: 0.5);
@@ -405,6 +425,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			(
 				questionResolverFactory: resolverFactory,
 				questionGraderFactory: graderFactory,
+				questionStatusCalculator: statusCalculator,
 				jsonSerializer: serializer
 			);
 
@@ -421,8 +442,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 
 		/// <summary>
 		/// Ensures that GradeSubmissionAsync returns the submission date back to the
-		/// user (omitting the result). This allows the client to navigate to the page
-		/// with the submission results.
+		/// user (omitting the result), for non-interactive submissions. This allows 
+		/// the client to navigate to the page with the submission results.
 		/// </summary>
 		[Fact]
 		public async Task GradeSubmissionAsync_NonInteractiveAttemptsRemaining_ReturnsResultWithDate()
@@ -434,6 +455,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 				interactive: false
 			);
 
+			var status = CreateUserQuestionStatus(attemptsRemaining: true);
+			var statusCalculator = GetMockQuestionStatusCalculator(store, status);
 			var submission = CreateQuestionSubmission(assignmentQuestionId: 1);
 			var resolvedQuestion = new MethodQuestion();
 			var resolverFactory = GetMockQuestionResolverFactory(store, resolvedQuestion);
@@ -449,6 +472,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			(
 				questionResolverFactory: resolverFactory,
 				questionGraderFactory: graderFactory,
+				questionStatusCalculator: statusCalculator,
 				jsonSerializer: serializer
 			);
 
@@ -486,8 +510,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 		}
 
 		/// <summary>
-		/// Ensures that the simple properties on the object returned by
-		/// GetQuestionToSolveAsync are correct.
+		/// Ensures that GetSubmissionResultAsync returns the correct result when a submission
+		/// is found with hte given date.
 		/// </summary>
 		[Fact]
 		public async Task GetSubmissionResultAsync_SubmissionFound_ReturnsCorrectResult()
@@ -515,6 +539,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 				)
 			);
 
+			var status = CreateUserQuestionStatus();
+			var statusCalculator = GetMockQuestionStatusCalculator(store, status);
 			var submission = CreateQuestionSubmission(assignmentQuestionId: 1);
 			var serializer = GetMockJsonSerializer("Contents", submission);
 			var resolvedQuestion = new MultipleChoiceQuestion();
@@ -546,6 +572,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			(
 				questionResolverFactory: resolverFactory,
 				questionGraderFactory: graderFactory,
+				questionStatusCalculator: statusCalculator,
 				questionScoreCalculator: scoreCalculator,
 				jsonSerializer: serializer
 			);
@@ -565,8 +592,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			Assert.Equal(user, result.QuestionSubmitted.User);
 			Assert.Equal(submission, result.QuestionSubmitted.LastSubmission);
 			Assert.False(result.QuestionSubmitted.Interactive);
-			Assert.Equal(1, result.QuestionSubmitted.NumAttempts);
-			Assert.Equal(1, result.QuestionSubmitted.NumAttemptsRemaining);
+			Assert.Equal(status, result.QuestionSubmitted.Status);
 			Assert.Equal(1, result.QuestionSubmitted.PastSubmissions.Count);
 			Assert.Equal(SubmissionDate, result.QuestionSubmitted.PastSubmissions[0]);
 			Assert.Null(result.QuestionSubmitted.AssignmentProgress);
@@ -621,7 +647,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 					Assignment = new Assignment()
 					{
 						CombinedSubmissions = !interactive,
-						MaxAttempts = numAttempts + numAttemptsRemaining
+						MaxAttempts = numAttempts + numAttemptsRemaining,
 					},
 					Points = questionPoints,
 					Question = generated
@@ -665,6 +691,26 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			submission.Object.AssignmentQuestionId = assignmentQuestionId;
 
 			return submission.Object;
+		}
+
+		/// <summary>
+		/// Returns a mock QuestionStatusCalculator.
+		/// </summary>
+		private IQuestionStatusCalculator GetMockQuestionStatusCalculator(
+			UserQuestionDataStore store,
+			UserQuestionStatus userQuestionStatus = null)
+		{
+			var userQuestionData = store.GetUserQuestionData
+			(
+				store.GetLoadedAssignmentQuestionIds()[0]
+			);
+			
+			var statusCalculator = new Mock<IQuestionStatusCalculator>();
+			statusCalculator
+				.Setup(m => m.GetQuestionStatus(userQuestionData))
+				.Returns(userQuestionStatus ?? CreateUserQuestionStatus());
+			
+			return statusCalculator.Object;
 		}
 
 		/// <summary>
@@ -831,6 +877,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 		private QuestionSolver GetQuestionSolver(
 			IQuestionResolverFactory questionResolverFactory = null,
 			IQuestionGraderFactory questionGraderFactory = null,
+			IQuestionStatusCalculator questionStatusCalculator = null,
 			IQuestionScoreCalculator questionScoreCalculator = null,
 			IAssignmentProgressRetriever assignmentProgressRetriever = null,
 			IJsonSerializer jsonSerializer = null)
@@ -839,9 +886,24 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionSolving
 			(
 				questionResolverFactory,
 				questionGraderFactory,
+				questionStatusCalculator,
 				questionScoreCalculator,
 				assignmentProgressRetriever,
 				jsonSerializer
+			);
+		}
+
+		/// <summary>
+		/// Returns a new user question status object.
+		/// </summary>
+		private UserQuestionStatus CreateUserQuestionStatus(
+			bool attemptsRemaining = true)
+		{
+			return new UserQuestionStatus
+			(
+				numAttempts: 0, 
+				answeredCorrectly: false, 
+				numAttemptsRemaining: attemptsRemaining ? (int?)null : 0
 			);
 		}
 	}

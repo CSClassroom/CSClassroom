@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using CSC.Common.Infrastructure.System;
 using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
+using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
+using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
 using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
@@ -31,13 +34,12 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		{
 			var userQuestionData = CreateUserQuestionData
 			(
-				randomlySelectedQuestion: null, 
-				attemptsRemaining: true
+				randomlySelectedQuestion: null
 			);
 
 			userQuestionData.AssignmentQuestion.Question = new MethodQuestion();
 
-			var updater = CreateUserQuestionDataUpdater(dbContext: null);
+			var updater = CreateUserQuestionDataUpdater();
 
 			Assert.Throws<InvalidOperationException>
 			(
@@ -62,11 +64,16 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 			var userQuestionData = CreateUserQuestionData
 			(
 				randomlySelectedQuestion, 
-				attemptsRemaining: false,
 				previousQuestionId: null
 			);
+			
+			var statusCalculator = GetMockQuestionStatusCalculator
+			(
+				userQuestionData, 
+				attemptsRemaining: false
+			);
 
-			var updater = CreateUserQuestionDataUpdater(database.Context);
+			var updater = CreateUserQuestionDataUpdater(database.Context, statusCalculator);
 			updater.AddToBatch(userQuestionData);
 
 			await updater.UpdateAllAsync();
@@ -98,11 +105,16 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 			var userQuestionData = CreateUserQuestionData
 			(
 				randomlySelectedQuestion,
-				attemptsRemaining: attemptsRemaining,
 				previousQuestionId: currentChoice.Id
 			);
+			
+			var statusCalculator = GetMockQuestionStatusCalculator
+			(
+				userQuestionData, 
+				attemptsRemaining
+			);
 
-			var updater = CreateUserQuestionDataUpdater(database.Context);
+			var updater = CreateUserQuestionDataUpdater(database.Context, statusCalculator);
 			updater.AddToBatch(userQuestionData);
 
 			await updater.UpdateAllAsync();
@@ -133,8 +145,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 			var userQuestionData = CreateUserQuestionData
 			(
 				randomlySelectedQuestion,
-				attemptsRemaining: true,
 				previousQuestionId: null
+			);
+			
+			var statusCalculator = GetMockQuestionStatusCalculator
+			(
+				userQuestionData, 
+				attemptsRemaining: true
 			);
 			
 			var questionSelector = CreateMockQuestionSelector
@@ -147,6 +164,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 			var updater = CreateUserQuestionDataUpdater
 			(
 				database.Context,
+				statusCalculator,
 				questionSelector
 			);
 
@@ -180,8 +198,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 			var userQuestionData = CreateUserQuestionData
 			(
 				randomlySelectedQuestion,
-				attemptsRemaining: true,
 				previousQuestionId: 12345
+			);
+			
+			var statusCalculator = GetMockQuestionStatusCalculator
+			(
+				userQuestionData, 
+				attemptsRemaining: true
 			);
 
 			var questionSelector = CreateMockQuestionSelector
@@ -194,6 +217,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 			var updater = CreateUserQuestionDataUpdater
 			(
 				database.Context,
+				statusCalculator,
 				questionSelector
 			);
 
@@ -209,7 +233,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		/// </summary>
 		private UserQuestionData CreateUserQuestionData(
 			RandomlySelectedQuestion randomlySelectedQuestion,
-			bool attemptsRemaining = true,
 			int? previousQuestionId = null)
 		{
 			return new UserQuestionData()
@@ -219,15 +242,32 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 				Seed = previousQuestionId,
 				AssignmentQuestion = new AssignmentQuestion()
 				{
-					Assignment = new Assignment
-					{
-						MaxAttempts = attemptsRemaining
-							? 2
-							: 1
-					},
 					Question = randomlySelectedQuestion
 				}
 			};
+		}
+
+		/// <summary>
+		/// Returns a mock QuestionStatusCalculator.
+		/// </summary>
+		private IQuestionStatusCalculator GetMockQuestionStatusCalculator(
+			UserQuestionData userQuestionData,
+			bool attemptsRemaining = true)
+		{
+			var statusCalculator = new Mock<IQuestionStatusCalculator>();
+			statusCalculator
+				.Setup(m => m.GetQuestionStatus(userQuestionData))
+				.Returns
+				(
+					new UserQuestionStatus
+					(
+						numAttempts: 0, 
+						answeredCorrectly: false, 
+						numAttemptsRemaining: attemptsRemaining ? (int?)null : 0
+					)
+				);
+			
+			return statusCalculator.Object;
 		}
 
 		/// <summary>
@@ -288,12 +328,14 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 		/// Creates a new RandomlySelectedUserQuestionDataUpdater.
 		/// </summary>
 		private RandomlySelectedUserQuestionDataUpdater CreateUserQuestionDataUpdater(
-			DatabaseContext dbContext,
+			DatabaseContext dbContext = null,
+			IQuestionStatusCalculator questionStatusCalculator = null,
 			IRandomlySelectedQuestionSelector questionSelector = null)
 		{
 			return new RandomlySelectedUserQuestionDataUpdater
 			(
 				dbContext,
+				questionStatusCalculator,
 				questionSelector
 			);
 		}

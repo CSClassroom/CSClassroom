@@ -7,6 +7,7 @@ using CSC.Common.Infrastructure.System;
 using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Service.Assignments.QuestionGeneration;
+using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
 using MoreLinq;
 
 namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
@@ -16,6 +17,11 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 	/// </summary>
 	public class GeneratedUserQuestionDataUpdater : IUserQuestionDataUpdater
 	{
+		/// <summary>
+		/// The user question status calculator.
+		/// </summary>
+		private readonly IQuestionStatusCalculator _questionStatusCalculator;
+		
 		/// <summary>
 		/// The question generator.
 		/// </summary>
@@ -40,10 +46,12 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 		/// Constructor.
 		/// </summary>
 		public GeneratedUserQuestionDataUpdater(
+			IQuestionStatusCalculator questionStatusCalculator,
 			IQuestionGenerator questionGenerator,
 			IGeneratedQuestionSeedGenerator seedGenerator, 
 			ITimeProvider timeProvider)
 		{
+			_questionStatusCalculator = questionStatusCalculator;
 			_questionGenerator = questionGenerator;
 			_seedGenerator = seedGenerator;
 			_timeProvider = timeProvider;
@@ -111,8 +119,13 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 		/// </summary>
 		private bool IsNewSeedRequired(UserQuestionData userQuestionData)
 		{
-			return    userQuestionData.AnyAttemptsRemaining
-				   && userQuestionData.Seed == null;
+			var allowNewAttempt = _questionStatusCalculator
+				.GetQuestionStatus(userQuestionData)
+				.AllowNewAttempt;
+				
+			var generationRequired = userQuestionData.Seed == null;
+
+			return allowNewAttempt && generationRequired;
 		}
 
 		/// <summary>

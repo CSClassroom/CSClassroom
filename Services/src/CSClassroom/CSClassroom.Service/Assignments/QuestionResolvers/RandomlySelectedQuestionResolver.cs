@@ -15,8 +15,13 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 	/// <summary>
 	/// Resolves randomly selected questions.
 	/// </summary>
-	public class RandomlySelectedQuestionResolver : QuestionResolver
+	public class RandomlySelectedQuestionResolver : IQuestionResolver
 	{
+		/// <summary>
+		/// The question to resolve.
+		/// </summary>
+		private readonly UserQuestionData _userQuestionData;
+		
 		/// <summary>
 		/// The database context.
 		/// </summary>
@@ -33,8 +38,9 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 		public RandomlySelectedQuestionResolver(
 			UserQuestionData userQuestionData,
 			DatabaseContext dbContext, 
-			IQuestionLoaderFactory questionLoaderFactory) : base(userQuestionData)
+			IQuestionLoaderFactory questionLoaderFactory)
 		{
+			_userQuestionData = userQuestionData;
 			_dbContext = dbContext;
 			_questionLoaderFactory = questionLoaderFactory;
 		}
@@ -42,15 +48,15 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 		/// <summary>
 		/// Returns the next question to be solved in the next submission.
 		/// </summary>
-		protected override async Task<Question> ResolveUnsolvedQuestionImplAsync()
+		public async Task<Question> ResolveUnsolvedQuestionAsync()
 		{
-			return await ResolveQuestionAsync(UserQuestionData.Seed.Value);
+			return await ResolveQuestionAsync(_userQuestionData.Seed.Value);
 		}
 
 		/// <summary>
 		/// Returns the actual question that was solved on a given submission.
 		/// </summary>
-		public override async Task<Question> ResolveSolvedQuestionAsync(
+		public async Task<Question> ResolveSolvedQuestionAsync(
 			UserQuestionSubmission submission)
 		{
 			return await ResolveQuestionAsync(submission.Seed.Value);

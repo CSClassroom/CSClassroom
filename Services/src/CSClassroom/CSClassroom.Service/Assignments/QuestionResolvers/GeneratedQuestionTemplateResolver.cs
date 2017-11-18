@@ -12,8 +12,13 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 	/// <summary>
 	/// Resolves generated question templates.
 	/// </summary>
-	public class GeneratedQuestionTemplateResolver : QuestionResolver
+	public class GeneratedQuestionTemplateResolver : IQuestionResolver
 	{
+		/// <summary>
+		/// The question to resolve.
+		/// </summary>
+		private readonly UserQuestionData _userQuestionData;
+		
 		/// <summary>
 		/// The json serializer.
 		/// </summary>
@@ -24,23 +29,24 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 		/// </summary>
 		public GeneratedQuestionTemplateResolver(
 			UserQuestionData userQuestionData,
-			IJsonSerializer jsonSerializer) : base(userQuestionData)
+			IJsonSerializer jsonSerializer)
 		{
 			_jsonSerializer = jsonSerializer;
+			_userQuestionData = userQuestionData;
 		}
 
 		/// <summary>
 		/// Returns the next question to be solved in the next submission.
 		/// </summary>
-		protected override async Task<Question> ResolveUnsolvedQuestionImplAsync()
+		public async Task<Question> ResolveUnsolvedQuestionAsync()
 		{
-			return await ResolveQuestionAsync(UserQuestionData.CachedQuestionData);
+			return await ResolveQuestionAsync(_userQuestionData.CachedQuestionData);
 		}
 
 		/// <summary>
 		/// Returns the actual question that was solved on a given submission.
 		/// </summary>
-		public override async Task<Question> ResolveSolvedQuestionAsync(
+		public async Task<Question> ResolveSolvedQuestionAsync(
 			UserQuestionSubmission submission)
 		{
 			return await ResolveQuestionAsync(submission.CachedQuestionData);
@@ -52,7 +58,7 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 		private Task<Question> ResolveQuestionAsync(string cachedQuestionData)
 		{
 			var actualQuestion = _jsonSerializer.Deserialize<Question>(cachedQuestionData);
-			actualQuestion.Id = UserQuestionData.AssignmentQuestion.QuestionId;
+			actualQuestion.Id = _userQuestionData.AssignmentQuestion.QuestionId;
 
 			return Task.FromResult(actualQuestion);
 		}

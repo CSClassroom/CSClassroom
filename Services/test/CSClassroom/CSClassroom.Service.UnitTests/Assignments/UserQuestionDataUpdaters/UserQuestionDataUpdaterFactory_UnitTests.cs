@@ -20,6 +20,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.UserQuestionDataUpdaters
 			var factory = new UserQuestionDataUpdaterFactory
 			(
 				dbContext: null,
+				questionStatusCalculator: null,
 				questionGenerator: null,
 				seedGenerator: null,
 				questionSelector: null,

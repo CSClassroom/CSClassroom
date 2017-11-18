@@ -7,6 +7,7 @@ using CSC.Common.Infrastructure.Serialization;
 using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Model.Assignments.ServiceResults;
+using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Assignments.AssignmentScoring;
 using CSC.CSClassroom.Service.Assignments.QuestionGraders;
@@ -32,6 +33,11 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 		private readonly IQuestionGraderFactory _questionGraderFactory;
 
 		/// <summary>
+		/// Determines the status of a question for the current user.
+		/// </summary>
+		private readonly IQuestionStatusCalculator _questionStatusCalculator;
+
+		/// <summary>
 		/// The question score calculator.
 		/// </summary>
 		private readonly IQuestionScoreCalculator _questionScoreCalculator;
@@ -52,12 +58,14 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 		public QuestionSolver(
 			IQuestionResolverFactory questionResolverFactory,
 			IQuestionGraderFactory questionGraderFactory,
+			IQuestionStatusCalculator questionStatusCalculator,
 			IQuestionScoreCalculator questionScoreCalculator,
 			IAssignmentProgressRetriever assignmentProgressRetriever,
 			IJsonSerializer jsonSerializer)
 		{
 			_questionResolverFactory = questionResolverFactory;
 			_questionGraderFactory = questionGraderFactory;
+			_questionStatusCalculator = questionStatusCalculator;
 			_questionScoreCalculator = questionScoreCalculator;
 			_assignmentProgressRetriever = assignmentProgressRetriever;
 			_jsonSerializer = jsonSerializer;
@@ -73,25 +81,14 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 			var userQuestionData = userQuestionDataStore
 				.GetUserQuestionData(assignmentQuestionId);
 
-			var assignmentProgress = await GetAssignmentProgressAsync(userQuestionData);
 			var lastSubmission = GetLastQuestionAttempt(userQuestionData);
-			var seed = GetSeedToDisplay(userQuestionData);
-			var pastSubmissions = GetPastSubmissions(userQuestionData);
 			var resolvedQuestion = await ResolveUnsolvedQuestionAsync(userQuestionData);
 
-			return new QuestionToSolve
+			return await GetQuestionToSolveAsync
 			(
-				userQuestionData.AssignmentQuestionId,
-				userQuestionData.AssignmentQuestion.Name,
-				resolvedQuestion,
-				seed,
-				userQuestionData.User,
-				lastSubmission,
-				userQuestionData.AssignmentQuestion.IsInteractive(),
-				userQuestionData.NumAttempts,
-				userQuestionData.NumAttemptsRemaining,
-				pastSubmissions,
-				assignmentProgress
+				userQuestionData, 
+				resolvedQuestion, 
+				lastSubmission
 			);
 		}
 
@@ -107,6 +104,8 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 			(
 				submission.AssignmentQuestionId
 			);
+			
+			var userQuestionStatus = GetUserQuestionStatus(userQuestionData);
 
 			var resolvedQuestion = await ResolveUnsolvedQuestionAsync
 			(
@@ -118,6 +117,7 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 				submission,
 				resolvedQuestion,
 				userQuestionData,
+				userQuestionStatus,
 				dateSubmitted
 			);
 
@@ -153,17 +153,21 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 				return null;
 			}
 
+			var submissionContents = _jsonSerializer
+				.Deserialize<QuestionSubmission>(submission.SubmissionContents);
+			
 			var resolvedQuestion = await ResolveSolvedQuestionAsync
 			(
 				userQuestionData,
 				submission
 			);
 
-			var assignmentProgress = await GetAssignmentProgressAsync(userQuestionData);
-			var seed = GetSeedToDisplay(userQuestionData);
-			var pastSubmissions = GetPastSubmissions(userQuestionData);
-			var submissionContents = _jsonSerializer
-				.Deserialize<QuestionSubmission>(submission.SubmissionContents);
+			var questionToSolve = await GetQuestionToSolveAsync
+			(
+				userQuestionData, 
+				resolvedQuestion, 
+				submissionContents
+			);
 
 			var scoredQuestionResult = await GradeQuestionAsync
 			(
@@ -173,20 +177,7 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 
 			return new SubmissionResult
 			(
-				new QuestionToSolve
-				(
-					userQuestionData.AssignmentQuestionId,
-					userQuestionData.AssignmentQuestion.Name,
-					resolvedQuestion,
-					seed,
-					userQuestionData.User,
-					submissionContents,
-					userQuestionData.AssignmentQuestion.IsInteractive(),
-					submission.UserQuestionData.NumAttempts,
-					userQuestionData.NumAttemptsRemaining,
-					pastSubmissions,
-					assignmentProgress
-				),
+				questionToSolve,
 				scoredQuestionResult.Result,
 				GetSubmissionScore(submission, dueDate, withLateness: false),
 				GetSubmissionScore(submission, dueDate, withLateness: true),
@@ -217,6 +208,34 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 		}
 
 		/// <summary>
+		/// Returns the question to solve.
+		/// </summary>
+		private async Task<QuestionToSolve> GetQuestionToSolveAsync(
+			UserQuestionData userQuestionData,
+			Question resolvedQuestion,
+			QuestionSubmission lastQuestionSubmission)
+		{
+			var userQuestionStatus = GetUserQuestionStatus(userQuestionData);
+			var assignmentProgress = await GetAssignmentProgressAsync(userQuestionData);
+			var seed = GetSeedToDisplay(userQuestionData);
+			var pastSubmissions = GetPastSubmissions(userQuestionData);
+			
+			return new QuestionToSolve
+			(
+				userQuestionData.AssignmentQuestionId,
+				userQuestionData.AssignmentQuestion.Name,
+				resolvedQuestion,
+				seed,
+				userQuestionData.User,
+				lastQuestionSubmission,
+				userQuestionData.AssignmentQuestion.IsInteractive(),
+				pastSubmissions,
+				userQuestionStatus,
+				assignmentProgress
+			);
+		}
+
+		/// <summary>
 		/// Returns the seed to display.
 		/// </summary>
 		private static int? GetSeedToDisplay(UserQuestionData userQuestionData)
@@ -229,8 +248,7 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 		/// <summary>
 		/// Returns a list of past submissions for a given question.
 		/// </summary>
-		private IList<DateTime> GetPastSubmissions(
-			UserQuestionData userQuestionData)
+		private IList<DateTime> GetPastSubmissions(UserQuestionData userQuestionData)
 		{
 			if (userQuestionData.AssignmentQuestion.IsInteractive())
 				return new List<DateTime>();
@@ -264,6 +282,14 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 				.CreateQuestionResolver(userQuestionData)
 				.ResolveSolvedQuestionAsync(userQuestionSubmission);
 		}
+
+		/// <summary>
+		/// Returns the status of the question for the current user.
+		/// </summary>
+		private UserQuestionStatus GetUserQuestionStatus(UserQuestionData uqd)
+		{
+			return _questionStatusCalculator.GetQuestionStatus(uqd);
+		}
 		
 		/// <summary>
 		/// Returns the progress for the assignment, for assignments that do
@@ -293,10 +319,13 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionSolvers
 			QuestionSubmission submission,
 			Question resolvedQuestion,
 			UserQuestionData userQuestionData,
+			UserQuestionStatus userQuestionStatus,
 			DateTime submissionDate)
 		{
-			if (!userQuestionData.AnyAttemptsRemaining)
+			if (!userQuestionStatus.AllowNewAttempt)
+			{
 				throw new InvalidOperationException("No attempts remaining.");
+			}
 
 			var scoredQuestionResult = await GradeQuestionAsync
 			(

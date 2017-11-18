@@ -560,9 +560,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 				user: null,
 				questionSubmission: null,
 				interactive: false,
-				numAttempts: 0,
-				numAttemptsRemaining: remaining,
 				pastSubmissions: null,
+				userQuestionStatus: new UserQuestionStatus
+				(
+					numAttempts: 1,
+					answeredCorrectly: false,
+					numAttemptsRemaining: remaining
+				), 
 				assignmentProgress: null
 			);
 		}

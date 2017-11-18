@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using CSC.Common.Infrastructure.Serialization;
 using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Assignments.ServiceResults;
 using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Assignments.QuestionLoaders;
+using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
 using CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters;
 
 namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
@@ -32,16 +34,23 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 		private readonly IQuestionLoaderFactory _questionLoaderFactory;
 
 		/// <summary>
+		/// The user question status calculator.
+		/// </summary>
+		private readonly IQuestionStatusCalculator _questionStatusCalculator;
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public QuestionResolverFactory(
 			DatabaseContext dbContext,
 			IJsonSerializer jsonSerializer,
-			IQuestionLoaderFactory questionLoaderFactory)
+			IQuestionLoaderFactory questionLoaderFactory,
+			IQuestionStatusCalculator questionStatusCalculator)
 		{
 			_dbContext = dbContext;
 			_jsonSerializer = jsonSerializer;
 			_questionLoaderFactory = questionLoaderFactory;
+			_questionStatusCalculator = questionStatusCalculator;
 		}
 
 		/// <summary>
@@ -49,9 +58,21 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionResolvers
 		/// </summary>
 		public IQuestionResolver CreateQuestionResolver(UserQuestionData userQuestionData)
 		{
-			return userQuestionData.AssignmentQuestion
+			var questionStatus = _questionStatusCalculator
+				.GetQuestionStatus(userQuestionData);
+			
+			var questionResolver = userQuestionData.AssignmentQuestion
 				.Question
 				.Accept(this, userQuestionData);
+
+			if (!questionStatus.AllowNewAttempt)
+			{
+				return new NoMoreAttemptsQuestionResolver(questionResolver);
+			}
+			else
+			{
+				return questionResolver;
+			}
 		}
 
 		/// <summary>

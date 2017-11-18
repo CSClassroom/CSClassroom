@@ -15,14 +15,13 @@
 @if (Model.User.Id != User.Id)
 {
     <h2 style="color: blue">Question view for @Model.User.FirstName @Model.User.LastName</h2>
-    <br />
 }
 
 <h2>@Assignment.Name</h2>
 <h4>@Model.Name</h4>
-@if (!Model.Interactive && Assignment.MaxAttempts.HasValue && Assignment.MaxAttempts.Value > 0 && Model.AnyAttemptsRemaining)
+@if (!Model.Interactive && Assignment.MaxAttempts.HasValue && Assignment.MaxAttempts.Value > 0 && Model.Status.AllowNewAttempt)
 {
-    <h5 style="color: blue">Attempt @(Model.NumAttempts + 1) / @Assignment.MaxAttempts</h5>
+    <h5 style="color: blue">Attempt @(Model.Status.NumAttempts + 1) / @Assignment.MaxAttempts</h5>
 }
 
 @if (ClassroomRole >= ClassroomRole.Admin)
@@ -30,9 +29,17 @@
     @Html.Partial("_EditQuestion", Model)
 }
 <p> </p>
-@if (!Model.AnyAttemptsRemaining)
+
+@if (!Model.Status.AllowNewAttempt)
 {
-    <span>You have made the maximum number of submissions for this question.</span>
+    if (Model.Status.AnsweredCorrectly)
+    {
+        <span>You have previously answered this question correctly.</span>
+    }
+    else
+    {
+        <span>You have made the maximum number of submissions for this question.</span>
+    }
 }
 else if (Assignment.AnswerInOrder && Model.AssignmentProgress.GetUnsolvedPriorQuestions().Any())
 {
@@ -63,9 +70,9 @@ else
             {
                 <p> </p>
                 <div class="form-group">
-                    @if (Model.NumAttemptsRemaining.HasValue)
+                    @if (Model.Status.NumAttemptsRemaining.HasValue)
                     {
-                        <span>Attempts Remaining: </span><span id="attemptsRemaining">@Model.NumAttemptsRemaining.Value</span><br />
+                        <span>Attempts Remaining: </span><span id="attemptsRemaining">@Model.Status.NumAttemptsRemaining.Value</span><br />
                     }
                     <input id="submit" type="submit" value="Submit" class="btn btn-default"/>
                     &nbsp;&nbsp;<input id="revert" type="button" value="Revert to default" class="btn btn-default" style="display: none"/>
@@ -78,8 +85,8 @@ else
             }
         </form>
         <script type="text/javascript">
-            var limitedAttempts = @(Model.NumAttemptsRemaining.HasValue ? "true" : "false");
-            var attemptsRemaining = @(Model.NumAttemptsRemaining.HasValue ? Model.NumAttemptsRemaining.ToString() : "null");
+            var limitedAttempts = @(Model.Status.NumAttemptsRemaining.HasValue ? "true" : "false");
+            var attemptsRemaining = @(Model.Status.NumAttemptsRemaining.HasValue ? Model.Status.NumAttemptsRemaining.ToString() : "null");
 
             $("#questionForm").ajaxForm({
                 beforeSend: function(e) {
