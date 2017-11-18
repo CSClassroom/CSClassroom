@@ -22,7 +22,7 @@
                 <div class="panel-body" style="line-height: 175%">
                     <table class="table">
                         <tbody>
-                        @foreach (var question in category)
+                        @foreach (var question in category.OrderBy(q => q.Name, new NaturalComparer()))
                         {
                             <tr>
                                 <td style="text-align: left">

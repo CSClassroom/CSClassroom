@@ -30,7 +30,9 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders
 		/// </summary>
 		public IList<int> GetLoadedAssignmentQuestionIds()
 		{
-			return _userQuestionDatas.Keys.ToList();
+			return _userQuestionDatas.Keys
+				.OrderBy(id => _userQuestionDatas[id].AssignmentQuestion.Order)
+				.ToList();
 		}
 
 		/// <summary>

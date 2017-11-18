@@ -380,7 +380,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 				assignmentQuestionIds.ToDictionary
 				(
 					id => id, 
-					id => (UserQuestionData)null
+					id => new UserQuestionData()
+					{
+						AssignmentQuestion = new AssignmentQuestion()
+						{
+							Id = id
+						}
+					}
 				)
 			);
 
