@@ -312,18 +312,17 @@ namespace CSC.CSClassroom.Service.Assignments
 				.Where(u => u.Id == userId)
 				.SingleOrDefaultAsync();
 
-			var section = !admin
-				? await _dbContext
-					.SectionMemberships
-					.Where
-					(
-						sm =>  sm.ClassroomMembership.UserId == userId
-							&& sm.ClassroomMembership.ClassroomId == classroom.Id
-							&& sm.Role == SectionRole.Student
-					)
-					.Select(sm => sm.Section)
-					.FirstOrDefaultAsync()
-				: null;
+			var section = await _dbContext
+				.SectionMemberships
+				.Where
+				(
+					sm =>    sm.ClassroomMembership.UserId == userId
+					      && sm.ClassroomMembership.Role != ClassroomRole.Admin
+					      && sm.ClassroomMembership.ClassroomId == classroom.Id
+					      && sm.Role == SectionRole.Student
+				)
+				.Select(sm => sm.Section)
+				.FirstOrDefaultAsync();
 
 			if (section == null && !admin)
 			{

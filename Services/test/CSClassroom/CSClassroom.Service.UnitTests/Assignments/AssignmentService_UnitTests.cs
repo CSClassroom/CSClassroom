@@ -572,9 +572,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 						It.Is<User>(user => user.UserName == "User1"),
 						It.Is<Section>
 						(
-							section => admin
-								? section == null
-								: section.Name == "Period1"
+							section => section.Name == "Period1"
 						),
 						It.Is<IList<Assignment>>
 						(
