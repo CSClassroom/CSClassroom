@@ -11,6 +11,7 @@ using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Assignments.AssignmentScoring;
 using CSC.CSClassroom.Service.Assignments.Validators;
 using Microsoft.EntityFrameworkCore;
+using MoreLinq;
 
 namespace CSC.CSClassroom.Service.Assignments
 {
@@ -84,7 +85,8 @@ namespace CSC.CSClassroom.Service.Assignments
 			var classroom = await LoadClassroomAsync(classroomName);
 			var section = classroom.Sections.SingleOrDefault(s => s.Name == sectionName);
 
-			IQueryable<AssignmentQuestion> assignmentQuestionsQuery = _dbContext.AssignmentQuestions
+			IQueryable<AssignmentQuestion> assignmentQuestionsQuery = _dbContext
+				.AssignmentQuestions
 				.Include(aq => aq.Question)
 				.Include(aq => aq.Assignment)
 				.Include(aq => aq.Assignment.Classroom)
@@ -406,12 +408,13 @@ namespace CSC.CSClassroom.Service.Assignments
 		/// </summary>
 		private async Task<bool> UpdateAssignmentAsync(Assignment assignment, IModelErrorCollection modelErrors)
 		{
+			UpdateQuestionOrder(assignment.Questions);
+			await UpdateQuestionNames(assignment.Questions);
+
 			if (!await _assignmentValidator.ValidateAssignmentAsync(assignment, modelErrors))
 			{
 				return false;
 			}
-
-			UpdateQuestionOrder(assignment.Questions);
 
 			if (string.IsNullOrWhiteSpace(assignment.GroupName))
 			{
@@ -440,7 +443,7 @@ namespace CSC.CSClassroom.Service.Assignments
 		/// <summary>
 		/// Updates the order of test classes.
 		/// </summary>
-		private void UpdateQuestionOrder(IEnumerable<AssignmentQuestion> assignmentQuestions)
+		private void UpdateQuestionOrder(IList<AssignmentQuestion> assignmentQuestions)
 		{
 			int index = 0;
 			foreach (var question in assignmentQuestions)
@@ -449,7 +452,29 @@ namespace CSC.CSClassroom.Service.Assignments
 				index++;
 			}
 		}
-		
+
+		/// <summary>
+		/// Updates the names of any question whose name was left blank.
+		/// </summary>
+		private async Task UpdateQuestionNames(IList<AssignmentQuestion> assignmentQuestions)
+		{
+			if (assignmentQuestions.Any(aq => string.IsNullOrWhiteSpace(aq.Name)))
+			{
+				var questionIds = assignmentQuestions.Select(aq => aq.QuestionId).ToHashSet();
+				var questionNames = await _dbContext.Questions
+					.Where(q => questionIds.Contains(q.Id))
+					.ToDictionaryAsync(q => q.Id, q => q.Name);
+
+				foreach (var assignmentQuestion in assignmentQuestions)
+				{
+					if (string.IsNullOrWhiteSpace(assignmentQuestion.Name))
+					{
+						assignmentQuestion.Name = questionNames[assignmentQuestion.QuestionId];
+					}
+				}
+			}
+		}
+
 		/// <summary>
 		/// Returns the submissions for a given section. Optionally filters
 		/// by assignment group name, user ID, and/or date.

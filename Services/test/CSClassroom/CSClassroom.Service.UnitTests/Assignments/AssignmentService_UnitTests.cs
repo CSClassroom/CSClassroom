@@ -145,8 +145,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 			Assert.Equal(DateTime.MaxValue, assignment.DueDates.First().DueDate);
 			Assert.Equal(2, assignment.Questions.Count);
 			Assert.Equal(questionIds[0], assignment.Questions[0].QuestionId);
+			Assert.Equal("Question1", assignment.Questions[0].Name);
 			Assert.Equal(0, assignment.Questions[0].Order);
 			Assert.Equal(questionIds[1], assignment.Questions[1].QuestionId);
+			Assert.Equal("Question2", assignment.Questions[1].Name);
 			Assert.Equal(1, assignment.Questions[1].Order);
 			Assert.Equal(1.0, assignment.Questions.First().Points);
 		}
@@ -269,6 +271,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 
 			var sectionIds = assignment.DueDates.Select(d => d.SectionId).ToList();
 			var questionIds = assignment.Questions.Select(aq => aq.QuestionId).ToList();
+			var newQuestion = database.Context.Questions.Single(q => q.Name == "Question4");
 
 			database.Reload();
 
@@ -276,6 +279,14 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 			assignment.DueDates.Remove(assignment.DueDates.First());
 			assignment.Questions.Remove(assignment.Questions.First());
 			assignment.Questions = assignment.Questions.Reverse().ToList();
+			assignment.Questions.Add
+			(
+				new AssignmentQuestion()
+				{
+					QuestionId = newQuestion.Id, 
+					Points = 1.0
+				}
+			);
 
 			var modelErrors = new MockErrorCollection();
 			var assignmentValidator = CreateMockAssignmentValidator
@@ -315,9 +326,27 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 			Assert.Equal(1, assignment.DueDates.Count);
 			Assert.Equal(sectionIds[1], assignment.DueDates.Single().SectionId);
 			Assert.Equal(AssignmentDueDate, assignment.DueDates.Single().DueDate);
-			Assert.Equal(2, assignment.Questions.Count);
-			Assert.Equal(questionIds[2], assignment.Questions.OrderBy(q => q.Order).First().QuestionId);
-			Assert.Equal(questionIds[1], assignment.Questions.OrderBy(q => q.Order).Last().QuestionId);
+			Assert.Equal(3, assignment.Questions.Count);
+			Assert.Equal
+			(
+				questionIds[2], 
+				assignment.Questions.OrderBy(q => q.Order).ElementAt(0).QuestionId
+			);
+			Assert.Equal
+			(
+				questionIds[1], 
+				assignment.Questions.OrderBy(q => q.Order).ElementAt(1).QuestionId
+			);
+			Assert.Equal
+			(
+				newQuestion.Id, 
+				assignment.Questions.OrderBy(q => q.Order).ElementAt(2).QuestionId
+			);
+			Assert.Equal
+			(
+				"Question4",
+				assignment.Questions.OrderBy(q => q.Order).ElementAt(2).Name
+			);
 		}
 
 		/// <summary>
@@ -934,7 +963,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 						{
 							QuestionId = questionId,
 							Points = 1.0,
-							Name = $"Question {index}"
 						}
 					).ToList(),
 				DueDates = new List<AssignmentDueDate>()
