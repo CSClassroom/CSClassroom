@@ -719,15 +719,23 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 		[InlineData(true)]
 		[InlineData(false)]
 		public async Task MarkAssignmentsAsGradedAsync_ValidSection_UpdatesLastTransferDate(
-			bool gradebookAlreadyExists)
+			bool gradebooksAlreadyExists)
 		{
 			var databaseBuilder = GetDatabaseWithSubmissions();
 
-			if (gradebookAlreadyExists)
+			if (gradebooksAlreadyExists)
 			{
 				databaseBuilder.AddSectionGradebook
 				(
 					"Class1", 
+					"Gradebook1",
+					"Period1",
+					AssignmentDueDate
+				);
+
+				databaseBuilder.AddSectionGradebook
+				(
+					"Class2", 
 					"Gradebook1",
 					"Period1",
 					AssignmentDueDate
@@ -760,9 +768,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 		{
 			return new TestDatabaseBuilder()
 				.AddClassroom("Class1")
+				.AddClassroom("Class2")
 				.AddSection("Class1", "Period1")
 				.AddSection("Class1", "Period2")
+				.AddSection("Class2", "Period1")
+				.AddSection("Class2", "Period2")
 				.AddClassroomGradebook("Class1", "Gradebook1")
+				.AddClassroomGradebook("Class2", "Gradebook1")
 				.AddStudent("User1", "Last1", "First1", "Class1", "Period1")
 				.AddStudent("User2", "Last2", "First2", "Class1", "Period1")
 				.AddStudent("User3", "Last3", "First3", "Class1", "Period2")

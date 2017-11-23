@@ -374,11 +374,11 @@ namespace CSC.CSClassroom.Service.Assignments
 			var classroomGradebook = await _dbContext.ClassroomGradebooks
 				.Where(cg => cg.ClassroomId == classroom.Id)
 				.Where(cg => cg.Name == gradebookName)
-				.SingleOrDefaultAsync();
+				.SingleAsync();
 
 			var sectionGradebook = await _dbContext.SectionGradebooks
 				.Where(sg => sg.Section.Name == sectionName)
-				.Where(sg => sg.ClassroomGradebook.Name == gradebookName)
+				.Where(sg => sg.ClassroomGradebook.Id == classroomGradebook.Id)
 				.SingleOrDefaultAsync();
 
 			if (sectionGradebook == null)
