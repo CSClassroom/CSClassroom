@@ -9,7 +9,7 @@
 <h4 style="color: blue">Student: @Model.FirstName @Model.LastName</h4>
 @if (ClassroomRole >= ClassroomRole.Admin)
 {
-    @Html.ActionLink("Edit Assignments", "Admin")
+    @Html.ActionLink("Manage Assignments", "Admin")
     <p></p>
 }
 @if (Model.SectionName != null)

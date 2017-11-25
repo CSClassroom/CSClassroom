@@ -1,9 +1,11 @@
+@using CSC.Common.Infrastructure.Utilities
 @using CSC.CSClassroom.WebApp.Providers
 @model Assignment
 @inject ITimeZoneProvider TimeZoneProvider;
 
 @{
     ViewData["Title"] = ViewBag.ActionName;
+    var buttonText = ViewBag.ActionName == "Edit" ? "Save assignment changes" : ViewBag.ActionName;
 }
 
 <h2>@ViewBag.ActionName Assignment</h2>
@@ -94,12 +96,32 @@
         </div>
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="@ViewBag.ActionName" class="btn btn-default" />
+                <input type="submit" value="@buttonText" class="btn btn-default" />
             </div>
         </div>
     </div>
 </form>
-
+@if (Model != null && Model.Id > 0)
+{
+    <hr />
+    <form asp-action="Create" asp-controller="Question" method="get">
+        <input type="hidden" name="sourceAssignmentId" value="@Model.Id"/>
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-2 control-label">Create new question</label>
+                <div class="col-md-10">
+                    <p class="form-control-static">Select a question category.</p>
+                    <select name="questionCategoryId" asp-items="@ViewBag.AvailableCategories" class="form-control-static"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Create new question" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    </form>
+}
 <div>
     <a asp-action="Index">Back to List</a>
 </div>

@@ -112,8 +112,13 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// </summary>
 		[Route("CreateQuestion")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public async Task<IActionResult> Create(string questionType, int? questionCategoryId)
+		public async Task<IActionResult> Create(
+			string questionType,
+			int? questionCategoryId, 
+			int? sourceAssignmentId)
 		{
+			ViewBag.SourceAssignmentId = sourceAssignmentId;
+
 			QuestionCategory category = null;
 			if (questionCategoryId.HasValue)
 			{
@@ -157,7 +162,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ValidateAntiForgeryToken]
 		[Route("CreateQuestion")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public async Task<IActionResult> Create(Question question)
+		public async Task<IActionResult> Create(int? sourceAssignmentId, Question question)
 		{
 			var category = await QuestionCategoryService.GetQuestionCategoryAsync
 			(
@@ -168,13 +173,26 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			if (ModelState.IsValid && 
 				await QuestionService.CreateQuestionAsync(ClassroomName, question, ModelErrors))
 			{
-				if (question.HasChoices)
+				if (sourceAssignmentId.HasValue)
+				{
+					return RedirectToAction
+					(
+						"Edit", 
+						"Assignment",
+						new { id = sourceAssignmentId.Value, createdQuestionId = question.Id }
+					);
+				}
+				else if (question.HasChoices)
 				{
 					return RedirectToAction("QuestionChoices", new { id = question.Id });
 				}
 				else if (category.RandomlySelectedQuestionId.HasValue)
 				{
-					return RedirectToAction("QuestionChoices", new { id = category.RandomlySelectedQuestionId });
+					return RedirectToAction
+					(
+						"QuestionChoices",
+						new { id = category.RandomlySelectedQuestionId }
+					);
 				}
 				else
 				{
@@ -374,7 +392,14 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			var questionCategories = await QuestionCategoryService
 				.GetQuestionCategoriesAsync(ClassroomName);
 
-			ViewBag.QuestionCategoryId = new SelectList(questionCategories, "Id", "Name");
+			ViewBag.QuestionCategoryId = new SelectList
+			(
+				questionCategories
+					.OrderBy(qc => qc.Name, new NaturalComparer()),
+				"Id", 
+				"Name"
+			);
+
 			ViewBag.AvailableQuestions = await QuestionService.GetQuestionsAsync(ClassroomName);
 		}
 	}

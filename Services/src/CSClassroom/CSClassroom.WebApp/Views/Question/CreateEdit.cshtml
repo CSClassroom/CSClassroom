@@ -24,7 +24,10 @@
         }
         <input type="hidden" name="QuestionType" value="@Model.GetType().Name" />
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        
+        @if (ViewBag.SourceAssignmentId != null)
+        {
+            <input type="hidden" name="sourceAssignmentId" value="@ViewBag.SourceAssignmentId" />
+        }
         @if (Model.QuestionCategory?.RandomlySelectedQuestionId != null)
         {
             <div class="form-group">

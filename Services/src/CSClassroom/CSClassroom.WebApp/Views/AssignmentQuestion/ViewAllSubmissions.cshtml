@@ -1,12 +1,13 @@
 ﻿@using System.Runtime.InteropServices.ComTypes
 @using System.Threading.Tasks
 @using CSC.Common.Infrastructure.Serialization
+@using CSC.CSClassroom.Model.Assignments.ServiceResults
 @using CSC.CSClassroom.WebApp.Extensions
 @using CSC.CSClassroom.WebApp.Providers
 @using CSC.CSClassroom.WebApp.ViewModels.Shared
 @using CSC.CSClassroom.Model.Users
 @inject ITimeZoneProvider TimeZoneProvider;
-@model IList<CSC.CSClassroom.Model.Assignments.ServiceResults.SubmissionResult>
+@model IList<SubmissionResult>
 
 <style>
     thead {
@@ -29,11 +30,14 @@
 @if (Model[0].QuestionSubmitted.User.Id != User.Id)
 {
     <h2 style="color: blue">Submission from @Model[0].QuestionSubmitted.User.FirstName @Model[0].QuestionSubmitted.User.LastName</h2>
-    <br />
 }
 
 <h2>@Assignment.Name</h2>
 <h5 style="color: blue">Submitted on @Model[0].SubmissionDate.FormatLongDateTime(TimeZoneProvider)</h5>
+@if (ClassroomRole >= ClassroomRole.Admin)
+{
+    @Html.ActionLink("Assignment Settings", "Edit", "Assignment", new { id = Assignment.Id })
+}
 <hr/>
 @if (!Assignment.OnlyShowCombinedScore || ClassroomRole >= ClassroomRole.Admin)
 {

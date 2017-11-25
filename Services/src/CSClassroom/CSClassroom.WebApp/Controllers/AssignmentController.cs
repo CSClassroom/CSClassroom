@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Assignments;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Service.Classrooms;
@@ -31,6 +32,11 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		private IQuestionService QuestionService { get; }
 
 		/// <summary>
+		/// The question category service.
+		/// </summary>
+		private IQuestionCategoryService QuestionCategoryService { get; }
+
+		/// <summary>
 		/// The section service.
 		/// </summary>
 		private ISectionService SectionService { get; }
@@ -54,12 +60,14 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			IAssignmentService assignmentService,
 			ISectionService sectionService,
 			IQuestionService questionService,
+			IQuestionCategoryService questionCategoryService,
 			IUserService userService)
 				: base(args, classroomService)
 		{
 			AssignmentService = assignmentService;
 			SectionService = sectionService;
 			QuestionService = questionService;
+			QuestionCategoryService = questionCategoryService;
 			UserService = userService;
 		}
 
@@ -103,7 +111,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			}
 			else
 			{
-				await PopulateDropDownsAsync();
+				await PopulateDropDownsAsync(assignment);
 
 				return View("CreateEdit", assignment);
 			}
@@ -114,15 +122,35 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// </summary>
 		[Route("Assignments/{id:int}/Edit")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public async Task<IActionResult> Edit(int id)
+		public async Task<IActionResult> Edit(int id, int? createdQuestionId = null)
 		{
-			await PopulateDropDownsAsync();
-
 			var assignment = await AssignmentService.GetAssignmentAsync(ClassroomName, id);
 			if (assignment == null)
 			{
 				return NotFound();
 			}
+
+			if (createdQuestionId != null)
+			{
+				var createdQuestion = await QuestionService.GetQuestionAsync
+				(
+					ClassroomName, 
+					createdQuestionId.Value
+				);
+
+				assignment.Questions.Add
+				(
+					new AssignmentQuestion()
+					{
+						Name = createdQuestion.Name,
+						Order = assignment.Questions.Count,
+						Question = createdQuestion,
+						QuestionId = createdQuestion.Id
+					}	
+				);
+			}
+
+			await PopulateDropDownsAsync(assignment);
 
 			return View("CreateEdit", assignment);
 		}
@@ -143,7 +171,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			}
 			else
 			{
-				await PopulateDropDownsAsync();
+				await PopulateDropDownsAsync(assignment);
 
 				return View("CreateEdit", assignment);
 			}
@@ -223,7 +251,9 @@ namespace CSC.CSClassroom.WebApp.Controllers
 						Selected = (assignment == groupName)
 					}
 				)
-			).Union
+			)
+			.OrderBy(s => s.Text, new NaturalComparer())
+			.Union
 			(
 				new[]
 				{
@@ -375,9 +405,29 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// <summary>
 		/// Populates dropdown lists required by the Create/Edit actions.
 		/// </summary>
-		private async Task PopulateDropDownsAsync()
+		private async Task PopulateDropDownsAsync(Assignment assignment = null)
 		{
 			ViewBag.AvailableQuestions = await QuestionService.GetQuestionsAsync(ClassroomName);
+
+			var availableCategories = await QuestionCategoryService
+				.GetQuestionCategoriesAsync(ClassroomName);
+
+			var defaultCategory = assignment?.Questions
+				?.LastOrDefault()
+				?.Question
+				?.QuestionCategory;
+
+			ViewBag.AvailableCategories = availableCategories
+				.OrderBy(qc => qc.Name, new NaturalComparer())
+				.Select
+				(
+					category => new SelectListItem()
+					{
+						Text = category.Name,
+						Value = category.Id.ToString(),
+						Selected = (category == defaultCategory)
+					}
+				).ToList();
 		}
 	}
 }

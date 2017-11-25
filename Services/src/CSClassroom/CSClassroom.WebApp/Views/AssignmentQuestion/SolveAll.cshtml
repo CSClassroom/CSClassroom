@@ -15,10 +15,13 @@
 @if (Model.Count > 0 && Model[0].User.Id != User.Id)
 {
     <h2 style="color: blue">Assignment view for @Model[0].User.FirstName @Model[0].User.LastName</h2>
-    <br />
 }
 
-<h2>@Assignment.Name</h2>
+<h2>@Assignment.Name</h2>  
+@if (ClassroomRole >= ClassroomRole.Admin)
+{
+    @Html.ActionLink("Assignment Settings", "Edit", "Assignment", new { id = Assignment.Id })
+}
 
 <hr/>
 @if (!Model.Any())
@@ -59,7 +62,6 @@ else
         keepAuthenticatedSessionAlive();
     </script>
     <br />
-    
 }
 
 @{

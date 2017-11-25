@@ -1,4 +1,5 @@
 ﻿@using CSC.CSClassroom.Model.Assignments.ServiceResults
+@using CSC.CSClassroom.Model.Users;
 @model AssignmentProgress
 @{
     int? linkUserId = Model.UserId != ViewBag.User.Id
@@ -33,7 +34,14 @@
         </td>
         <td style="width: 100%;">
             <div id="wrapper" class="center">
-                <p class="center"><strong>@ViewBag.Assignment.Name</strong></p>
+                <p class="center">
+                    <strong>@ViewBag.Assignment.Name</strong>
+                    @if (ClassroomRole >= ClassroomRole.Admin)
+                    {
+                        <br>
+                        @Html.ActionLink("Assignment Settings", "Edit", "Assignment", new {id = Assignment.Id})
+                    }
+                </p>
                 <div id="container" class="question-container">
                     @foreach (var question in Model.Questions)
                     {

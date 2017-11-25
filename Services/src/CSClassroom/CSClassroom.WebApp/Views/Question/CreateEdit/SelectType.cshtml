@@ -8,9 +8,13 @@
 <h3><b>Select the type of question to create:</b></h3>
 
 <form asp-action="Create" method="get" class="form-horizontal">
-    @if (Model.QuestionCategoryId.HasValue)
+    @if (Model.QuestionCategoryId != null)
     {
         <input type="hidden" name="questionCategoryId" value="@Model.QuestionCategoryId.Value" />
+    }
+    @if (ViewBag.SourceAssignmentId != null)
+    {
+        <input type="hidden" name="sourceAssignmentId" value="@ViewBag.SourceAssignmentId" />
     }
     <div style="margin-left: 25px">
         @foreach (var item in Model.QuestionTypes)
