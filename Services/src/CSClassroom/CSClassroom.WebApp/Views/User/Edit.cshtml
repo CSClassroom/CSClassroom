@@ -1,4 +1,6 @@
-﻿@model CSC.CSClassroom.Model.Users.User
+﻿@using CSC.CSClassroom.Model.Assignments
+@using CSC.CSClassroom.Model.Users
+@model CSC.CSClassroom.Model.Users.User
 
 @{
     ViewData["Title"] = "Edit User";
@@ -45,6 +47,13 @@
             </div>
         </div>
         <div class="form-group">
+            <label asp-for="AdditionalContacts" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <span asp-validation-for="AdditionalContacts" class="text-danger"></span>
+                <table id="additionalContacts" class="equal-width"></table>
+            </div>
+        </div>
+        <div class="form-group">
             <label asp-for="GitHubLogin" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <input asp-for="GitHubLogin" class="form-control" />
@@ -59,3 +68,19 @@
         </div>
     </div>
 </form>
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "additionalContacts",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Model.AdditionalContacts)),
+        properties = new[]
+        {
+            nameof(AdditionalContact.LastName),
+            nameof(AdditionalContact.FirstName),
+            nameof(AdditionalContact.EmailAddress)
+        },
+        orderByProp = nameof(AdditionalContact.LastName),
+        startMinRows = 0
+    })

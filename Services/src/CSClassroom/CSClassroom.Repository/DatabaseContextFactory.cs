@@ -25,12 +25,12 @@ namespace CSC.CSClassroom.Repository
 		public DatabaseContext CreateDbContext(string[] args)
 		{
 			var configuration = new ConfigurationBuilder()
-				.SetBasePath(Directory.GetCurrentDirectory())
+				.SetBasePath(Environment.CurrentDirectory)
 				.AddJsonFile(c_settingsFileName)
 				.Build();
 
 			var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-			var connectionString = configuration[environmentName];
+			var connectionString = configuration["ConnectionString"];
 
 			if (connectionString == null)
 			{

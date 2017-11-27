@@ -246,6 +246,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			   .AddClassroom("Class1")
 			   .AddSection("Class1", "Section1")
 			   .AddStudent("User1", "LastName", "FirstName", "Class1", "Section1")
+			   .AddAdditionalContact("User1", "LastName2", "FirstName2", "EmailAddress2")
 			   .Build();
 
 			var userId = database.Context.Users.Single().Id;
@@ -257,10 +258,14 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			var currentUser = await userService.GetUserAsync(userId);
 			var classroomMembership = currentUser.ClassroomMemberships.Single();
 			var sectionMembership = classroomMembership.SectionMemberships.Single();
+			var additionalContact = currentUser.AdditionalContacts.Single();
 
 			Assert.Equal("User1", currentUser.UserName);
 			Assert.Equal("Class1", classroomMembership.Classroom.Name);
 			Assert.Equal("Section1", sectionMembership.Section.Name);
+			Assert.Equal("FirstName2", additionalContact.FirstName);
+			Assert.Equal("LastName2", additionalContact.LastName);
+			Assert.Equal("EmailAddress2", additionalContact.EmailAddress);
 		}
 
 		/// <summary>
@@ -520,6 +525,133 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 
 			Assert.True(result);
 			Assert.Equal("NewPublicName", user.PubliclyDisplayedName);
+		}
+
+		/// <summary>
+		/// Ensures that UpdateUserAsync will update the user's public name if it 
+		/// has changed.
+		/// </summary>
+		[Fact]
+		public async Task UpdateUserAsync_AdditionalContactAdded_ChangeSaved()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddSection("Class1", "Section1")
+				.AddStudent("User1", "LastName", "FirstName", "Class1", "Section1")
+				.Build();
+
+			var user = database.Context.Users.Single();
+			user.EmailAddressConfirmed = true;
+			database.Context.SaveChanges();
+			database.Reload();
+
+			user.AdditionalContacts = new List<AdditionalContact>
+			{
+				new AdditionalContact()
+				{
+					LastName = "LastName2",
+					FirstName = "FirstName2",
+					EmailAddress = "EmailAddress2"
+				}
+			};
+
+			var modelErrors = new MockErrorCollection();
+			var userService = GetUserService(database.Context);
+
+			var result = await userService.UpdateUserAsync
+			(
+				user,
+				"ConfirmationUrlBuilder",
+				modelErrors
+			);
+
+			database.Reload();
+			user = database.Context.Users.Include(u => u.AdditionalContacts).Single();
+
+			Assert.True(result);
+			Assert.Equal("LastName2", user.AdditionalContacts.Single().LastName);
+			Assert.Equal("FirstName2", user.AdditionalContacts.Single().FirstName);
+			Assert.Equal("EmailAddress2", user.AdditionalContacts.Single().EmailAddress);
+		}
+
+		/// <summary>
+		/// Ensures that UpdateUserAsync will update the user's public name if it 
+		/// has changed.
+		/// </summary>
+		[Fact]
+		public async Task UpdateUserAsync_AdditionalContactModified_ChangeSaved()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddSection("Class1", "Section1")
+				.AddStudent("User1", "LastName", "FirstName", "Class1", "Section1")
+				.AddAdditionalContact("User1", "LastName2", "FirstName2", "EmailAddress2")
+				.Build();
+			
+			var user = database.Context.Users.Include(u => u.AdditionalContacts).Single();
+			user.EmailAddressConfirmed = true;
+			database.Context.SaveChanges();
+			database.Reload();
+
+			user.AdditionalContacts[0].LastName = "LastName3";
+			user.AdditionalContacts[0].FirstName = "FirstName3";
+			user.AdditionalContacts[0].EmailAddress = "EmailAddress3";
+
+			var modelErrors = new MockErrorCollection();
+			var userService = GetUserService(database.Context);
+
+			var result = await userService.UpdateUserAsync
+			(
+				user,
+				"ConfirmationUrlBuilder",
+				modelErrors
+			);
+
+			database.Reload();
+			user = database.Context.Users.Include(u => u.AdditionalContacts).Single();
+
+			Assert.True(result);
+			Assert.Equal("LastName3", user.AdditionalContacts.Single().LastName);
+			Assert.Equal("FirstName3", user.AdditionalContacts.Single().FirstName);
+			Assert.Equal("EmailAddress3", user.AdditionalContacts.Single().EmailAddress);
+		}
+
+		/// <summary>
+		/// Ensures that UpdateUserAsync will update the user's public name if it 
+		/// has changed.
+		/// </summary>
+		[Fact]
+		public async Task UpdateUserAsync_AdditionalContactRemoved_ChangeSaved()
+		{
+			var database = new TestDatabaseBuilder()
+				.AddClassroom("Class1")
+				.AddSection("Class1", "Section1")
+				.AddStudent("User1", "LastName", "FirstName", "Class1", "Section1")
+				.AddAdditionalContact("User1", "LastName2", "FirstName2", "EmailAddress2")
+				.Build();
+			
+			var user = database.Context.Users.Include(u => u.AdditionalContacts).Single();
+			user.EmailAddressConfirmed = true;
+			database.Context.SaveChanges();
+			database.Reload();
+
+			user.AdditionalContacts.Clear();
+
+			var modelErrors = new MockErrorCollection();
+			var userService = GetUserService(database.Context);
+
+			var result = await userService.UpdateUserAsync
+			(
+				user,
+				"ConfirmationUrlBuilder",
+				modelErrors
+			);
+
+			database.Reload();
+			user = database.Context.Users.Include(u => u.AdditionalContacts).Single();
+
+			Assert.True(result);
+			Assert.Empty(user.AdditionalContacts);
 		}
 
 		/// <summary>

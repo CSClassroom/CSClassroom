@@ -274,6 +274,32 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 		}
 
 		/// <summary>
+		/// Adds an additional contact to the database.
+		/// </summary>
+		public TestDatabaseBuilder AddAdditionalContact(
+			string userName,
+			string lastName,
+			string firstName,
+			string emailAddress)
+		{
+			var user = _buildContext.Users
+				.SingleOrDefault(u => u.UserName == userName);
+
+			var additionalContact = new AdditionalContact()
+			{
+				FirstName = firstName,
+				LastName = lastName,
+				EmailAddress = emailAddress,
+				UserId = user.Id
+			};
+
+			_buildContext.AdditionalContacts.Add(additionalContact);
+			_buildContext.SaveChanges();
+
+			return this;
+		}
+
+		/// <summary>
 		/// Adds a question submission to the database.
 		/// </summary>
 		public TestDatabaseBuilder AddQuestionSubmission(

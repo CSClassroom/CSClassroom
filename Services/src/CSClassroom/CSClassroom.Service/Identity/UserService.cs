@@ -106,7 +106,9 @@ namespace CSC.CSClassroom.Service.Identity
 		/// </summary>
 		public async Task<User> GetUserAsync(int userId)
 		{
-			var user = await _dbContext.Users.SingleAsync(u => u.Id == userId);
+			var user = await _dbContext.Users
+				.Include(u => u.AdditionalContacts)
+				.SingleAsync(u => u.Id == userId);
 
 			await LoadUserAsync(user);
 
@@ -124,6 +126,7 @@ namespace CSC.CSClassroom.Service.Identity
 			var existingUser = await _dbContext.Users
 				.Include(u => u.ClassroomMemberships)
 					.ThenInclude(cm => cm.Classroom)
+				.Include(u => u.AdditionalContacts)
 				.SingleAsync(u => u.Id == user.Id);
 
 			bool updatedEmail = false;
@@ -181,6 +184,33 @@ namespace CSC.CSClassroom.Service.Identity
 				existingUser.EmailConfirmationCode = GenerateEmailConfirmationCode();
 
 				updatedEmail = true;
+			}
+
+			foreach (var additionalContact in existingUser.AdditionalContacts.ToList())
+			{
+				var modifiedContact = user.AdditionalContacts
+					?.SingleOrDefault(ac => ac.Id == additionalContact.Id);
+				if (modifiedContact != null)
+				{
+					additionalContact.LastName = modifiedContact.LastName;
+					additionalContact.FirstName = modifiedContact.FirstName;
+					additionalContact.EmailAddress = modifiedContact.EmailAddress;
+				}
+				else
+				{
+					existingUser.AdditionalContacts.Remove(additionalContact);
+				}
+			}
+
+			if (user.AdditionalContacts != null)
+			{
+				foreach (var potentialNewContact in user.AdditionalContacts)
+				{
+					if (!existingUser.AdditionalContacts.Any(ac => ac.Id == potentialNewContact.Id))
+					{
+						existingUser.AdditionalContacts.Add(potentialNewContact);
+					}
+				}
 			}
 
 			await _dbContext.SaveChangesAsync();

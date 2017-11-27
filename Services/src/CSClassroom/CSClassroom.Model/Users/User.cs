@@ -82,6 +82,12 @@ namespace CSC.CSClassroom.Model.Users
 		public virtual IList<Commit> Commits { get; set; }
 
 		/// <summary>
+		/// Additional contacts for the user.
+		/// </summary>
+		[Display(Name = "Additional Contacts")]
+		public virtual IList<AdditionalContact> AdditionalContacts { get; set; }
+
+		/// <summary>
 		/// Returns whether or not the user is activated.
 		/// </summary>
 		public bool IsActivated =>

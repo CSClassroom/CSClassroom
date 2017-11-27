@@ -246,43 +246,66 @@ namespace CSC.CSClassroom.Service.Communications
 			Func<DateTime, string> formatDateTime,
 			bool emailAdmins)
 		{
-			var recipients = await _dbContext.SectionMemberships
+			var students = await _dbContext.SectionMemberships
 				.Where(sm => sm.ClassroomMembership.ClassroomId == classroom.Id)
 				.Where(sm => sm.Role == SectionRole.Student)
 				.Where(sm => sectionIds.Contains(sm.SectionId))
-				.Select(sm => sm.ClassroomMembership.User)
+				.Include(sm => sm.ClassroomMembership.User)
+				.Include(sm => sm.ClassroomMembership.User.AdditionalContacts)
 				.ToListAsync();
+
+			var users = students.Select(sm => sm.ClassroomMembership.User).ToList();
 
 			if (emailAdmins)
 			{
 				var admins = await _dbContext.ClassroomMemberships
 					.Where(cm => cm.ClassroomId == classroom.Id)
 					.Where(cm => cm.Role == ClassroomRole.Admin)
-					.Select(cm => cm.User)
+					.Include(sm => sm.User)
+					.Include(sm => sm.User.AdditionalContacts)
 					.ToListAsync();
 
-				recipients.AddRange(admins);
+				users.AddRange(admins.Select(a => a.User));
 			}
 
-			if (recipients.Any())
+			if (users.Any())
 			{
 				if (announcement.User == null)
 				{
 					await _dbContext.Entry(announcement).Reference(a => a.User).LoadAsync();
 				}
+
+				var recipients = new List<EmailRecipient>();
+				foreach (var user in users.Distinct())
+				{
+					recipients.Add
+					(
+						new EmailRecipient
+						(
+							$"{user.FirstName} {user.LastName}",
+							user.EmailAddress
+						)
+					);
+
+					if (user.AdditionalContacts != null)
+					{
+						foreach (var additionalContact in user.AdditionalContacts)
+						{
+							recipients.Add
+							(
+								new EmailRecipient
+								(
+									$"{additionalContact.FirstName} {additionalContact.LastName}",
+									additionalContact.EmailAddress
+								)
+							);
+						}
+					}
+				}
 				
 				await _emailProvider.SendMessageAsync
 				(
-					recipients
-						.Distinct()
-						.Select
-						(
-							u => new EmailRecipient
-							(
-								$"{u.FirstName} {u.LastName}", 
-								u.EmailAddress
-							)
-						).ToList(),
+					recipients,
 					$"{classroom.DisplayName}: {announcement.Title}",
 					announcement.Contents + GetEmailFooter(announcement, formatDateTime)
 				);

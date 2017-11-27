@@ -33,6 +33,11 @@ namespace CSC.CSClassroom.Repository
 		public DbSet<ClassroomMembership> ClassroomMemberships { get; set; }
 
 		/// <summary>
+		/// Additional contacts for a user.
+		/// </summary>
+		public DbSet<AdditionalContact> AdditionalContacts { get; set; }
+
+		/// <summary>
 		/// The groups table.
 		/// </summary>
 		public DbSet<Classroom> Classrooms { get; set; }
@@ -279,6 +284,7 @@ namespace CSC.CSClassroom.Repository
 			SetupIndex<Section>(builder, s => new {s.ClassroomId, s.Name});
 			SetupIndex<ClassroomMembership>(builder, cm => new {cm.UserId, cm.ClassroomId});
 			SetupIndex<SectionMembership>(builder, sm => new {sm.ClassroomMembershipId, sm.SectionId});
+			SetupIndex<AdditionalContact>(builder, ac => new {ac.UserId, ac.EmailAddress});
 			SetupIndex<QuestionCategory>(builder, qc => new {qc.ClassroomId, qc.Name, qc.RandomlySelectedQuestionId});
 			SetupIndex<Question>(builder, q => new {q.QuestionCategoryId, q.Name});
 			SetupIndex<UserQuestionData>(builder, uqd => new {uqd.AssignmentQuestionId, uqd.UserId});

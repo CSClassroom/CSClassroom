@@ -225,7 +225,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 
 			var emailProvider = GetMockEmailProvider
 			(
-				Collections.CreateList("Student1Email", "Admin1Email"),
+				Collections.CreateList("Student1Email", "Admin1Email", "AdditionalContact1Email"),
 				"Class1 DisplayName: Title",
 				"SanitizedContents"
 			);
@@ -336,7 +336,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 
 			var emailProvider = GetMockEmailProvider
 			(
-				Collections.CreateList("Student2Email"),
+				Collections.CreateList("Student2Email", "AdditionalContact2Email"),
 				"Class1 DisplayName: UpdatedTitle",
 				"SanitizedUpdatedContents"
 			);
@@ -434,7 +434,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 				.AddSection("Class1", "Section2")
 				.AddAdmin("Admin1", "LastName", "FirstName", "Class1", superUser: false)
 				.AddStudent("Student1", "LastName", "FirstName", "Class1", "Section1")
-				.AddStudent("Student2", "LastName", "FirstName", "Class1", "Section2");
+				.AddStudent("Student2", "LastName", "FirstName", "Class1", "Section2")
+				.AddAdditionalContact("Student1", "LastName", "FirstName", "AdditionalContact1Email")
+				.AddAdditionalContact("Student2", "LastName", "FirstName", "AdditionalContact2Email");
 		}
 
 		/// <summary>

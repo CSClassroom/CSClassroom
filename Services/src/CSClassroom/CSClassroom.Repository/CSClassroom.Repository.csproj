@@ -32,4 +32,10 @@
     <ProjectReference Include="..\CSClassroom.Model\CSClassroom.Model.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DatabaseConnectionStrings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

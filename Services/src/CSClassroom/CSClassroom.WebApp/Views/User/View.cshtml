@@ -50,6 +50,27 @@
             <br><br>
         </dd>
         <dt>
+            @Html.DisplayNameFor(model => model.AdditionalContacts)
+        </dt>
+        <dd>
+            @if (Model.AdditionalContacts.Any())
+            {
+                <ul style="list-style-position: inside; padding-left:0;">
+                    @foreach (var contact in Model.AdditionalContacts)
+                    {
+                        <li>@contact.FirstName @contact.LastName (@contact.EmailAddress)</li>
+                    }
+                </ul>
+                <br />
+            }
+            else
+            {
+                <span>None</span>
+                <br><br>
+            }
+        </dd>
+
+        <dt>
             @Html.DisplayNameFor(model => model.GitHubLogin)
         </dt>
         <dd>
