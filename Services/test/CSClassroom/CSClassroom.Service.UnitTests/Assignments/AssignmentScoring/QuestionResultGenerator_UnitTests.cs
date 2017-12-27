@@ -78,9 +78,42 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 				DueDate
 			);
 
-			Assert.Equal(0.9, result.Score);
+			Assert.Equal(2.7, result.Score);
 			Assert.Equal(Completion.Completed, result.Status.Completion);
 			Assert.True(result.Status.Late);
+		}
+
+		/// <summary>
+		/// Ensures that the correct status is returned for a completed optional (0-point) question.
+		/// </summary>
+		[Fact]
+		public void CreateQuestionResult_CompletedOptionalQuestion_ReturnsCorrectStatus()
+		{
+			var assignmentQuestion = CreateAssignmentQuestion(points: 0.0);
+			var user = CreateUser();
+			var scoredSubmissions = Collections.CreateList
+			(
+				CreateScoredSubmission(daysLate: 0, rawScore: 0.0, scoreInAssignment: 0.0, isLate: false),
+				CreateScoredSubmission(daysLate: 0, rawScore: 1.0, scoreInAssignment: 0.0, isLate: false)
+			);
+
+			var questionResultGenerator = CreateQuestionResultGenerator
+			(
+				assignmentQuestion,
+				scoredSubmissions
+			);
+
+			var result = questionResultGenerator.CreateQuestionResult
+			(
+				assignmentQuestion,
+				user,
+				scoredSubmissions.Select(s => s.Submission).ToList(),
+				DueDate
+			);
+
+			Assert.Equal(0.0, result.Score);
+			Assert.Equal(Completion.Completed, result.Status.Completion);
+			Assert.False(result.Status.Late);
 		}
 
 		/// <summary>
@@ -205,7 +238,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 		/// </summary>
 		private AssignmentQuestion CreateAssignmentQuestion(
 			bool supportsInteractiveSubmissions = true, 
-			bool combinedSubmissions = false)
+			bool combinedSubmissions = false,
+			double points = 3.0)
 		{
 			return new AssignmentQuestion()
 			{
@@ -217,7 +251,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 					CombinedSubmissions = combinedSubmissions
 				},
 				Name = "Question Name",
-				Points = 3,
+				Points = points,
 				Question = supportsInteractiveSubmissions
 					? (Question) new MultipleChoiceQuestion()
 					: (Question) new GeneratedQuestionTemplate()
@@ -239,9 +273,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 		{
 			return Collections.CreateList
 			(
-				CreateScoredSubmission(daysLate: 0, score: 0.5, isLate: false),
-				CreateScoredSubmission(daysLate: 2, score: 0.8, isLate: true),
-				CreateScoredSubmission(daysLate: 1, score: 0.9, isLate: true)
+				CreateScoredSubmission(daysLate: 0, rawScore: 0.5, scoreInAssignment: 1.5, isLate: false),
+				CreateScoredSubmission(daysLate: 2, rawScore: 0.8, scoreInAssignment: 2.2, isLate: true),
+				CreateScoredSubmission(daysLate: 1, rawScore: 0.9, scoreInAssignment: 2.7, isLate: true)
 			);
 		}
 
@@ -250,16 +284,18 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 		/// </summary>
 		private ScoredSubmission CreateScoredSubmission(
 			int daysLate,
-			double score,
+			double rawScore,
+			double scoreInAssignment,
 			bool isLate)
 		{
 			return new ScoredSubmission
 			(
 				new UserQuestionSubmission()
 				{
-					DateSubmitted = DueDate + TimeSpan.FromDays(daysLate)
+					DateSubmitted = DueDate + TimeSpan.FromDays(daysLate),
+					Score = rawScore
 				},
-				score,
+				scoreInAssignment,
 				isLate
 			);
 		}
@@ -329,7 +365,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 								scoredSubmission.Submission.DateSubmitted,
 								DueDate,
 								assignmentQuestion.IsInteractive(),
-								scoredSubmission.Score
+								scoredSubmission.Submission.Score
 							)
 						).Returns(scoredSubmission.Status);
 				}

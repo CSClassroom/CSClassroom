@@ -57,7 +57,8 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 					submission => new
 					{
 						Submission = submission,
-						Score = _questionScoreCalculator.GetSubmissionScore
+						RawScore = submission.Score,
+						ScoreInAssignment = _questionScoreCalculator.GetSubmissionScore
 						(
 							submission,
 							dueDate,
@@ -68,17 +69,21 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 				).ToList();
 
 			var bestSubmission = submissions.Count > 0
-				? scoredSubmissions.MaxBy(result => result.Score)
+				? scoredSubmissions
+					.OrderByDescending(result => result.ScoreInAssignment)
+					.ThenByDescending(result => result.RawScore)
+					.First()
 				: null;
 
-			var score = bestSubmission?.Score ?? 0.0;
+			var rawScore = bestSubmission?.RawScore ?? 0.0;
+			var scoreInAssignment = bestSubmission?.ScoreInAssignment ?? 0.0;
 			var dateSubmitted = bestSubmission?.Submission?.DateSubmitted;
 			var status = _submissionStatusCalculator.GetStatusForQuestion
 			(
 				dateSubmitted,
 				dueDate,
 				question.IsInteractive(),
-				score
+				rawScore
 			);
 
 			bool includeSubmissions = !question.IsInteractive() 
@@ -98,9 +103,9 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 								scoredSubmission.Submission.DateSubmitted,
 								dueDate,
 								false /*interactive*/,
-								scoredSubmission.Score
+								scoredSubmission.RawScore
 							),
-							scoredSubmission.Score,
+							scoredSubmission.ScoreInAssignment,
 							question.Points
 						)
 					).ToList()
@@ -114,7 +119,7 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 				combinedSubmissions,
 				questionName,
 				questionPoints,
-				score,
+				scoreInAssignment,
 				status,
 				submissionResults
 			);
