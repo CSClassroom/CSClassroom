@@ -1,3 +1,0 @@
-{
-    "ConnectionString": "User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database=csclassroom;Pooling=true;"
-}

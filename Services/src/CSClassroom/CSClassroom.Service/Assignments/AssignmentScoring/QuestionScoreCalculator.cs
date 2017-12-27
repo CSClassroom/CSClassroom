@@ -53,7 +53,16 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 				(submission.DateSubmitted - dueDate.Value).TotalDays
 			);
 
-			return Math.Min(daysLate * c_lateDayDeduction, c_maxLateDeduction);
+			var classroom = submission.UserQuestionData
+				.AssignmentQuestion
+				.Assignment
+				.Classroom;
+
+			return Math.Min
+			(
+				daysLate * classroom.DailyLatenessDeduction, 
+				classroom.MaxLatenessDeduction
+			);
 		}
 	}
 }

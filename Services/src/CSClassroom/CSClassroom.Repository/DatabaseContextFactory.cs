@@ -17,7 +17,7 @@ namespace CSC.CSClassroom.Repository
 		/// <summary>
 		/// The file containing the database's connection strings.
 		/// </summary>
-		private const string c_settingsFileName = "DatabaseConnectionStrings.json";
+		private const string c_settingsFileName = "appSettings.Environment.json";
 
 		/// <summary>
 		/// Creates a database context.
@@ -30,7 +30,7 @@ namespace CSC.CSClassroom.Repository
 				.Build();
 
 			var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-			var connectionString = configuration["ConnectionString"];
+			var connectionString = configuration.GetConnectionString("PostgresDefaultConnection");
 
 			if (connectionString == null)
 			{

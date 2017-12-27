@@ -79,6 +79,7 @@ namespace CSC.CSClassroom.WebApp
 				.AddAuthentication(SetupAuthentication)
 				.AddCookie(SetupCookieAuthentication)
 				.AddOpenIdConnect(SetupOpenIdConnectAuthentication);
+
 			services.AddTelemetry(Configuration, typeof(CSClassroomTelemetryInitializer));
 			services.AddMvc(SetupMvc);
 

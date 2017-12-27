@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Assignments;
@@ -71,6 +72,32 @@ namespace CSC.CSClassroom.Model.Classrooms
 			Description = "Whether or not the class is active. Students cannot access inactive classes."
 		)]
 		public bool IsActive { get; set; }
+
+		/// <summary>
+		/// The late percentage per day.
+		/// </summary>
+		[Display
+		(
+			Name = "Daily lateness deduction",
+			Description = "The percentage of a question score that is deducted each day the "
+				+ "question is late. Must be a value between 0 and 1."
+		)]
+		[DefaultValue(0.05)]
+		[Range(0, 1)]
+		public double DailyLatenessDeduction { get; set; }
+
+		/// <summary>
+		/// The late percentage per day.
+		/// </summary>
+		[Display
+		(
+			Name = "Maximum lateness deduction",
+			Description = "The maximum percentage deducted due to lateness, regardless of "
+				+ "how late a question is submitted. Must be a value between 0 and 1."
+		)]
+		[DefaultValue(0.2)]
+		[Range(0, 1)]
+		public double MaxLatenessDeduction { get; set; }
 
 		/// <summary>
 		/// The sections in this classroom.

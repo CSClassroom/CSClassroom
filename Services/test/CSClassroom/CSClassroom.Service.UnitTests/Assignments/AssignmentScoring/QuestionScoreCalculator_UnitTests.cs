@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using CSC.CSClassroom.Model.Assignments;
+using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Service.Assignments.AssignmentScoring;
 using Xunit;
 
@@ -32,7 +33,21 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 			var submission = new UserQuestionSubmission()
 			{
 				DateSubmitted = DateTime.Parse(dateSubmitted),
-				Score = score
+				Score = score,
+				UserQuestionData = new UserQuestionData()
+				{
+					AssignmentQuestion = new AssignmentQuestion()
+					{
+						Assignment = new Assignment()
+						{
+							Classroom = new Classroom()
+							{
+								DailyLatenessDeduction = 0.05,
+								MaxLatenessDeduction = 0.2
+							}
+						}
+					}
+				}
 			};
 
 			var questionScoreCalculator = new QuestionScoreCalculator();
