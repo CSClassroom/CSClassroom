@@ -7,9 +7,9 @@
 
 <div id="wrapper-@Model.EditorName"></div>
 <script>
-    function createEditor(text)
-    {
-        $('#wrapper-@Model.EditorName').html('<pre id="@Model.EditorName">' + (text != null ? text : '') + '</pre>');
+    function createEditor(text) {
+        $('#wrapper-@Model.EditorName').html('<pre id="@Model.EditorName"></pre>');
+        $('#@Model.EditorName').text(text);
         createCodeEditor('@Model.EditorName', @Html.Raw(Model.TextArea ? $"$(\"textarea[name = {@Model.EditorName}]\")" : "undefined"), @Model.MinLines, @Model.MaxLines);
     }
 
