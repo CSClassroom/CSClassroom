@@ -281,11 +281,118 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		}
 
 		/// <summary>
+		/// Deletes a submission for a single question.
+		/// </summary>
+		[Route("Questions/{id:int}/DeleteSubmission/{submissionDate}")]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
+		public async Task<IActionResult> DeleteSubmission(int id, int userId, long submissionDate)
+		{
+			if (Assignment.CombinedSubmissions)
+			{
+				return NotFound();
+			}
+
+			var questionSubmission = await AssignmentQuestionService.GetSubmissionAsync
+			(
+				ClassroomName,
+				AssignmentId,
+				id,
+				userId,
+				submissionDate.FromEpoch()
+			);
+
+			if (questionSubmission == null)
+			{
+				return NotFound();
+			}
+
+			return View(questionSubmission);
+		}
+
+		/// <summary>
+		/// Shows a page allowing the submission of a solution to a question.
+		/// </summary>
+		[HttpPost, ActionName("DeleteSubmission")]
+		[Route("Questions/{id:int}/DeleteSubmission/{submissionDate}")]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
+		public async Task<IActionResult> DeleteSubmissionConfirmed(int id, int userId, long submissionDate)
+		{
+			if (Assignment.CombinedSubmissions)
+			{
+				return NotFound();
+			}
+
+			await AssignmentQuestionService.DeleteSubmissionAsync
+			(
+				ClassroomName,
+				AssignmentId,
+				id,
+				userId,
+				submissionDate.FromEpoch()
+			);
+
+			return RedirectToAction("Index", "Assignment", new { userId });
+		}
+
+		/// <summary>
+		/// Deletes a submission for a single question.
+		/// </summary>
+		[Route("DeleteSubmissions")]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
+		public async Task<IActionResult> DeleteAllSubmissions(int userId, long submissionDate)
+		{
+			if (!Assignment.CombinedSubmissions)
+			{
+				return NotFound();
+			}
+
+			var questionSubmissions = await AssignmentQuestionService.GetSubmissionsAsync
+			(
+				ClassroomName,
+				AssignmentId,
+				userId,
+				submissionDate.FromEpoch()
+			);
+
+			if (!questionSubmissions.Any())
+			{
+				return NotFound();
+			}
+
+			return View(questionSubmissions);
+		}
+
+		/// <summary>
 		/// Returns whether or not the user has permission to see the assignment.
 		/// </summary>
 		private bool CanSeeAssignment()
 		{
 			return !Assignment.IsPrivate || ClassroomRole >= ClassroomRole.Admin;
+		}
+
+		/// <summary>
+		/// Shows a page allowing the submission of a solution to a question.
+		/// </summary>
+		[HttpPost, ActionName("DeleteSubmissions")]
+		[Route("DeleteSubmissions")]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
+		public async Task<IActionResult> DeleteAllSubmissionsConfirmed(int userId, long submissionDate)
+		{
+			if (!Assignment.CombinedSubmissions)
+			{
+				return NotFound();
+			}
+
+			await AssignmentQuestionService.DeleteSubmissionAsync
+			(
+				ClassroomName,
+				AssignmentId,
+				null /* assignmentQuestionId */,
+				userId,
+				submissionDate.FromEpoch()
+			);
+
+			return RedirectToAction("Index", "Assignment", new { userId });
 		}
 	}
 }

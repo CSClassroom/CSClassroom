@@ -49,9 +49,18 @@
 </form>
 @Html.Partial($"_QuestionScore", Model)
 
-@if (Model.QuestionSubmitted.Status.AllowNewAttempt && Model.ScoreWithoutLateness < Model.QuestionPoints)
+@if (Model.QuestionSubmitted.User.Id == User.Id)
 {
-    <h4>@Html.ActionLink("Try Again", "Solve", new { id = Model.QuestionSubmitted.AssignmentQuestionId })</h4>
+    if (Model.QuestionSubmitted.Status.AllowNewAttempt && Model.ScoreWithoutLateness < Model.QuestionPoints)
+    {
+        <h4>@Html.ActionLink("Try Again", "Solve", new { id = Model.QuestionSubmitted.AssignmentQuestionId })</h4>
+    }
+}
+
+@if (ClassroomRole >= ClassroomRole.Admin)
+{
+    <br>
+    @Html.ActionLink("Delete Submission", "DeleteSubmission", new { userId = Model.QuestionSubmitted.User.Id, submissionDate = Model.SubmissionDate.ToEpoch() })
 }
 
 <br/>

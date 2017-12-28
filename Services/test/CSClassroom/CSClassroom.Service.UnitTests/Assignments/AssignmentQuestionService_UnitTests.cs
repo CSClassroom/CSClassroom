@@ -16,6 +16,7 @@ using CSC.CSClassroom.Service.Assignments.QuestionSolvers;
 using CSC.CSClassroom.Service.Assignments.UserQuestionDataLoaders;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -365,6 +366,87 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 		}
 
 		/// <summary>
+		/// Ensures that DeleteSubmissionAsync deletes a submission for a single question.
+		/// </summary>
+		[Fact]
+		public async Task DeleteSubmissionAsync_SingleQuestion_SubmissionDeleted()
+		{
+			var database = GetDatabaseWithSubmissions().Build();
+			var assignment = database.Context
+				.Assignments
+				.Include(a => a.Questions)
+				.Single(a => a.Name == "Unit 1a");
+			var user = database.Context.Users.Single();
+			database.Reload();
+
+			var assignmentQuestionService = GetAssignmentQuestionService
+			(
+				dbContext: database.Context
+			);
+
+			await assignmentQuestionService.DeleteSubmissionAsync
+			(
+				"Class1",
+				assignment.Id,
+				assignment.Questions[0].Id,
+				user.Id,
+				DueDate
+			);
+
+			var submissions = database.Context
+				.UserQuestionSubmissions
+				.Where
+				(
+					uqs => uqs.UserQuestionData.AssignmentQuestion.AssignmentId 
+						== assignment.Id
+				).ToList();
+			
+			Assert.False(submissions.Any(s => s.DateSubmitted == DueDate));
+			Assert.True(submissions.Any(s => s.DateSubmitted != DueDate));
+		}
+
+		/// <summary>
+		/// Ensures that DeleteSubmissionAsync deletes a submission for an assignment
+		/// containing multiple questions with combined submissions.
+		/// </summary>
+		[Fact]
+		public async Task DeleteSubmissionAsync_CombinedSubmissions_SubmissionDeleted()
+		{
+			var database = GetDatabaseWithSubmissions().Build();
+			var assignment = database.Context
+				.Assignments
+				.Include(a => a.Questions)
+				.Single(a => a.Name == "Unit 1b");
+			var user = database.Context.Users.Single();
+			database.Reload();
+
+			var assignmentQuestionService = GetAssignmentQuestionService
+			(
+				dbContext: database.Context
+			);
+
+			await assignmentQuestionService.DeleteSubmissionAsync
+			(
+				"Class1",
+				assignment.Id,
+				null /* assignmentQuestionId */,
+				user.Id,
+				DueDate
+			);
+
+			var submissions = database.Context
+				.UserQuestionSubmissions
+				.Where
+				(
+					uqs => uqs.UserQuestionData.AssignmentQuestion.AssignmentId
+					    == assignment.Id
+				).ToList();
+			
+			Assert.False(submissions.Any(s => s.DateSubmitted == DueDate));
+			Assert.True(submissions.Any(s => s.DateSubmitted != DueDate));
+		}
+
+		/// <summary>
 		/// Returns a mock UserQuestionDataLoaderFactory.
 		/// </summary>
 		private IUserQuestionDataLoaderFactory GetMockUserQuestionDataLoaderFactory(
@@ -618,6 +700,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 				.AddStudent("User1", "Last1", "First1", "Class1", "Period1")
 				.AddQuestionCategory("Class1", "Category1")
 				.AddQuestion("Class1", "Category1", new MethodQuestion() {Name = "Question1"})
+				.AddQuestion("Class1", "Category1", new MethodQuestion() {Name = "Question2"})
 				.AddAssignment
 				(
 					"Class1",
@@ -634,6 +717,88 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 							"Question1"
 						}
 					}
+				)
+				.AddAssignment
+				(
+					"Class1",
+					"Unit 1",
+					"Unit 1b",
+					sectionDueDates: new Dictionary<string, DateTime>()
+					{
+						["Period1"] = DueDate
+					},
+					questionsByCategory: new Dictionary<string, string[]>()
+					{
+						["Category1"] = new[]
+						{
+							"Question1",
+							"Question2"
+						}
+					},
+					combinedSubmissions: true
+				);
+		}
+
+		/// <summary>
+		/// Returns a database builder with pre-added submissions
+		/// </summary>
+		private TestDatabaseBuilder GetDatabaseWithSubmissions()
+		{
+			return GetDatabase()
+				.AddQuestionSubmission
+				(
+					"Class1",
+					"Category1",
+					"Question1",
+					"User1",
+					"Unit 1a",
+					"Contents",
+					score: 0.5,
+					dateSubmitted: DueDate
+				)
+				.AddQuestionSubmission
+				(
+					"Class1",
+					"Category1",
+					"Question1",
+					"User1",
+					"Unit 1a",
+					"Contents2",
+					score: 1.0,
+					dateSubmitted: DueDate + TimeSpan.FromDays(1)
+				)
+				.AddQuestionSubmission
+				(
+					"Class1",
+					"Category1",
+					"Question1",
+					"User1",
+					"Unit 1b",
+					"Contents",
+					score: 1.0,
+					dateSubmitted: DueDate
+				)
+				.AddQuestionSubmission
+				(
+					"Class1",
+					"Category1",
+					"Question2",
+					"User1",
+					"Unit 1b",
+					"Contents2",
+					score: 0.5,
+					dateSubmitted: DueDate
+				)
+				.AddQuestionSubmission
+				(
+					"Class1",
+					"Category1",
+					"Question2",
+					"User1",
+					"Unit 1b",
+					"Contents2",
+					score: 1.0,
+					dateSubmitted: DueDate + TimeSpan.FromDays(1)
 				);
 		}
 

@@ -71,5 +71,15 @@ namespace CSC.CSClassroom.Service.Assignments
 			int assignmentId,
 			int userId,
 			DateTime submissionDate);
+
+		/// <summary>
+		/// Removes a submission for one or more questions.
+		/// </summary>
+		Task DeleteSubmissionAsync(
+			string classroomName,
+			int assignmentId,
+			int? assignmentQuestionId,
+			int userId,
+			DateTime submissionDate);
 	}
 }

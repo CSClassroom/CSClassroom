@@ -1,0 +1,56 @@
+﻿@using CSC.CSClassroom.Model.Assignments.ServiceResults
+@using CSC.CSClassroom.WebApp.Providers
+@inject ITimeZoneProvider TimeZoneProvider
+@model SubmissionResult
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h2>Delete Submission</h2>
+
+<h3>Are you sure you want to delete this submission?</h3>
+<div>
+    <h4>Section</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            Student
+        </dt>
+        <dd>
+            @($"{Model.QuestionSubmitted.User.FirstName} {Model.QuestionSubmitted.User.LastName}")
+        </dd>
+        <dt>
+            Assignment
+        </dt>
+        <dd>
+            @Assignment.Name
+        </dd>
+        <dt>
+            Question
+        </dt>
+        <dd>
+            @Model.QuestionSubmitted.Name
+        </dd>
+        <dt>
+            Submission Date
+        </dt>
+        <dd>
+            @Model.SubmissionDate.FormatLongDateTime(TimeZoneProvider)
+        </dd>
+        <dt>
+            Score
+        </dt>
+        <dd>
+            @Math.Round(Model.ScoreWithLateness, 1, MidpointRounding.AwayFromZero) / @Model.QuestionPoints
+        </dd>
+    </dl>
+    
+    <form asp-action="DeleteSubmission">
+        <div class="form-actions no-color">
+            <input type="hidden" name="userId" value="@Model.QuestionSubmitted.User.Id" />
+            <input type="hidden" name="submissionDate" value="@Model.SubmissionDate.ToEpoch()" />
+            <input type="submit" value="Delete" class="btn btn-default"/>
+        </div>
+    </form>
+</div>

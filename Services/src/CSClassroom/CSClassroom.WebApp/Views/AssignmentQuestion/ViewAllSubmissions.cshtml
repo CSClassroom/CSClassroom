@@ -68,8 +68,15 @@
     {
         <h3>@Html.ActionLink("Try Again", "SolveAll")</h3>
     }
+}
 
-    <br />
+@if (ClassroomRole >= ClassroomRole.Admin)
+{
+    <br>
+    @Html.ActionLink("Delete Submission", "DeleteAllSubmissions", new { userId = Model[0].QuestionSubmitted.User.Id, submissionDate = Model[0].SubmissionDate.ToEpoch() })
+}
+
+@{
     var pastSubmissions = Model
         .SelectMany(result => result.QuestionSubmitted.PastSubmissions)
         .Distinct()
@@ -78,6 +85,7 @@
 
     if (pastSubmissions.Any())
     {
+        <br />
         @Html.Partial("_PastSubmissions", new PastSubmissions(Model[0].QuestionSubmitted.User.Id, pastSubmissions))
     }
 }

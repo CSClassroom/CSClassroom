@@ -288,6 +288,61 @@ namespace CSC.CSClassroom.Service.Assignments
 		}
 
 		/// <summary>
+		/// Removes a submission for one or more questions.
+		/// </summary>
+		public async Task DeleteSubmissionAsync(
+			string classroomName,
+			int assignmentId,
+			int? assignmentQuestionId,
+			int userId,
+			DateTime submissionDate)
+		{
+			var submissionQuery = _dbContext.UserQuestionSubmissions
+				.Include(uqs => uqs.UserQuestionData)
+				.Where
+				(
+					uqs => uqs.UserQuestionData
+						.AssignmentQuestion
+						.Assignment
+						.Classroom
+						.Name == classroomName
+				)
+				.Where
+				(
+					uqs => uqs.UserQuestionData
+					   .AssignmentQuestion
+					   .AssignmentId == assignmentId	
+				)
+				.Where
+				(
+					uqs => uqs.UserQuestionData.UserId == userId	
+				)
+				.Where
+				(
+					uqs => (uqs.DateSubmitted - submissionDate).Duration() 
+						< TimeSpan.FromMilliseconds(1)
+				);
+
+			if (assignmentQuestionId.HasValue)
+			{
+				submissionQuery = submissionQuery.Where
+				(
+					uqs => uqs.UserQuestionData
+						       .AssignmentQuestionId == assignmentQuestionId
+				);
+			}
+
+			var submissions = await submissionQuery.ToListAsync();
+			foreach (var submission in submissions)
+			{
+				submission.UserQuestionData.NumAttempts--;
+				_dbContext.UserQuestionSubmissions.Remove(submission);
+			}
+
+			await _dbContext.SaveChangesAsync();
+		}
+
+		/// <summary>
 		/// Loads user question data for a single question.
 		/// </summary>
 		private async Task<UserQuestionDataStore> LoadDataForSingleQuestionAsync(
