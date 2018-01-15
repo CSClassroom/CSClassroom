@@ -125,7 +125,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 				.GetAnnouncementsAsync("Class1", userId, admin: true);
 			var announcements = announcementsQuery.OrderBy(a => a.DatePosted).ToList();
 
-			Assert.Equal(3, announcements.Count);
+			Assert.Equal(2, announcements.Count);
 
 			Assert.Equal("Title1", announcements[0].Title);
 			Assert.Equal("Contents1", announcements[0].Contents);
@@ -141,13 +141,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 			Assert.Equal(PostDate2, announcements[1].DatePosted);
 			Assert.Equal(1, announcements[1].Sections.Count);
 			Assert.Contains(announcements[1].Sections, s => s.Section.Name == "Section1");
-
-			Assert.Equal("Title3", announcements[2].Title);
-			Assert.Equal("Contents3", announcements[2].Contents);
-			Assert.Equal("Admin1", announcements[2].User.UserName);
-			Assert.Equal(PostDate3, announcements[2].DatePosted);
-			Assert.Equal(1, announcements[2].Sections.Count);
-			Assert.Contains(announcements[2].Sections, s => s.Section.Name == "Section2");
 		}
 
 		/// <summary>
@@ -433,6 +426,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 				.AddSection("Class1", "Section1")
 				.AddSection("Class1", "Section2")
 				.AddAdmin("Admin1", "LastName", "FirstName", "Class1", superUser: false)
+				.AddSectionRecipient("Admin1", "Class1", "Section1")
 				.AddStudent("Student1", "LastName", "FirstName", "Class1", "Section1")
 				.AddStudent("Student2", "LastName", "FirstName", "Class1", "Section2")
 				.AddAdditionalContact("Student1", "LastName", "FirstName", "AdditionalContact1Email")

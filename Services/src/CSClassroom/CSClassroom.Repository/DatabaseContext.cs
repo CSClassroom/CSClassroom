@@ -248,6 +248,31 @@ namespace CSC.CSClassroom.Repository
 		/// The announcement sections table.
 		/// </summary>
 		public DbSet<AnnouncementSection> AnnouncementSections { get; set; }
+		
+		/// <summary>
+		/// The section recipients table.
+		/// </summary>
+		public DbSet<SectionRecipient> SectionRecipients { get; set; }
+		
+		/// <summary>
+		/// The conversations table.
+		/// </summary>
+		public DbSet<Conversation> Conversations { get; set; }
+		
+		/// <summary>
+		/// The messages table.
+		/// </summary>
+		public DbSet<Message> Messages { get; set; }
+		
+		/// <summary>
+		/// The attachments table.
+		/// </summary>
+		public DbSet<Attachment> Attachments { get; set; }
+		
+		/// <summary>
+		/// The table containing all attachment data.
+		/// </summary>
+		public DbSet<AttachmentData> AttachmentData { get; set; }
 
 		/// <summary>
 		/// Constructor.
@@ -302,6 +327,9 @@ namespace CSC.CSClassroom.Repository
 			SetupIndex<SectionGradebook>(builder, g => new {g.ClassroomGradebookId, g.SectionId});
 			SetupIndex<CheckpointTestClass>(builder, tc => new {tc.CheckpointId, tc.TestClassId});
 			SetupIndex<Announcement>(builder, a => a.DatePosted);
+			SetupIndex<AnnouncementSection>(builder, a => new {a.AnnouncementId, a.SectionId});
+			SetupIndex<SectionRecipient>(builder, sr => new {sr.ClassroomMembershipId, sr.SectionId});
+			SetupIndex<Message>(builder, m => new {m.ConversationId, m.AuthorId}, "Sent IS NULL");
 		}
 
 		/// <summary>
@@ -309,9 +337,17 @@ namespace CSC.CSClassroom.Repository
 		/// </summary>
 		private static void SetupIndex<TEntity>(
 			ModelBuilder modelBuilder, 
-			Expression<Func<TEntity, object>> expression) where TEntity : class
+			Expression<Func<TEntity, object>> expression,
+			string filter = null) where TEntity : class
 		{
-			modelBuilder.Entity<TEntity>().HasIndex(expression).IsUnique();
+			var builder = modelBuilder.Entity<TEntity>().HasIndex(expression);
+
+			if (filter != null)
+			{
+				builder.HasFilter(filter);
+			}
+			
+			builder.IsUnique();
 		}
 
 		/// <summary>

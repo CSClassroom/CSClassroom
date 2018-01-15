@@ -20,6 +20,11 @@ namespace CSC.CSClassroom.WebApp.BasePages
 		public ClassroomRole ClassroomRole => ViewBag.ClassroomRole;
 
 		/// <summary>
+		/// Whether or not the current user is an admin.
+		/// </summary>
+		public bool IsAdmin => ClassroomRole >= ClassroomRole.Admin;
+
+		/// <summary>
 		/// The classrooms with access.
 		/// </summary>
 		public IList<ClassroomMembership> ClassroomsWithAccess => ViewBag.ClassroomsWithAccess;

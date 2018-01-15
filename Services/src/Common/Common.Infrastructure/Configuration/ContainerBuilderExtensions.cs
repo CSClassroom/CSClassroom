@@ -4,6 +4,7 @@ using Autofac;
 using CSC.Common.Infrastructure.Async;
 using CSC.Common.Infrastructure.Email;
 using CSC.Common.Infrastructure.GitHub;
+using CSC.Common.Infrastructure.Image;
 using CSC.Common.Infrastructure.Queue;
 using CSC.Common.Infrastructure.Security;
 using CSC.Common.Infrastructure.Serialization;
@@ -76,6 +77,14 @@ namespace CSC.Common.Infrastructure.Configuration
 			(
 				CreateSendGridMailProvider(sendGridSettings, csClassroomSettings)
 			).As<IEmailProvider>();
+		}
+
+		/// <summary>
+		/// Registers an image processor.
+		/// </summary>
+		public static void RegisterImageProcessor(this ContainerBuilder builder)
+		{
+			builder.RegisterType<ImageProcessor>().As<IImageProcessor>().InstancePerLifetimeScope();
 		}
 
 		/// <summary>

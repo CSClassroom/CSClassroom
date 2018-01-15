@@ -143,4 +143,15 @@ Global
 		{1045C8FF-5168-47B8-8954-4DD5C19729CF} = {D251C224-2E53-43C4-9F79-F5A1D04EE10B}
 		{5F8A8375-26C8-4818-98EB-46CE2D5A5575} = {1045C8FF-5168-47B8-8954-4DD5C19729CF}
 	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.FileWidth = 80
+		$1.scope = text/plain
+		$0.TextStylePolicy = $2
+		$2.inheritsSet = null
+		$2.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $3
+		$3.scope = text/x-csharp
+	EndGlobalSection
 EndGlobal

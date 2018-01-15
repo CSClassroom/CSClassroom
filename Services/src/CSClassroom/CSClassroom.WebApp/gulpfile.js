@@ -12,7 +12,7 @@ var htmlmin = require("gulp-htmlmin");
 var merge = require("merge-stream");
 var newer = require("gulp-newer");
 var rename = require("gulp-rename");
-var uglify = require("gulp-uglify");
+var uglify = require("gulp-uglifyes");
 var yargs = require("yargs");
 
 
@@ -57,7 +57,7 @@ function getBundleTasks(bundles, minify) {
             .pipe(newer(outputFile))
             .pipe(browserifyOperation())
             .pipe(concat(outputFile))
-            .pipe(minifyOperation())
+            .pipe(minifyOperation().on('error', function(e) { console.log(e); throw e;}))
             .pipe(gulp.dest("."));
     }));
 }

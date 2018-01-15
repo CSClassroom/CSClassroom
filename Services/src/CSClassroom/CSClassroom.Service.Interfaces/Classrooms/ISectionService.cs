@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Users;
 
@@ -25,12 +26,18 @@ namespace CSC.CSClassroom.Service.Classrooms
 		/// <summary>
 		/// Creates a section.
 		/// </summary>
-		Task CreateSectionAsync(string classroomName, Section section);
+		Task<bool> CreateSectionAsync(
+			string classroomName,
+			Section section,
+			IModelErrorCollection errors);
 
 		/// <summary>
 		/// Updates a section.
 		/// </summary>
-		Task UpdateSectionAsync(string classroomName, Section section);
+		Task<bool> UpdateSectionAsync(
+			string classroomName,
+			Section section,
+			IModelErrorCollection errors);
 
 		/// <summary>
 		/// Removes a section.

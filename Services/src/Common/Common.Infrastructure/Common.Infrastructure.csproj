@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DefineConstants>$(DefineConstants);CODE_ANALYSIS;NETFX_CORE;SIMPLE_JSON_OBJARRAYINTERNAL;SIMPLE_JSON_INTERNAL;NET_45;PORTABLE;SIMPLE_JSON_READONLY_COLLECTIONS</DefineConstants>
@@ -11,11 +10,9 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <RootNamespace>CSC.Common.Infrastructure</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="../Common.Infrastructure.Interfaces/Common.Infrastructure.Interfaces.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="AsyncFriendlyStackTrace" Version="1.5.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
@@ -33,9 +30,9 @@
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="2.5.0" />
     <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="3.0.1" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0002" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />
   </ItemGroup>
-
 </Project>

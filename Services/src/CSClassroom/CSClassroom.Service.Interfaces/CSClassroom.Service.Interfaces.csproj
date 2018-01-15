@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DebugType>portable</DebugType>
@@ -10,11 +9,9 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <RootNamespace>CSC.CSClassroom.Service.Interfaces</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="../../BuildService/BuildService.Model/BuildService.Model.csproj" />
     <ProjectReference Include="../../Common/Common.Infrastructure.Interfaces/Common.Infrastructure.Interfaces.csproj" />
     <ProjectReference Include="../CSClassroom.Model/CSClassroom.Model.csproj" />
   </ItemGroup>
-
 </Project>

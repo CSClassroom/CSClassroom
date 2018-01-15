@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Repository;
 using Microsoft.EntityFrameworkCore;
+using MoreLinq;
 
 namespace CSC.CSClassroom.Service.Classrooms
 {
@@ -19,11 +22,19 @@ namespace CSC.CSClassroom.Service.Classrooms
 		private readonly DatabaseContext _dbContext;
 
 		/// <summary>
+		/// Ensures that sections being created/modified are valid.
+		/// </summary>
+		private readonly ISectionValidator _sectionValidator;
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public SectionService(DatabaseContext dbContext)
+		public SectionService(
+			DatabaseContext dbContext, 
+			ISectionValidator sectionValidator)
 		{
 			_dbContext = dbContext;
+			_sectionValidator = sectionValidator;
 		}
 
 		/// <summary>
@@ -40,6 +51,7 @@ namespace CSC.CSClassroom.Service.Classrooms
 			return await _dbContext.Sections
 				.Where(section => section.ClassroomId == classroom.Id)
 				.Include(section => section.SectionGradebooks)
+				.Include(section => section.SectionRecipients)
 				.SingleOrDefaultAsync(section => section.Name == sectionName);
 		}
 
@@ -65,20 +77,33 @@ namespace CSC.CSClassroom.Service.Classrooms
 		/// <summary>
 		/// Creates a section.
 		/// </summary>
-		public async Task CreateSectionAsync(string classroomName, Section section)
+		public async Task<bool> CreateSectionAsync(
+			string classroomName, 
+			Section section,
+			IModelErrorCollection errors)
 		{
 			var classroom = await LoadClassroomAsync(classroomName);
-
 			section.ClassroomId = classroom.Id;
+
+			if (!await _sectionValidator.ValidateSectionAsync(section, errors))
+			{
+				return false;
+			}
+			
 			_dbContext.Add(section);
 
 			await _dbContext.SaveChangesAsync();
+
+			return true;
 		}
 
 		/// <summary>
 		/// Updates a section.
 		/// </summary>
-		public async Task UpdateSectionAsync(string classroomName, Section section)
+		public async Task<bool> UpdateSectionAsync(
+			string classroomName, 
+			Section section,
+			IModelErrorCollection errors)
 		{
 			var classroom = await LoadClassroomAsync(classroomName);
 
@@ -90,10 +115,17 @@ namespace CSC.CSClassroom.Service.Classrooms
 
 			_dbContext.Entry(currentSection).State = EntityState.Detached;
 
+			if (!await _sectionValidator.ValidateSectionAsync(section, errors))
+			{
+				return false;
+			}
+			
 			UpdateSection(section);
 			_dbContext.Update(section);
 
 			await _dbContext.SaveChangesAsync();
+
+			return true;
 		}
 
 		/// <summary>
@@ -118,6 +150,14 @@ namespace CSC.CSClassroom.Service.Classrooms
 				sectionGradebook => sectionGradebook.Id,
 				sectionGradebook => sectionGradebook.SectionId == section.Id,
 				section.SectionGradebooks
+			);
+			
+			_dbContext.RemoveUnwantedObjects
+			(
+				_dbContext.SectionRecipients,
+				sectionRecipient => sectionRecipient.Id,
+				sectionRecipient => sectionRecipient.SectionId == section.Id,
+				section.SectionRecipients
 			);
 		}
 

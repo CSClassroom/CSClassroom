@@ -91,6 +91,11 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		}
 
 		/// <summary>
+		/// Returns whether or not the user is a classroom admin.
+		/// </summary>
+		protected bool IsAdmin => ClassroomRole >= ClassroomRole.Admin;
+
+		/// <summary>
 		/// Returns the given user's classroom membership for this classroom.
 		/// </summary>
 		private static ClassroomMembership GetClassroomMembership(

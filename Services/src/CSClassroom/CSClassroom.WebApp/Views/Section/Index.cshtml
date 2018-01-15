@@ -21,6 +21,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.AllowNewRegistrations)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AllowStudentMessages)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -35,6 +38,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.AllowNewRegistrations, "YesNo")
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AllowStudentMessages, "YesNo")
             </td>
             <td>
                 <a asp-action="Students" asp-controller="Student" asp-route-sectionName="@item.Name">Students</a> |

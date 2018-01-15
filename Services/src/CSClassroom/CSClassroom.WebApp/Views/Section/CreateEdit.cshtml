@@ -41,11 +41,28 @@
             </div>
         </div>
         <div class="form-group">
+            <label asp-for="AllowStudentMessages" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="AllowStudentMessages" class="form-control-static"></p>
+                <input asp-for="AllowStudentMessages" class="checkbox" type="checkbox" value="true" />
+                <input type="hidden" name="AllowStudentMessages" value="false" />
+                <span asp-validation-for="AllowStudentMessages" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
             <label asp-for="SectionGradebooks" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <p asp-description-for="SectionGradebooks" class="form-control-static"></p>
                 <table id="sectionGradebooks" class="equal-width"></table>
                 <span asp-validation-for="SectionGradebooks" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="SectionRecipients" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="SectionRecipients" class="form-control-static"></p>
+                <table id="sectionRecipients" class="equal-width"></table>
+                <span asp-validation-for="SectionRecipients" class="text-danger"></span>
             </div>
         </div>
         <div class="form-group">
@@ -90,6 +107,41 @@
                     (
                         ((ClassroomGradebook)classroomGradebook).Name, 
                         ((ClassroomGradebook)classroomGradebook).Id
+                    )
+                )
+            )
+        }
+    })
+
+@await Component.InvokeAsync(
+    "DynamicTable",
+    new
+    {
+        tableElementId = "sectionRecipients",
+        modelExplorer = ViewData.ModelExplorer.GetExplorerForProperty(nameof(Section.SectionRecipients)),
+        properties = new[]
+        {
+            nameof(SectionRecipient.ClassroomMembershipId),
+            nameof(SectionRecipient.ViewAnnouncements),
+            nameof(SectionRecipient.EmailAnnouncements),
+            nameof(SectionRecipient.ViewMessages),
+            nameof(SectionRecipient.EmailMessages)
+        },
+        orderByProp = nameof(SectionRecipient.ClassroomMembershipId),
+        startMinRows = 0,
+        textAreas = false,
+        dropDownLists = new List<DropDownList>()
+        {
+            new DropDownList
+            (
+                nameof(SectionRecipient.ClassroomMembershipId),
+                ((List<ClassroomMembership>)ViewBag.ClassroomAdmins).Cast<object>().ToList(),
+                (Func<object, DropDownListItem>)
+                (
+                    admin => new DropDownListItem
+                    (
+                        $"{((ClassroomMembership)admin).User.LastName}, {((ClassroomMembership)admin).User.FirstName}",
+                        ((ClassroomMembership)admin).Id
                     )
                 )
             )

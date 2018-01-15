@@ -65,6 +65,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionResolvers
 		/// Ensures that CreateQuestionResolver returns a NoMoreAttemptsQuestionResolver
 		/// when no more attempts are allowed.
 		/// </summary>
+		[Fact]
 		public void CreateQuestionResolver_NoNewAttemptAllowed_ReturnsCorrectType()
 		{
 			var userQuestionData = new UserQuestionData()

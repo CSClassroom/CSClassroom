@@ -13,7 +13,7 @@
         <script>
             appInsights.setAuthenticatedUserContext("@(User.Identity.Name
                .Replace("\\", "\\\\"))"
-               .replace(/[,;=| ]+/g, "_"));
+                .replace(/[,;=| ]+/g, "_"));
         </script>
     }
 
@@ -36,32 +36,46 @@
         <link rel="stylesheet" href="~/css/external.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/css/internal.min.css" asp-append-version="true" />
     </environment>
-
+    <script>
+        $(document)
+            .ajaxSend(function (event, jqxhr, settings) {
+                if (settings.type.toUpperCase() !== "POST") return;
+                jqxhr.setRequestHeader('RequestVerificationToken', $(".AntiForge" + " input").val());
+            })
+    </script>
 </head>
 <body>
-    @Html.Partial("_NavBar")
-    <div class="container body-content">
-        @Html.Partial("_Activation")
-        @RenderBody()
-        <script type="text/javascript">
-            $(document).ready(rewriteGridCollectionNames);
-            function cookieExists(name) {
-                var nameToFind = name + "=";
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    if (cookies[i].trim().indexOf(nameToFind) === 0) return true;
-                }
-                return false;
+<span class="AntiForge"> @Html.AntiForgeryToken() </span>
+@Html.Partial("_NavBar")
+<div class="container body-content">
+    @Html.Partial("_Activation")
+    @RenderBody()
+    <script type="text/javascript">
+        $(document).ready(rewriteGridCollectionNames);
+
+        function cookieExists(name) {
+            var nameToFind = name + "=";
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                if (cookies[i].trim().indexOf(nameToFind) === 0) return true;
             }
-            if (!cookieExists("_timeZoneOffset")) {
-                var now = new Date();
-                var timeZoneOffset = -now.getTimezoneOffset();  // in minutes
-                now.setTime(now.getTime() + 10*24*60*60*1000); // keep it for 10 days
-                document.cookie = "_timeZoneOffset=" + timeZoneOffset.toString() + ";expires=" + now.toGMTString() + ";path=/;" + document.cookie;
-                }
-        </script>
-        <hr />
-    </div>
+            return false;
+        }
+
+        if (!cookieExists("_timeZoneOffset")) {
+            var now = new Date();
+            var timeZoneOffset = -now.getTimezoneOffset(); // in minutes
+            now.setTime(now.getTime() + 10 * 24 * 60 * 60 * 1000); // keep it for 10 days
+            document.cookie = "_timeZoneOffset=" +
+                timeZoneOffset.toString() +
+                ";expires=" +
+                now.toGMTString() +
+                ";path=/;" +
+                document.cookie;
+        }
+    </script>
+    <hr/>
+</div>
 
 </body>
 </html>

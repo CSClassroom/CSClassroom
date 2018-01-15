@@ -13,9 +13,10 @@ require('tinymce/plugins/fullscreen');
 require('tinymce/plugins/textcolor');
 require('tinymce/plugins/table');
 require('tinymce/plugins/autoresize');
+require('./tinymceSaveAjaxPlugin');
 
-window.initTinyMce = function(selector, extraSettings) {
-    var settings = {
+window.initTinyMce = function(selector, modifySettings) {
+    var defaultSettings = {
         selector: selector,
         menubar: false,
         plugins: [
@@ -23,7 +24,7 @@ window.initTinyMce = function(selector, extraSettings) {
             'searchreplace visualblocks fullscreen',
             'textcolor table autoresize'
         ],
-        toolbar: 'undo redo | styleselect | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link table | preview',
+        toolbar: 'styleselect | bold italic underline | forecolor backcolor | bullist numlist outdent indent | link table | preview',
         forced_root_block: false,
         branding: false,
         elementpath: false,
@@ -31,13 +32,13 @@ window.initTinyMce = function(selector, extraSettings) {
         autoresize_min_height: 200,
         autoresize_bottom_margin: 0,
         relative_urls: false,
-        remove_script_host: false
+        remove_script_host: false,
+        setup: (editor) => editor.on('change', () => editor.save())
     };
 
-    for (var propName in extraSettings) {
-        settings[propName] = extraSettings[propName];
+    if (modifySettings) {
+        modifySettings(defaultSettings);
     }
 
-    tinyMCE.init(settings);
-}
-
+    tinyMCE.init(defaultSettings);
+};

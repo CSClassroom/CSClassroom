@@ -1,0 +1,390 @@
+﻿@using CSC.Common.Infrastructure.Extensions
+@using CSC.Common.Infrastructure.Utilities
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@model Conversation
+@inject ITimeZoneProvider TimeZoneProvider
+<style>
+    .summary-col-heading {
+        font-weight: bold;
+        font-size: large;
+        padding-right: 10px;
+    }
+    .summary-col-value {
+        font-size: large;
+    }
+    .MultiFile-preview {
+        margin: 10px;
+    }
+</style>
+@{
+    ViewData["Title"] = "Message";
+    bool AnySentMessages = Model.Messages.Any(c => c.Sent.HasValue);
+    string Title = AnySentMessages ? "View Message" : "New Message";
+    bool ShowActionRequiredToggle = IsAdmin && AnySentMessages;
+    bool ShowOwner = IsAdmin && AnySentMessages;
+    bool ShowDeleteButton = IsAdmin || !AnySentMessages;
+    string UpdateStatusUrl = @Url.Action("UpdateStatus", new { conversationId = Model.Id });
+    string UpdateOwnerUrl = @Url.Action("UpdateOwner", new {conversationId = Model.Id});
+    string SaveDraftUrl = Url.Action("SaveDraftReply", new { conversationId = Model.Id });
+    string SendUrl = Url.Action("SendReply", new {conversationId = Model.Id});
+    var SentMessages = Model.Messages
+        .Where(m => m.Sent.HasValue)
+        .OrderBy(m => m.Sent.Value)
+        .ToList();
+}
+<h2>@Title</h2>
+@if (IsAdmin)
+{
+    <hr>
+}
+<table class="summary-table">
+    @if (IsAdmin)
+    {
+        <tr>
+            <td class="summary-col-heading">
+                Student:
+            </td>
+            <td class="summary-col-value">
+                @($"{Model.Student.FirstName} {Model.Student.LastName}") &nbsp;
+                (@Html.ActionLink("Assignments", "Index", "Assignment", new { userId = Model.StudentId }, new { target="_blank" }) |
+                 @Html.ActionLink("Projects", "Index", "Project", new { userId = Model.StudentId }, new { target="_blank" }))
+            </td>
+        </tr>
+    }
+    <tr>
+        <td class="summary-col-heading">
+            Subject:
+        </td>
+        <td class="summary-col-value">
+            @Model.Subject
+        </td>
+    </tr>
+    @if (ShowOwner)
+    {
+        string ownerText = Model.Owner != null ? $"{Model.Owner.FirstName} {Model.Owner.LastName}" : "None";
+        string ownerColor = Model.Owner != null ? (Model.Owner.Id == User.Id ? "green" : "black") : "#a5042f";
+        string ownerFontWeight = (Model.Owner == null || Model.Owner.Id == User.Id) ? "bold" : "normal";
+        <tr>
+            <td class="summary-col-heading">
+                Owner:
+            </td>
+            <td class="summary-col-value">
+                <span id="ownerName" style="margin-right: 3px; line-height: 1.0; vertical-align: text-middle"></span>
+                <input type="button" id="ownerButton" value="Take Ownership" class="btn-sm btn-default" style="display: inline; vertical-align: top; line-height: 1.0; margin-right: 3px; display: none"/>
+                <img id="ownerProgress" style="display: none; vertical-align: initial" src="~/images/ajax-loader.gif">
+            </td>
+        </tr>
+    }
+    @if (ShowActionRequiredToggle)
+    {
+        <tr>
+            <td class="summary-col-heading">
+                Actionable:
+            </td>
+            <td class="summary-col-value">
+                <span id="actionRequiredWrapper" style="display: inline-block; line-height: 1.3; vertical-align: top">
+                    <input id="actionRequired" type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No" data-onstyle="waiting" data-offstyle="not-waiting" style="vertical-align: top" @(Model.Actionable ? "checked" : "")/>
+                </span>
+                <script>$("#actionRequired").bootstrapToggle();</script>
+                <img id="actionRequiredProgress" style="display: none; margin-left: 10px" src="~/images/ajax-loader.gif">
+            </td>
+        </tr>
+    }
+</table>
+@if (AnySentMessages)
+{
+    if (IsAdmin)
+    {
+        <hr>
+    }
+    else
+    {
+        <br>
+    }
+    <div class="panel-group">
+        @foreach (var message in SentMessages)
+        {
+            var panelStyle = (message == SentMessages.Last() ? "margin-bottom:0px" : "margin-bottom: 20px");
+            <div class="panel panel-primary @(message.AuthorId == Model.StudentId ? "panel-student" : "panel-admin")" style="@panelStyle">
+                <div class="panel-heading">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div>
+                            <span class="panel-title">
+                                @message.Author.PubliclyDisplayedName
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="panel-body" style="padding-bottom: 3px; padding-top: 10px">
+                    @Html.Raw(message.Contents)
+                    @if (message.Attachments?.Any() ?? false)
+                    {
+                        <hr style="line-height: 5px; margin-bottom: 2px; margin-top: 10px"/>
+                        <span style="font-size: 9pt; font-weight: bold">Attachments:</span>
+                        <br>
+                        var attachments = message.Attachments
+                            .OrderBy(a => a.FileName, new NaturalComparer())
+                            .ToList();
+                        <ul>
+                            @foreach (var attachment in attachments)
+                            {
+                                var attachmentUrl = Url.Action(
+                                    "GetAttachment",
+                                    new {conversationId = Model.Id, attachmentId = attachment.Id});
+                                <li>
+                                    <a href="@attachmentUrl">@attachment.FileName</a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    <hr style="line-height: 5px; margin-bottom: 2px; margin-top: 10px"/>
+                    <span style="font-size: 9pt; font-weight: bold">Sent on @message.Sent.Value.FormatLongDateTime(TimeZoneProvider)</span>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@{
+    var draftContents = Model.Messages
+        .FirstOrDefault(m => !m.Sent.HasValue && m.AuthorId == User.Id)
+        ?.Contents;
+}
+
+<form asp-action="SendReply" id="replyForm" enctype="multipart/form-data">
+    <div class="form-horizontal">
+        <hr/>
+        @if (AnySentMessages)
+        {
+            <h2>Reply</h2>
+            <br>
+        }
+        <div id="mustOwnBeforeReply" class="alert alert-danger max-width" style="display: none">
+            You are not the owner of this message.
+        </div>
+        <div class="form-group">
+            <div class="col-md-10">
+                <textarea id="contents" name="messageContents">
+                    @Html.Raw(draftContents)
+                </textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-10">
+                <input type="file" name="attachments" id="attachments" data-maxsize="10240" style="visibility: hidden; height: 0px" class="multi with-preview">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-10">
+                <input type="hidden" name="conversationId" value="@Model.Id" />
+                <input type="submit" id="submitButton" value="Send" class="btn btn-default"/>
+                <input type="button" value="Attach file..." class="btn btn-default" onclick="$('#attachments').find('input').last().click()" />
+                @if (ShowDeleteButton)
+                {
+                    <input type="button" id="deleteButton" value="Delete @(AnySentMessages ? "Conversation" : "Draft")" class="btn btn-default"/>
+                }
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (ShowDeleteButton)
+{
+    <form asp-action="Delete" id="deleteForm"></form>
+}
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <environment names="Development">
+        <script src="~/js/tinymceBundle.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/js/tinymceBundle.min.js" asp-append-version="true"></script>
+    </environment>
+    <script>
+        $(document).ready(() => {
+            initTinyMce(
+                '#contents',
+                (settings) => {
+                    @if (ShowOwner)
+                    {
+                        @:settings.readonly = @(Model.OwnerId != User.Id ? "true" : "false");
+                    }
+                    settings.plugins += " saveajax";
+                    settings.toolbar = "saveajax | " + settings.toolbar;
+                    settings.saveajax_save_draft_callback = () => Promise.resolve($.post(
+                        "@SaveDraftUrl",
+                        {
+                            conversationId: @Model.Id,
+                            messageContents: tinymce.get('contents').getContent()
+                        }));
+                    settings.saveajax_final_submit_callback = () => Promise.resolve(
+                            $.post({
+                                url: "@SendUrl",
+                                data: new FormData($("#replyForm")[0]),
+                                processData: false,
+                                contentType: false
+                            }))
+                        .then((response) => {
+                            if (!response.result) {
+                                return Promise.reject({
+                                    html: '<ul>' +
+                                        response.attachmentErrors
+                                        .map(err => '<li>' + err + '</li>')
+                                        .join('') +
+                                        '</ul>'
+                                });
+                            }
+                            return Promise.resolve();
+                        })
+                        .catch(() => {
+                            return Promise.reject({
+                                text: "An error occured attempting to send your message."
+                            });
+                        });
+                });
+            
+            @if (ShowOwner)
+            {
+                <text>
+                    function updateEditorStatus(readonly) {
+                        delayPromise(0).then(() => {
+                            if (readonly) {
+                                $("#mustOwnBeforeReply").show();
+                                $("#replyForm :input").prop('disabled', true);
+                                if (!tinymce.get('contents').readonly) {
+                                    tinymce.get('contents').setMode('readonly');
+                                }
+                            } else {
+                                $("#mustOwnBeforeReply").hide();
+                                $("#replyForm :input").prop('disabled', false);
+                                if (tinymce.get('contents').readonly) {
+                                    tinymce.get('contents').setMode('design');
+                                }
+                            }
+                        });
+                    }
+
+                    function setOwner(newOwnerId, newOwnerName) {
+                        window.ownerId = newOwnerId;
+                        window.ownerName = newOwnerName;
+                        $("#ownerName").text(window.ownerName || "None");
+                        $("#ownerName").css(
+                            'font-weight',
+                            window.ownerId == null || window.ownerId === @User.Id
+                            ? "bold"
+                            : "normal");
+                        $("#ownerName").css(
+                            'color',
+                            window.ownerId !== null
+                            ? (window.ownerId === @User.Id ? "green" : "black")
+                            : "#a5042f");
+                        $("#ownerButton").prop(
+                            'value',
+                            window.ownerId === @User.Id
+                            ? "Release Ownership"
+                            : "Take Ownership");
+                        updateEditorStatus(newOwnerId !== @User.Id);
+                    }
+                    
+                    @if (Model.Owner != null)
+                    {
+                        @:setOwner(@Model.Owner.Id, '@($"{Model.Owner.FirstName} {Model.Owner.LastName}")');
+                    }
+                    else
+                    {
+                        @:setOwner(null, null);
+                    }
+                    
+                    $("#ownerButton").show();
+                    $("#ownerButton").click(() => {
+                        var newOwnerId = window.ownerId !== @User.Id ? @User.Id : null;
+                        $("#ownerProgress").show();
+                        $("#ownerButton").prop('disabled', true);
+                        prolongPromise(Promise.resolve($.post(
+                                "@UpdateOwnerUrl",
+                                {
+                                    expectedOwnerId: window.ownerId,
+                                    newOwnerId: newOwnerId
+                                })))
+                            .then((result) => {
+                                setOwner(result.newOwnerId, result.newOwnerName);
+                                return delayPromise(0).then(() => result);
+                            })
+                            .then((result) => {
+                                if (result.newOwnerId !== newOwnerId) {
+                                    alertDialogText(
+                                        "Failed to change owner",
+                                        "The owner was already changed by another user. If you still would like to " +
+                                        "change the owner, please try again.");
+                                }
+                            })
+                            .catch((ex) => {
+                                alertDialogText(
+                                    "Failed to change owner",
+                                    "An error occured when attempting to change the owner.");
+                            })
+                            .then(() => {
+                                $("#ownerButton").prop('disabled', false);
+                                $("#ownerProgress").hide();
+                            });
+                    });
+                </text>
+            }
+        
+            @if (ShowActionRequiredToggle)
+            {
+                <text>
+                    $("#actionRequiredWrapper").click(function(e) {
+                        e.stopPropagation();
+
+                        var state = $("#actionRequired").prop('checked');
+                        $("#actionRequired").bootstrapToggle('disable');
+                        $("#actionRequiredProgress").show();
+                        prolongPromise(
+                                Promise.resolve($.post("@UpdateStatusUrl", { actionRequired: !state })))
+                            .then(() => {
+                                $("#actionRequired").bootstrapToggle('enable');
+                                $("#actionRequired").bootstrapToggle('toggle');
+                            })
+                            .catch((ex) => {
+                                alertDialogText(
+                                    "Failed to change status",
+                                    "An error occured when attempting to change the status.");
+                            })
+                            .then(() => {
+                                $("#actionRequired").bootstrapToggle('enable');
+                                $("#actionRequiredProgress").hide();
+                            });
+                    });
+                </text>
+            }
+        
+            @if (ShowDeleteButton)
+            {
+                <text>
+                $("#deleteButton").click(() => {
+                    confirmDialog(
+                        "Delete @(AnySentMessages ? "Conversation" : "Draft")",
+                        "@(AnySentMessages
+                              ? "Are you sure you would like to delete this entire conversation?"
+                              : "Are you sure you would like to delete this draft message?")",
+                        (result) => {
+                            if (result) {
+                                $(window).off('beforeunload');
+                                $('#deleteForm').submit();
+                            }
+                        });
+                });
+                </text>
+            }
+        });
+    </script>
+}
+

@@ -6,9 +6,11 @@
         "node_modules/jquery/dist/jquery.js",
         "node_modules/jquery-validation/dist/jquery.validate.js",
         "node_modules/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
-        "node_modules/bootstrap/dist/js/bootstrap.js",
+        "Content/js/bootstrap.js",
+        "node_modules/bootstrap-toggle/js/bootstrap-toggle.js",
         "node_modules/jquery-ui-dist/jquery-ui.js",
         "node_modules/jquery-form/jquery.form.js",
+        "node_modules/jquery-multifile/jquery.MultiFile.js",
         "node_modules/tinymce/tinymce.js",
         "node_modules/datatables.net/js/jquery.dataTables.js",
         "node_modules/d3/d3.js",
@@ -52,7 +54,8 @@
         "Content/css/markdownAceEditor.css",
         "Content/css/highlight.js.css",
         "node_modules/jquery-ui-themes/themes/smoothness/jquery-ui.css",
-        "node_modules/bootstrap/dist/css/bootstrap.css",
+        "Content/css/bootstrap.css",
+        "node_modules/bootstrap-toggle/css/bootstrap-toggle.css",
         "node_modules/datatables.net-jqui/css/dataTables.jqueryui.css",
         "node_modules/nvd3/build/nv.d3.css",
         "node_modules/quill/dist/quill.snow.css"
@@ -76,7 +79,7 @@
       "targetFolder": "wwwroot/images"
     },
     {
-      "inputFiles": "node_modules/bootstrap/fonts/*",
+      "inputFiles": "Content/fonts/*",
       "targetFolder": "wwwroot/fonts"
     },
     {

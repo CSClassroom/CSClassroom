@@ -1,0 +1,162 @@
+﻿@using CSC.CSClassroom.Model.Communications.ServiceResults
+@using CSC.CSClassroom.WebApp.Extensions
+@using CSC.CSClassroom.WebApp.Providers
+@using CSC.CSClassroom.WebApp.ViewModels.Message
+@using ReflectionIT.Mvc.Paging
+@model IndexViewModel
+@inject ITimeZoneProvider TimeZoneProvider
+@{
+    ViewData["Title"] = "Messages";
+}
+<style>
+    .table-bordered {
+        border-top: 0.5px solid #000000 !important;
+        border-bottom: 0.5px solid #000000 !important;
+        border-left: 0.5px solid #000000 !important;
+        border-right: 0.5px solid #000000 !important;
+    }
+    .table-bordered > thead > tr > th,
+    .table-bordered > tbody > tr > th,
+    .table-bordered > tfoot > tr > th,
+    .table-bordered > thead > tr > td,
+    .table-bordered > tbody > tr > td,
+    .table-bordered > tfoot > tr > td {
+        border-top: 0.5px solid #000000 !important;
+        border-bottom: 0.5px solid #000000 !important;
+        border-left: none;
+        border-right: none;
+    }
+</style>
+<h2>Messages</h2>
+<form asp-action="Index" method="GET" class="form-inline">
+    <div class="form-group" style="margin-right: 10px">
+        <label class="control-label">Number of messages:</label>
+        <select asp-for="PageSize" name="pageSize" asp-items="ViewBag.PageSizes" class="form-control input-sm"></select>
+    </div>
+    @if (IsAdmin)
+    {
+        <div class="form-group" style="margin-right: 10px">
+            <label class="control-label">Student:</label>
+            <select asp-for="StudentId" name="studentId" asp-items="ViewBag.StudentFilter" class="form-control input-sm"></select>
+        </div>
+    }
+    <button type="submit" class="btn-sm btn-default">Apply</button>
+</form>
+<br>
+<table class="table table-hover table-bordered">
+    <thead>
+    <tr style="background-color: #337ab7; color: white">
+        @if (IsAdmin)
+        {
+            <th>
+                Student
+            </th>
+        }
+        <th>
+            Subject
+        </th>
+        <th>
+            Last Reply
+        </th>
+        <th>
+            Last Replier
+        </th>
+        @if (IsAdmin)
+        {
+            <th>
+                Owner
+            </th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Conversations)
+    {
+        <tr class="clickable-row @(IsAdmin && item.ActionableByUser(User.Id) && (item.Owner == null || item.Owner.Id == User.Id) ? "danger" : "")" style="cursor: pointer;" data-href='@Url.Action("Show", new { conversationId = item.Id})'>
+            @if (IsAdmin)
+            {
+                <td>
+                    @($"{item.StudentFirstName} {item.StudentLastName}")
+                </td>
+            }
+            <td>
+                @item.Subject
+            </td>
+            <td>
+                @if (item.LastReply != null)
+                {
+                    @(item.LastReply.Sent.Value.FormatShortDateTime(TimeZoneProvider))
+                }
+                else
+                {
+                    <i>Draft</i>
+                }
+            </td>
+            <td>
+                @if (item.LastReply != null)
+                {
+                    @(IsAdmin 
+                          ? $"{item.LastReply.FirstName} {item.LastReply.LastName}" 
+                          : item.LastReply.PubliclyDisplayedName)
+                }
+            </td>
+            @if (IsAdmin)
+            {
+                <td>
+                    @if (item.Owner != null)
+                    {
+                        @($"{item.Owner.FirstName} {item.Owner.LastName}")
+                    }
+                    else if (item.LastReply != null)
+                    {
+                        <i>None</i>
+                    }
+                </td>
+            }
+        </tr>
+    }
+    </tbody>
+</table>
+<script>
+    jQuery(document).ready(function($) {
+        $(".clickable-row").click(function() {
+            window.location = $(this).data("href");
+        });
+    });
+</script>
+<p></p>
+<nav>
+    <vc:pager paging-list="@Model.Conversations" />
+</nav>
+
+<form asp-action="Create">
+    <div class="form-horizontal">
+        <hr />
+        <h3 center>New Message</h3>
+        <br>
+        @if (IsAdmin)
+        {
+            <div class="form-group">
+                <label class="col-md-1 control-label">Student</label>
+                <div class="col-md-10">
+                    <select name="studentId" asp-items="ViewBag.NewMessageStudents" class="form-control" style="max-width: 200px" required></select>
+                </div>
+            </div>
+        }
+        else
+        {
+            <input name="studentId" type="hidden" value="@User.Id" />
+        }
+        <div class="form-group">
+            <label class="col-md-1 control-label">Subject</label>
+            <div class="col-md-10">
+                <input name="subject" type="text" class="form-control" style="max-width: 400px" required />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-1 col-md-10">
+                <input type="submit" value="Create" class="btn btn-default"/>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1815,6 +1815,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 				.AddClassroom("Class1")
 				.AddSection("Class1", "Section1")
 				.AddStudent("User1", "LastName", "FirstName", "Class1", "Section1", "GitHubUser", inGitHubOrg: true)
+				.AddSectionRecipient("User1", "Class1", "Section1")
 				.Build();
 
 			var userId = database.Context.Users.Single().Id;
@@ -1831,12 +1832,14 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 			var classroomMemberships = database.Context.ClassroomMemberships
 				.Where(cm => cm.User.UserName == "User1")
 				.Include(cm => cm.Classroom)
+				.Include(cm => cm.SectionRecipients)
 				.OrderBy(cm => cm.Classroom.Name)
 				.ToList();
 
 			Assert.Single(classroomMemberships);
 			Assert.Equal("Class1", classroomMemberships[0].Classroom.Name);
 			Assert.Equal(ClassroomRole.General, classroomMemberships[0].Role);
+			Assert.Empty(classroomMemberships[0].SectionRecipients);
 		}
 
 		/// <summary>

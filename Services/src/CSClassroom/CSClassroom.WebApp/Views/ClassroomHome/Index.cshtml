@@ -23,7 +23,7 @@ else
     <p></p>
 }
 
-<div class="panel-group" style="max-width: 700px">
+<div class="panel-group">
     @foreach (var announcement in Model)
     {
         var panelStyle = (announcement == Model.Last() ? "margin-bottom:0px" : "margin-bottom: 20px");
@@ -50,7 +50,7 @@ else
                 </div>
         
             </div>
-            <div class="panel-body" style="padding-bottom: 3px; padding-top: 10px">
+            <div class="panel-body" style="padding-bottom: 3px; padding-top: 10px; overflow-wrap: break-word">
                 @Html.Raw(announcement.Contents)
                 <hr style="line-height: 5px; margin-bottom: 2px; margin-top: 10px"/>
                 <span style="font-size: x-small; font-weight: bold">Posted by @announcement.User.PubliclyDisplayedName on @announcement.DatePosted.FormatLongDateTime(TimeZoneProvider)</span>

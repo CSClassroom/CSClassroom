@@ -71,6 +71,7 @@ namespace CSC.CSClassroom.Service.Configuration
 			builder.RegisterType<ClassroomArchiver>().As<IClassroomArchiver>();
 			builder.RegisterType<ClassroomService>().As<IClassroomService>();
 			builder.RegisterType<SectionService>().As<ISectionService>();
+			builder.RegisterType<SectionValidator>().As<ISectionValidator>();
 		}
 
 		/// <summary>
@@ -214,6 +215,7 @@ namespace CSC.CSClassroom.Service.Configuration
 		private static void RegisterCommunicationServices(ContainerBuilder builder)
 		{
 			builder.RegisterType<AnnouncementService>().As<IAnnouncementService>();
+			builder.RegisterType<MessageService>().As<IMessageService>();
 		}
 
 		/// <summary>

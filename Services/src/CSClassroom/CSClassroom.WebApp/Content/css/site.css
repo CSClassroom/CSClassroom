@@ -105,3 +105,44 @@ tr.shown td.details-control {
 ul.pagination {
     margin: 0px 0 !important
 }
+
+.mce-panel, .panel-group, .max-width {
+ max-width: 700px !important
+}
+
+.panel-admin {
+    border-color: #337ab7 !important;
+}
+
+.panel-admin > .panel-heading {
+    background-color: #337ab7 !important;
+    border-color: #337ab7 !important;
+}
+
+.panel-student {
+    border-color: #a5042f !important;
+}
+
+.panel-student > .panel-heading {
+    background-color: #a5042f !important;
+    border-color: #a5042f !important;
+}
+
+.btn-waiting {
+    background-color: #a5042f;
+    color: #ffffff;
+}
+
+.btn-waiting:hover {
+    background-color: #730321;
+    color: #ffffff;
+}
+
+.btn-not-waiting {
+    background-color: #337ab7 !important;
+    color: #ffffff;
+}
+
+.btn-not-waiting:hover {
+    background-color: #204e75 !important;
+    color: #ffffff;

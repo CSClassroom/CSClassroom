@@ -441,6 +441,8 @@ namespace CSC.CSClassroom.Repository.Migrations
 
                     b.Property<bool>("AllowNewRegistrations");
 
+                    b.Property<bool>("AllowStudentMessages");
+
                     b.Property<int>("ClassroomId");
 
                     b.Property<string>("DisplayName")
@@ -499,11 +501,102 @@ namespace CSC.CSClassroom.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AnnouncementId");
-
                     b.HasIndex("SectionId");
 
+                    b.HasIndex("AnnouncementId", "SectionId")
+                        .IsUnique();
+
                     b.ToTable("AnnouncementSections");
+                });
+
+            modelBuilder.Entity("CSC.CSClassroom.Model.Communications.Attachment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ContentType");
+
+                    b.Property<string>("FileName");
+
+                    b.Property<int>("MessageId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.ToTable("Attachments");
+                });
+
+            modelBuilder.Entity("CSC.CSClassroom.Model.Communications.AttachmentData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("AttachmentId");
+
+                    b.Property<byte[]>("FileContents");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttachmentId")
+                        .IsUnique();
+
+                    b.ToTable("AttachmentData");
+                });
+
+            modelBuilder.Entity("CSC.CSClassroom.Model.Communications.Conversation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("Actionable");
+
+                    b.Property<int>("ClassroomId");
+
+                    b.Property<int>("CreatorId");
+
+                    b.Property<int?>("OwnerId")
+                        .IsConcurrencyToken();
+
+                    b.Property<int>("StudentId");
+
+                    b.Property<string>("Subject");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassroomId");
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Conversations");
+                });
+
+            modelBuilder.Entity("CSC.CSClassroom.Model.Communications.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("AuthorId");
+
+                    b.Property<string>("Contents");
+
+                    b.Property<int>("ConversationId");
+
+                    b.Property<DateTime?>("Sent");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("ConversationId", "AuthorId")
+                        .IsUnique()
+                        .HasFilter("Sent IS NULL");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Build", b =>
@@ -827,6 +920,33 @@ namespace CSC.CSClassroom.Repository.Migrations
                         .IsUnique();
 
                     b.ToTable("SectionMemberships");
+                });
+
+            modelBuilder.Entity("CSC.CSClassroom.Model.Users.SectionRecipient", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("ClassroomMembershipId");
+
+                    b.Property<bool>("EmailAnnouncements");
+
+                    b.Property<bool>("EmailMessages");
+
+                    b.Property<int>("SectionId");
+
+                    b.Property<bool>("ViewAnnouncements");
+
+                    b.Property<bool>("ViewMessages");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SectionId");
+
+                    b.HasIndex("ClassroomMembershipId", "SectionId")
+                        .IsUnique();
+
+                    b.ToTable("SectionRecipients");
                 });
 
             modelBuilder.Entity("CSC.CSClassroom.Model.Users.User", b =>
@@ -1213,6 +1333,57 @@ namespace CSC.CSClassroom.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("CSC.CSClassroom.Model.Communications.Attachment", b =>
+                {
+                    b.HasOne("CSC.CSClassroom.Model.Communications.Message", "Message")
+                        .WithMany("Attachments")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("CSC.CSClassroom.Model.Communications.AttachmentData", b =>
+                {
+                    b.HasOne("CSC.CSClassroom.Model.Communications.Attachment", "Attachment")
+                        .WithOne("AttachmentData")
+                        .HasForeignKey("CSC.CSClassroom.Model.Communications.AttachmentData", "AttachmentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("CSC.CSClassroom.Model.Communications.Conversation", b =>
+                {
+                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Classroom", "Classroom")
+                        .WithMany()
+                        .HasForeignKey("ClassroomId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CSC.CSClassroom.Model.Users.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CSC.CSClassroom.Model.Users.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
+
+                    b.HasOne("CSC.CSClassroom.Model.Users.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("CSC.CSClassroom.Model.Communications.Message", b =>
+                {
+                    b.HasOne("CSC.CSClassroom.Model.Users.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CSC.CSClassroom.Model.Communications.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("CSC.CSClassroom.Model.Projects.Build", b =>
                 {
                     b.HasOne("CSC.CSClassroom.Model.Projects.Commit", "Commit")
@@ -1351,6 +1522,19 @@ namespace CSC.CSClassroom.Repository.Migrations
 
                     b.HasOne("CSC.CSClassroom.Model.Classrooms.Section", "Section")
                         .WithMany("SectionMemberships")
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("CSC.CSClassroom.Model.Users.SectionRecipient", b =>
+                {
+                    b.HasOne("CSC.CSClassroom.Model.Users.ClassroomMembership", "ClassroomMembership")
+                        .WithMany("SectionRecipients")
+                        .HasForeignKey("ClassroomMembershipId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CSC.CSClassroom.Model.Classrooms.Section", "Section")
+                        .WithMany("SectionRecipients")
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

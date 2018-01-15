@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CSC.CSClassroom.Model.Classrooms;
+using CSC.CSClassroom.Model.Communications;
 
 namespace CSC.CSClassroom.Model.Users
 {
@@ -52,5 +53,11 @@ namespace CSC.CSClassroom.Model.Users
 		/// A list of section memberships for this user.
 		/// </summary>
 		public virtual List<SectionMembership> SectionMemberships { get; set; }
+		
+		/// <summary>
+		/// The sections this user receives announcements and messages for, if the
+		/// user is an admin.
+		/// </summary>
+		public virtual List<SectionRecipient> SectionRecipients { get; set; }
 	}
 }

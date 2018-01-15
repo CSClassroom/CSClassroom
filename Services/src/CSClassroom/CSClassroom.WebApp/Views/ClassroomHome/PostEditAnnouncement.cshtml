@@ -58,18 +58,7 @@
 </div>
 
 <script>
-// Initialize the app
-    initTinyMce(
-        '#contents',
-        {
-            setup: function(editor) {
-                editor.on('change',
-                    function() {
-                        editor.save();
-                    });
-            }
-        });
-
+    initTinyMce('#contents');
 </script>
 
 

@@ -401,8 +401,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 						== assignment.Id
 				).ToList();
 			
-			Assert.False(submissions.Any(s => s.DateSubmitted == DueDate));
-			Assert.True(submissions.Any(s => s.DateSubmitted != DueDate));
+			Assert.DoesNotContain(submissions, s => s.DateSubmitted == DueDate);
+			Assert.Contains(submissions, s => s.DateSubmitted != DueDate);
 		}
 
 		/// <summary>
@@ -442,8 +442,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments
 					    == assignment.Id
 				).ToList();
 			
-			Assert.False(submissions.Any(s => s.DateSubmitted == DueDate));
-			Assert.True(submissions.Any(s => s.DateSubmitted != DueDate));
+			Assert.DoesNotContain(submissions, s => s.DateSubmitted == DueDate);
+			Assert.Contains(submissions, s => s.DateSubmitted != DueDate);
 		}
 
 		/// <summary>

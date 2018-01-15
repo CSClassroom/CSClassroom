@@ -1,13 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.Utilities;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Users;
+using CSC.CSClassroom.Service.Assignments;
 using CSC.CSClassroom.Service.Classrooms;
 using CSC.CSClassroom.Service.Identity;
 using CSC.CSClassroom.WebApp.Filters;
 using CSC.CSClassroom.WebApp.ViewModels.Shared;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CSC.CSClassroom.WebApp.Controllers
 {
@@ -71,8 +74,10 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// </summary>
 		[Route("CreateSection")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public IActionResult Create()
+		public async Task<IActionResult> Create()
 		{
+			await PopulateDropDownsAsync();
+			
 			return View("CreateEdit");
 		}
 
@@ -85,16 +90,15 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> Create(Section section)
 		{
-			EnsureNoDuplicateSectionGradebooks(section);
-
-			if (ModelState.IsValid)
+			if (ModelState.IsValid 
+			    && await SectionService.CreateSectionAsync(ClassroomName, section, ModelErrors)) 
 			{
-				await SectionService.CreateSectionAsync(ClassroomName, section);
-
 				return RedirectToAction("Index");
 			}
 			else
 			{
+				await PopulateDropDownsAsync();
+				
 				return View("CreateEdit", section);
 			}
 		}
@@ -116,6 +120,8 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			{
 				return NotFound();
 			}
+			
+			await PopulateDropDownsAsync();
 
 			return View("CreateEdit", section);
 		}
@@ -129,16 +135,15 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> Edit(string sectionName, Section section)
 		{
-			EnsureNoDuplicateSectionGradebooks(section);
-
-			if (ModelState.IsValid)
+			if (ModelState.IsValid 
+			    && await SectionService.UpdateSectionAsync(ClassroomName, section, ModelErrors))
 			{
-				await SectionService.UpdateSectionAsync(ClassroomName, section);
-
 				return RedirectToAction("Index");
 			}
 			else
 			{
+				await PopulateDropDownsAsync();
+				
 				return View("CreateEdit", section);
 			}
 		}
@@ -179,25 +184,15 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		}
 
 		/// <summary>
-		/// Ensures that there are no duplicate section gradebooks.
+		/// Populates dropdown lists required by the Create/Edit actions.
 		/// </summary>
-		private void EnsureNoDuplicateSectionGradebooks(Section section)
+		private async Task PopulateDropDownsAsync()
 		{
-			if (section.SectionGradebooks != null)
-			{
-				var classroomGradebookIds = section.SectionGradebooks
-					.Select(d => d.ClassroomGradebookId)
-					.ToList();
-
-				if (classroomGradebookIds.Distinct().Count() != classroomGradebookIds.Count)
-				{
-					ModelState.AddModelError
-					(
-						"SectionGradebooks",
-						"You may only have one section gradebook per classroom gradebook."
-					);
-				}
-			}
+			var admins = await ClassroomService.GetClassroomAdminsAsync(ClassroomName);
+			ViewBag.ClassroomAdmins = admins
+				.OrderBy(a => a.User.LastName)
+				.ThenBy(a => a.User.FirstName)
+				.ToList();
 		}
 	}
 }

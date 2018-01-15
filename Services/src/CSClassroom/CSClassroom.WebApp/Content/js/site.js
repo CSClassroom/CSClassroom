@@ -68,6 +68,7 @@ function rewriteGridCollectionNames()
         });
     });
 }
+
 /**
  * Keeps the authenticated session alive, by making repeated authenticated requests.
  * @param ensureAuthenticatedUrl The URL to call.
@@ -95,4 +96,52 @@ function keepAuthenticatedSessionAlive(ensureAuthenticatedUrl)
         };
 
     setTimeout(renewToken, renewalDelayMs);
+}
+
+function delayPromise(delayMs) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => resolve(), delayMs)
+    });
+}
+
+function prolongPromise(promise, delayMs = 1000) {
+    return Promise.all([promise, delayPromise(delayMs)])
+        .then((results) => {
+            return results[0];
+        })
+}
+
+function alertDialogInternal(title, width, height) {
+    return $("<div></div>").dialog( {
+        buttons: { "Ok": function () { $(this).dialog("close"); } },
+        close: function (event, ui) { $(this).remove(); },
+        resizable: false,
+        title: title,
+        width: width,
+        height: height, 
+        modal: true
+    });
+}
+
+function alertDialogHtml(title, htmlMessage, width = 600, height = undefined) {
+    alertDialogInternal(title, width, height).html(htmlMessage);
+}
+
+function alertDialogText(title, textMessage, width = 600, height = undefined) {
+    alertDialogInternal(title, width, height).text(textMessage);
+}
+
+function confirmDialog(title, message, callback, width = 600, height = undefined) {
+    $("<div></div>").dialog( {
+        buttons: { 
+            Ok: function () { $(this).dialog("close"); callback(true); }, 
+            Cancel: function () { $(this).dialog("close"); callback(false); }
+        },
+        close: function (event, ui) { $(this).remove(); },
+        resizable: false,
+        title: title,
+        width: width,
+        height: height,
+        modal: true
+    }).text(message);
 }

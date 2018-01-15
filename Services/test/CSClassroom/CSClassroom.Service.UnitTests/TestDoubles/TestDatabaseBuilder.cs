@@ -67,7 +67,8 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 		public TestDatabaseBuilder AddSection(
 			string classroomName,
 			string sectionName,
-			bool allowRegistrations = true)
+			bool allowRegistrations = true,
+			bool allowStudentMessages = true)
 		{
 			var classroom = _buildContext.Classrooms
 				.Single(c => c.Name == classroomName);
@@ -77,7 +78,8 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 				Name = sectionName,
 				DisplayName = $"{sectionName} DisplayName",
 				ClassroomId = classroom.Id,
-				AllowNewRegistrations = allowRegistrations
+				AllowNewRegistrations = allowRegistrations,
+				AllowStudentMessages = allowStudentMessages
 			};
 
 			_buildContext.Sections.Add(section);
@@ -215,6 +217,43 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 
 			return this;
 		}
+
+		/// <summary>
+		/// Adds a classroom admin.
+		/// </summary>
+		public TestDatabaseBuilder AddSectionRecipient(
+			string userName,
+			string classroomName,
+			string sectionName,
+			bool viewAnnouncements = true,
+			bool emailAnnouncements = true,
+			bool viewMessages = true,
+			bool emailMessages = true)
+		{
+			var classroomMembership = _buildContext.ClassroomMemberships
+				.Where(c => c.Classroom.Name == classroomName)
+				.Single(c => c.User.UserName == userName);
+
+			var section = _buildContext.Sections
+				.Where(c => c.Classroom.Name == classroomName)
+				.Single(c => c.Name == sectionName);
+
+			var sectionRecipient = new SectionRecipient()
+			{
+				ClassroomMembershipId = classroomMembership.Id,
+				SectionId = section.Id,
+				ViewAnnouncements = viewAnnouncements,
+				EmailAnnouncements = emailAnnouncements,
+				ViewMessages = viewMessages,
+				EmailMessages = emailMessages
+			};
+
+			_buildContext.SectionRecipients.Add(sectionRecipient);
+			_buildContext.SaveChanges();
+
+			return this;
+		}
+		
 
 		/// <summary>
 		/// Adds a question category to the database.
@@ -806,6 +845,9 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 			return this;
 		}
 
+		/// <summary>
+		/// Adds an announcement to the database.
+		/// </summary>
 		public TestDatabaseBuilder AddAnnouncement(
 			string classroomName,
 			string userName,
@@ -840,6 +882,65 @@ namespace CSC.CSClassroom.Service.UnitTests.TestDoubles
 								Section = classroom.Sections.Single(s => s.Name == sn)
 							}
 						).ToList()
+				}
+			);
+
+			_buildContext.SaveChanges();
+
+			return this;
+		}
+
+		/// <summary>
+		/// Adds a conversation to the database.
+		/// </summary>
+		public TestDatabaseBuilder AddConversation(
+			string classroomName,
+			string studentUserName,
+			string creatorUserName,
+			string subject,
+			DateTime? sent,
+			IList<KeyValuePair<string, byte[]>> attachments = null)
+		{
+			var classroom = _buildContext.Classrooms
+				.Include(c => c.Sections)
+				.Single(c => c.Name == classroomName);
+
+			var student = _buildContext.Users
+				.Single(u => u.UserName == studentUserName);
+
+			var creator = _buildContext.Users
+				.Single(u => u.UserName == creatorUserName);
+
+			_buildContext.Conversations.Add
+			(
+				new Conversation()
+				{
+					ClassroomId = classroom.Id,
+					CreatorId = creator.Id,
+					StudentId = student.Id,
+					Subject = subject,
+					Messages = new List<Message>
+					{
+						new Message()
+						{
+							AuthorId = _buildContext.Users
+								.Single(u => u.UserName == creatorUserName)
+								.Id,
+							Contents = "Contents",
+							Sent = sent,
+							Attachments = attachments?.Select
+							(
+								a => new Attachment()
+								{
+									FileName = a.Key,
+									AttachmentData = new AttachmentData()
+									{
+										FileContents = a.Value
+									}
+								}	
+							)?.ToList()
+						}
+					}
 				}
 			);
 

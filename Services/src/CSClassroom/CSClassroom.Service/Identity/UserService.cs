@@ -439,11 +439,13 @@ namespace CSC.CSClassroom.Service.Identity
 			var membership = await _dbContext.ClassroomMemberships
 				.Where(m => m.ClassroomId == classroom.Id && m.UserId == userId)
 				.Include(m => m.SectionMemberships)
+				.Include(m => m.SectionRecipients)
 				.SingleAsync();
 
 			if (membership.SectionMemberships.Any())
 			{
 				membership.Role = ClassroomRole.General;
+				membership.SectionRecipients.Clear();
 			}
 			else
 			{

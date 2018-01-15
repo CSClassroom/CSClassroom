@@ -1,7 +1,7 @@
 ﻿@using CSC.CSClassroom.Model.Classrooms
 @using CSC.CSClassroom.Model.Users
 <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
+    <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>
@@ -11,7 +11,8 @@
             </button>
             @if (ViewBag.Classroom != null)
             {
-                <a asp-controller="ClassroomHome" asp-action="Index" class="navbar-brand">@ViewBag.Classroom.DisplayName</a>}
+                <a asp-controller="ClassroomHome" asp-action="Index" class="navbar-brand">@ViewBag.Classroom.DisplayName</a>
+			}
             else
             {
                 <a asp-controller="Home" asp-action="Index" class="navbar-brand">CS Classroom</a>
@@ -21,16 +22,30 @@
             <ul class="nav navbar-nav">
                 @if (ViewBag.Classroom != null)
                 {
-                    if (((User)ViewBag.User).SuperUser)
+					var showClassrooms = ((User)ViewBag.User).SuperUser;
+				    var showSections = ViewBag.ClassroomRole >= ClassroomRole.Admin;
+				    var showMessages = ViewBag.ClassroomRole >= ClassroomRole.Admin || 
+				        ((User)ViewBag.User).ClassroomMemberships?.Any
+				        (
+				            cm => cm.SectionMemberships?.Any
+				            (
+				                sm => sm.Section.AllowStudentMessages    
+				            ) ?? false
+				        ) ?? false;
+                    if (showClassrooms)
                     {
                         <li><a asp-controller="Classroom" asp-action="Index">Classes</a></li>
                     }
-                    if (ViewBag.ClassroomRole >= ClassroomRole.Admin)
+                    if (showSections)
                     {
                         <li><a asp-controller="Section" asp-action="Index">Sections</a></li>
                     }
                     <li><a asp-controller="Assignment" asp-action="Index">Assignments</a></li>
                     <li><a asp-controller="Project" asp-action="Index">Projects</a></li>
+                    if (showMessages)
+                    {
+                        <li><a asp-controller="Message" asp-action="Index">Messages</a></li>
+                    }
                 }
             </ul>
             @await Html.PartialAsync("_LoginPartial")

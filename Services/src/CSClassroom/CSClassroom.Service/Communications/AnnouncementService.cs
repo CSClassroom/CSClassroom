@@ -73,29 +73,30 @@ namespace CSC.CSClassroom.Service.Communications
 		{
 			var announcementsQuery = _dbContext.Announcements
 				.Include(a => a.User)
+				.Include(a => a.Sections)
+				.ThenInclude(s => s.Section)
 				.Where(a => a.Classroom.Name == classroomName);
+			
+			var classroomMembership = await _dbContext.ClassroomMemberships
+				.Where(cm => cm.Classroom.Name == classroomName)
+				.Where(cm => cm.UserId == userId)
+				.Include(cm => cm.SectionMemberships)
+				.Include(cm => cm.SectionRecipients)
+				.SingleAsync();
 
-			if (admin)
-			{
-				announcementsQuery = announcementsQuery
-					.Include(a => a.Sections)
-					.ThenInclude(s => s.Section);
-			}
-			else
-			{
-				var classroomMembership = await _dbContext.ClassroomMemberships
-					.Where(cm => cm.Classroom.Name == classroomName)
-					.Where(cm => cm.UserId == userId)
-					.Include(cm => cm.SectionMemberships)
-					.SingleOrDefaultAsync();
+			var sectionIds = admin
+				? classroomMembership.SectionRecipients
+					?.Where(sr => sr.ViewAnnouncements)
+					?.Select(sr => sr.SectionId)
+					?.ToList()
+				: classroomMembership.SectionMemberships
+					?.Select(sm => sm.SectionId)
+					?.ToList();
+			
+			sectionIds = sectionIds ?? new List<int>();
 
-				var studentSectionIds = classroomMembership
-					.SectionMemberships
-					.Select(sm => sm.SectionId);
-
-				announcementsQuery = announcementsQuery
-					.Where(a => a.Sections.Any(s => studentSectionIds.Contains(s.SectionId)));
-			}
+            announcementsQuery = announcementsQuery
+                .Where(a => a.Sections.Any(s => sectionIds.Contains(s.SectionId)));
 
 			return announcementsQuery.OrderByDescending(a => a.DatePosted);
 		}
@@ -258,14 +259,19 @@ namespace CSC.CSClassroom.Service.Communications
 
 			if (emailAdmins)
 			{
-				var admins = await _dbContext.ClassroomMemberships
-					.Where(cm => cm.ClassroomId == classroom.Id)
-					.Where(cm => cm.Role == ClassroomRole.Admin)
-					.Include(sm => sm.User)
-					.Include(sm => sm.User.AdditionalContacts)
+				var adminRecipients = await _dbContext.SectionRecipients
+					.Where(sr => sr.ClassroomMembership.ClassroomId == classroom.Id)
+					.Where(sr => sr.EmailAnnouncements)
+					.Include(sr => sr.ClassroomMembership.User.AdditionalContacts)
 					.ToListAsync();
 
-				users.AddRange(admins.Select(a => a.User));
+				users.AddRange
+				(
+					adminRecipients
+						.Where(ar => sectionIds.Contains(ar.SectionId))
+						.Select(ar => ar.ClassroomMembership.User)
+						.Distinct()
+				);
 			}
 
 			if (users.Any())
