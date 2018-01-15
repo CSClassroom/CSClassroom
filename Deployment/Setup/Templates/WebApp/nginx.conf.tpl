@@ -13,6 +13,7 @@ http
     ssl_certificate /etc/nginx/ssl/nginx.crt;
     ssl_certificate_key /etc/nginx/ssl/nginx.key;
     large_client_header_buffers 8 64k;
+    client_max_body_size 20M;
 
     if ($host = www.$server_name) {
       rewrite ^(.*) https://$server_name$request_uri? permanent;
