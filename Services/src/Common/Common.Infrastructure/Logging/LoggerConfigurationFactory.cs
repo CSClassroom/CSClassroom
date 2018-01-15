@@ -1,7 +1,9 @@
 ﻿using System;
 using CSC.Common.Infrastructure.Logging;
+using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,27 +16,16 @@ using Serilog.ExtensionMethods;
 namespace CSC.Common.Infrastructure.Configuration
 {
 	/// <summary>
-	/// Extension methods for configuring the logger factory.
+	/// Creates a logger configuration.
 	/// </summary>
-	public static class ApplicationBuilderExtensions
+	public static class LoggerConfigurationFactory
 	{
-		/// <summary>
-		/// Configures logging.
-		/// </summary>
-		public static void UseTelemetry(
-			this IApplicationBuilder appBuilder,
-			ILoggerFactory loggerFactory,
-			IConfigurationRoot configurationRoot,
-			Func<LogEvent, bool> includeLogEvent)
-		{
-			loggerFactory.AddDebug();
-			loggerFactory.AddSerilog(CreateLogger(configurationRoot, includeLogEvent));
-		}
-		
 		/// <summary>
 		/// Creates a logger for Serilog.
 		/// </summary>
-		private static Logger CreateLogger(IConfigurationRoot configurationRoot, Func<LogEvent, bool> includeLogEvent)
+		public static LoggerConfiguration CreateLoggerConfiguration(
+			IConfigurationRoot configurationRoot, 
+			Func<LogEvent, bool> includeLogEvent)
 		{
 			var loggerConfiguration = new LoggerConfiguration()
 				.MinimumLevel.Information()
@@ -52,10 +43,8 @@ namespace CSC.Common.Infrastructure.Configuration
 			}
 
 			// Write to application insights if requested
-
-			var appInsightsKey = configurationRoot.GetSection("ApplicationInsights")
-				?["InstrumentationKey"];
-
+			var appInsightsKey = configurationRoot
+				.GetSection("ApplicationInsights")?["InstrumentationKey"];
 			if (appInsightsKey != null)
 			{
 				loggerConfiguration.WriteTo.ApplicationInsightsTraces
@@ -68,7 +57,7 @@ namespace CSC.Common.Infrastructure.Configuration
 				);
 			}
 
-			return loggerConfiguration.CreateLogger();
+			return loggerConfiguration;
 		}
 
 		/// <summary>

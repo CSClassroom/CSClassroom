@@ -51,22 +51,15 @@ namespace CSC.CSClassroom.WebApp
 		/// <summary>
 		/// The configuration for the application.
 		/// </summary>
-		public IConfigurationRoot Configuration { get; }
+		public readonly IConfiguration _configuration;
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public Startup(IHostingEnvironment env, ILoggerFactory loggerFactory)
+		public Startup(IConfiguration configuration, ILoggerFactory loggerFactory)
 		{
+			_configuration = configuration;
 			_loggerFactory = loggerFactory;
-
-			var builder = new ConfigurationBuilder()
-				.SetBasePath(env.ContentRootPath)
-				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-				.AddJsonFile($"appsettings.Environment.json", optional: true)
-				.AddEnvironmentVariables();
-
-			Configuration = builder.Build();
 		}
 
 		/// <summary>
@@ -80,7 +73,7 @@ namespace CSC.CSClassroom.WebApp
 				.AddCookie(SetupCookieAuthentication)
 				.AddOpenIdConnect(SetupOpenIdConnectAuthentication);
 
-			services.AddTelemetry(Configuration, typeof(CSClassroomTelemetryInitializer));
+			services.AddTelemetry(_configuration, typeof(CSClassroomTelemetryInitializer));
 			services.AddMvc(SetupMvc);
 
 			var builder = new ContainerBuilder();
@@ -109,11 +102,10 @@ namespace CSC.CSClassroom.WebApp
 		/// Configures the HTTP request pipeline. 
 		/// This method is called by the runtime.
 		/// </summary>
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+		public void Configure(IApplicationBuilder app)
 		{
 			ApplyDatabaseMigrations(app);
 
-			app.UseTelemetry(loggerFactory, Configuration, IncludeLogEvent);
 			app.UseStaticFiles();
 			app.UseStatusCodePages();
 			app.UseExceptionHandler("/Error");
@@ -146,7 +138,7 @@ namespace CSC.CSClassroom.WebApp
 		/// </summary>
 		private IConfigurationSection GetSection(string sectionName)
 		{
-			return Configuration.GetSection(sectionName);
+			return _configuration.GetSection(sectionName);
 		}
 
 		/// <summary>
@@ -171,9 +163,9 @@ namespace CSC.CSClassroom.WebApp
 		/// </summary>
 		private void SetupOpenIdConnectAuthentication(OpenIdConnectOptions options)
 		{
-			options.ClientId = Configuration["Authentication:AzureAd:ClientId"];
-			options.Authority = Configuration["Authentication:AzureAd:AADInstance"] + "Common";
-			options.CallbackPath = Configuration["Authentication:AzureAd:CallbackPath"];
+			options.ClientId = _configuration["Authentication:AzureAd:ClientId"];
+			options.Authority = _configuration["Authentication:AzureAd:AADInstance"] + "Common";
+			options.CallbackPath = _configuration["Authentication:AzureAd:CallbackPath"];
 			options.TokenValidationParameters = new TokenValidationParameters
 			{
 				ValidateIssuer = false,
@@ -215,40 +207,6 @@ namespace CSC.CSClassroom.WebApp
 			(
 				_container.Resolve<ITimeZoneProvider>())
 			);
-		}
-
-		/// <summary>
-		/// Returns whether or not to include a given log event.
-		/// </summary>
-		private bool IncludeLogEvent(LogEvent logEvent)
-		{
-			if (logEvent.Properties.ContainsKey("RequestPath"))
-			{
-				string requestPath = logEvent.Properties["RequestPath"]
-					.ToString()
-					.Substring(1);
-
-				if (requestPath.StartsWith("/css")
-					|| requestPath.StartsWith("/images")
-					|| requestPath.StartsWith("/js")
-					|| requestPath.StartsWith("/lib")
-					|| requestPath.StartsWith("/markdown")
-					|| requestPath.StartsWith("/favicon.ico"))
-				{
-					return false;
-				}
-			}
-
-			if (logEvent.Properties.ContainsKey("SourceContext")
-					&& logEvent.Properties["SourceContext"]
-						.ToString()
-						.StartsWith("\"Microsoft.EntityFrameworkCore")
-					&& logEvent.Level == LogEventLevel.Information)
-			{
-				return false;
-			}
-
-			return true;
 		}
 
 		/// <summary>

@@ -25,7 +25,7 @@ namespace CSC.BuildService.Endpoint
 		/// <summary>
 		/// The configuration.
 		/// </summary>
-		public IConfigurationRoot Configuration { get; }
+		private readonly IConfiguration _configuration;
 
 		/// <summary>
 		/// The logger factory.
@@ -40,17 +40,10 @@ namespace CSC.BuildService.Endpoint
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public Startup(IHostingEnvironment env, ILoggerFactory loggerFactory)
+		public Startup(IConfiguration configuration, ILoggerFactory loggerFactory)
 		{
+			_configuration = configuration;
 			_loggerFactory = loggerFactory;
-
-			var builder = new ConfigurationBuilder()
-				.SetBasePath(env.ContentRootPath)
-				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-				.AddJsonFile($"appsettings.Environment.json", optional: true)
-				.AddEnvironmentVariables();
-
-			Configuration = builder.Build();
 		}
 
 		/// <summary>
@@ -59,7 +52,7 @@ namespace CSC.BuildService.Endpoint
 		public IServiceProvider ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().AddJsonOptions(ApplyJsonOptions);
-			services.AddTelemetry(Configuration);
+			services.AddTelemetry(_configuration);
 			services.AddSingleton(typeof(IHttpContextAccessor), typeof(HttpContextAccessor));
 			services.AddHangfireQueue(DatabaseConnectionString, _loggerFactory);
 			
@@ -67,7 +60,7 @@ namespace CSC.BuildService.Endpoint
 
 			builder.RegisterDockerHostFactory(GetSection("DockerHost"), GetSection("DockerContainers"));
 			builder.RegisterJsonSerialization(new TypeMapCollection());
-			builder.RegisterBuildService(Configuration.GetSection("ProjectRunner"));
+			builder.RegisterBuildService(_configuration.GetSection("ProjectRunner"));
 			builder.RegisterSystem();
 			builder.RegisterOperationRunner();
 
@@ -83,7 +76,6 @@ namespace CSC.BuildService.Endpoint
 		/// </summary>
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 		{
-			app.UseTelemetry(_loggerFactory, Configuration, logEvent => true);
 			app.UseExceptionHandler("/Error");
 			app.UseHangfireServer(GetBackgroundJobServerOptions());
 			app.UseMvc();
@@ -105,7 +97,7 @@ namespace CSC.BuildService.Endpoint
 		/// </summary>
 		private IConfigurationSection GetSection(string sectionName)
 		{
-			return Configuration.GetSection(sectionName);
+			return _configuration.GetSection(sectionName);
 		}
 
 		/// <summary>

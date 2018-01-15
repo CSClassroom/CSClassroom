@@ -32,15 +32,29 @@ namespace CSC.Common.Infrastructure.Configuration
 		/// </summary>
 		public static void AddTelemetry(
 			this IServiceCollection services,
-			IConfigurationRoot configuration,
+			IConfiguration configuration,
 			params Type[] telemetryInitializers)
 		{
 			services.AddApplicationInsightsTelemetry(configuration);
 
+			// Disable exception logging (as Serilog already sends exceptions
+			// to Application Insights).
+			var telemetryConfiguration = services.BuildServiceProvider()
+				.GetService<TelemetryConfiguration>();
+			var builder = telemetryConfiguration.TelemetryProcessorChainBuilder;
+			builder.Use((next) => new ExceptionFilterTelemetryProcessor(next));
+			builder.Build();
+
+			// Allow code to retrieve the current operation ID. This is useful
+			// for sending the operation ID to backend requests.
 			services.AddScoped<IOperationIdProvider, OperationIdProvider>();
 
+			// Uses the operation ID in the request header, if any.
 			services.AddSingleton(typeof(ITelemetryInitializer), typeof(OperationIdTelemetryInitializer));
+			
+			// Includes the hostname with each log entry.
 			services.AddSingleton(typeof(ITelemetryInitializer), typeof(HostnameTelemetryInitializer));
+
 			foreach (var type in telemetryInitializers)
 			{
 				services.AddSingleton(typeof(ITelemetryInitializer), type);
