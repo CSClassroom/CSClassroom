@@ -496,7 +496,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 							to => to.Select(r => r.EmailAddress).ToHashSet().SetEquals(expectedEmails)
 						),
 						subject,
-						message
+						message,
+						null /* customSender */,
+						null /* threadInfo */
 					)
 				).Returns(Task.CompletedTask);
 			return emailProvider;

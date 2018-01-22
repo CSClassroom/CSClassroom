@@ -17,17 +17,17 @@ namespace CSC.Common.Infrastructure.Email
 		private readonly string _apiKey;
 
 		/// <summary>
-		/// The from address for all messages.
+		/// The default from address for all messages.
 		/// </summary>
-		private readonly string _fromAddress;
+		public string DefaultFromAddress { get; }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public SendGridEmailProvider(string apiKey, string fromAddress)
+		public SendGridEmailProvider(string apiKey, string defaultFromAddress)
 		{
 			_apiKey = apiKey;
-			_fromAddress = fromAddress;
+			DefaultFromAddress = defaultFromAddress;
 		}
 
 		/// <summary>
@@ -36,7 +36,9 @@ namespace CSC.Common.Infrastructure.Email
 		public async Task SendMessageAsync(
 			IList<EmailRecipient> recipients,
 			string subject, 
-			string body)
+			string body,
+			EmailSender customSender = null,
+			ThreadInfo threadInfo = null)
 		{
 			if (_apiKey == null)
 			{
@@ -44,8 +46,13 @@ namespace CSC.Common.Infrastructure.Email
 				return;
 			}
 
-			var from = new EmailAddress(_fromAddress, "CS Classroom");
-			var tos = recipients.Select(r => new EmailAddress(r.EmailAddress, r.Name)).ToList();
+			var from = customSender != null
+				? new EmailAddress(customSender.FromAddress, customSender.Name)
+				: new EmailAddress(DefaultFromAddress, "CS Classroom");
+			var tos = recipients
+				.Select(r => new EmailAddress(r.EmailAddress, r.Name))
+				.ToList();
+			
 			SendGridMessage msg;
 			if (tos.Count == 1)
 			{
@@ -68,6 +75,27 @@ namespace CSC.Common.Infrastructure.Email
 					plainTextContent: null,
 					htmlContent: body
 				);
+			}
+
+			if (threadInfo != null)
+			{
+				msg.Headers = new Dictionary<string, string>();
+				
+				msg.Headers["Message-Id"] = $"<{threadInfo.MessageId}>";
+				
+				if (threadInfo.InReplyTo != null)
+				{
+					msg.Headers["In-Reply-To"] = $"<{threadInfo.InReplyTo}";
+				}
+
+				if (threadInfo.References != null)
+				{
+					msg.Headers["References"] = string.Join
+					(
+						" ", 
+						threadInfo.References.Select(r => $"<{r}>")
+					);
+				}
 			}
 
 			var client = new SendGridClient(_apiKey);

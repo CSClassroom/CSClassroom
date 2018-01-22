@@ -430,7 +430,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 						to => to.Count == 1 && to[0].EmailAddress == "NewEmailAddress"
 					),
 					It.IsAny<string>(),
-					It.IsAny<string>()
+					It.IsAny<string>(),
+					null /* customSender */,
+					null /* threadInfo */
 				),
 				Times.Once
 			);
@@ -484,7 +486,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 						to => to.Count == 1 && to[0].EmailAddress == "User1Email"
 					),
 					It.IsAny<string>(),
-					It.IsAny<string>()
+					It.IsAny<string>(),
+					null /* customSender */,
+					null /* threadInfo */
 				),
 				Times.Never
 			);
@@ -1209,7 +1213,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 						to => to.Count == 1 && to[0].EmailAddress == "EmailAddress"
 					),
 					It.IsAny<string>(),
-					It.IsAny<string>()
+					It.IsAny<string>(),
+					null /* customSender */,
+					null /* threadInfo */
 				),
 				Times.Once
 			);
@@ -1565,7 +1571,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 						to => to.Count == 1 && to[0].EmailAddress == "User1Email"
 					),
 					It.IsAny<string>(),
-					It.IsAny<string>()
+					It.IsAny<string>(),
+					null /* customSender */,
+					null /* threadInfo */
 				),
 				Times.Once
 			);
@@ -2131,7 +2139,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 							to => to.Count == 1 && to[0].EmailAddress == emailAddress
 						),
 						It.IsAny<string>(),
-						It.IsAny<string>()
+						It.IsAny<string>(),
+						null /* customSender */,
+						null /* threadInfo */
 					)
 				).Returns(Task.CompletedTask);
 

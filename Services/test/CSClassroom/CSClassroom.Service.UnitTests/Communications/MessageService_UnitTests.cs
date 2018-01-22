@@ -698,14 +698,16 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 			var attachment2 = new byte[6];
 			var downsampled = new byte[2];
 
-			var timeProvider = GetMockTimeProvider(SentDate);
+			var timeProvider = GetMockTimeProvider(SentDate + TimeSpan.FromHours(1));
 			var htmlSanitizer = GetMockHtmlSanitizer("Final", "Sanitized");
 			var imageProcessor = GetMockImageProcessor(attachment1, downsampled);
 			var emailProvider = GetMockEmailProvider
 			(
+				"First1 Last1 (CS Classroom)",
 				new [] { "Student1Email", "Teacher1Email" },
 				"RE: [Class1 | First1 Last1]: Subject",
-				"Sanitized"
+				"Sanitized",
+				previousSentMessages: 1
 			);
 
 			var messageService = CreateMessageService
@@ -934,11 +936,16 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 		/// Returns a mock e-mail provider.
 		/// </summary>
 		private static Mock<IEmailProvider> GetMockEmailProvider(
-			ICollection<string> expectedEmails,
+			string senderName,
+			ICollection<string> recipients,
 			string subject,
-			string message)
+			string message,
+			int previousSentMessages)
 		{
 			var emailProvider = new Mock<IEmailProvider>(MockBehavior.Strict);
+			emailProvider
+				.Setup(m => m.DefaultFromAddress)
+				.Returns("no-reply@domain.com");
 			emailProvider
 				.Setup
 				(
@@ -948,10 +955,17 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 						(
 							to => to.Select(r => r.EmailAddress)
 								.ToHashSet()
-								.SetEquals(expectedEmails)
+								.SetEquals(recipients)
 						),
 						subject,
-						message
+						message,
+						It.Is<EmailSender>(sender => sender.Name == senderName),
+						It.Is<ThreadInfo>
+						(
+							ti => ti.MessageId != ti.InReplyTo && 
+							      !ti.References.Contains(ti.MessageId) &&
+							      ti.References.Count == previousSentMessages
+						)
 					)
 				).Returns(Task.CompletedTask);
 			

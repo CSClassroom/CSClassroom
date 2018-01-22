@@ -981,7 +981,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 						body =>
 							body.Contains("Feedback4")
 							&& body.Contains("UrlMarkAsRead")
-					)
+					),
+					null /* customSender */,
+					null /* threadInfo */
 				);
 			}
 			else
@@ -990,7 +992,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				(
 					It.IsAny<IList<EmailRecipient>>(),
 					It.IsAny<string>(),
-					It.IsAny<string>()
+					It.IsAny<string>(),
+					null /* customSender */,
+					null /* threadInfo */
 				);
 			}
 		}

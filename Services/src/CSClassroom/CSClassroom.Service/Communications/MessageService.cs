@@ -353,7 +353,7 @@ namespace CSC.CSClassroom.Service.Communications
 					admin
 				);
 
-				UpdateDraft(conversation, authorId, contents, send: false);
+				await UpdateDraftAsync(conversation, authorId, contents, send: false);
 				
 				await _dbContext.SaveChangesAsync();
 			});
@@ -389,7 +389,7 @@ namespace CSC.CSClassroom.Service.Communications
 					admin
 				);
 
-				message = UpdateDraft
+				message = await UpdateDraftAsync
 				(
 					conversation, 
 					authorId, 
@@ -509,7 +509,7 @@ namespace CSC.CSClassroom.Service.Communications
 		/// <summary>
 		/// Updates the latest draft of a message for a given author.
 		/// </summary>
-		private Message UpdateDraft(
+		private async Task<Message> UpdateDraftAsync(
 			Conversation conversation,
 			int authorId, 
 			string messageContents, 
@@ -525,7 +525,10 @@ namespace CSC.CSClassroom.Service.Communications
 				message = new Message
 				{
 					ConversationId = conversation.Id,
-					AuthorId = authorId
+					AuthorId = authorId,
+					Author = await _dbContext.Users
+						.Where(u => u.Id == authorId)
+						.SingleAsync()
 				};
 			}
 
@@ -605,23 +608,20 @@ namespace CSC.CSClassroom.Service.Communications
 			Func<int, string> getAttachmentUrl,
 			Func<DateTime, string> formatDateTime)
 		{
-			var (recipients, subject) = await GetEnvelopeAsync(message);
-			var attachments = GetEmailAttachmentList(message, getAttachmentUrl);
-			var footer = GetEmailFooter(message, formatDateTime, conversationUrl);
-			
 			await _emailProvider.SendMessageAsync
 			(
-				recipients,
-				subject,
-				message.Contents + _htmlSanitizer.SanitizeHtml(attachments + footer)
+				await GetEmailRecipientsAsync(message),
+				GetEmailSubject(message),
+				GetEmailContents(message, conversationUrl, getAttachmentUrl, formatDateTime),
+				GetEmailSender(message),
+				GetEmailThreadInfo(message)
 			);
 		}
 
 		/// <summary>
-		/// Returns the e-mail envelope (recipients and subject).
+		/// Returns the e-mail recipients.
 		/// </summary>
-		private async Task<(IList<EmailRecipient> recipients, string subject)> 
-			GetEnvelopeAsync(Message message)
+		private async Task<IList<EmailRecipient>> GetEmailRecipientsAsync(Message message)
 		{
 			var student = await _dbContext.Users
 				.Where(user => user.Id == message.Conversation.StudentId)
@@ -654,7 +654,16 @@ namespace CSC.CSClassroom.Service.Communications
 					)
 				)
 				.ToList();
-			
+
+			return recipients;
+		}
+
+		/// <summary>
+		/// Returns the e-mail subject.
+		/// </summary>
+		private string GetEmailSubject(Message message)
+		{
+			var student = message.Conversation.Student;
 			var subject = $"[{message.Conversation.Classroom.Name} "
 			              + $"| {student.FirstName} {student.LastName}]: "
 			              + message.Conversation.Subject;
@@ -664,7 +673,34 @@ namespace CSC.CSClassroom.Service.Communications
 				subject = $"RE: {subject}";
 			}
 
-			return (recipients, subject);
+			return subject;
+		}
+
+		/// <summary>
+		/// Returns the e-mail sender.
+		/// </summary>
+		private EmailSender GetEmailSender(Message message)
+		{
+			return new EmailSender
+			(
+				$"{message.Author.FirstName} {message.Author.LastName} (CS Classroom)",
+				_emailProvider.DefaultFromAddress.Replace("@", $"-{message.Author.Id}@")
+			);
+		}
+
+		/// <summary>
+		/// Returns the e-mail contents.
+		/// </summary>
+		private string GetEmailContents(
+			Message message,
+			string conversationUrl,
+			Func<int, string> getAttachmentUrl,
+			Func<DateTime, string> formatDateTime)
+		{
+			var attachments = GetEmailAttachmentList(message, getAttachmentUrl);
+			var footer = GetEmailFooter(message, formatDateTime, conversationUrl);
+			
+			return message.Contents + _htmlSanitizer.SanitizeHtml(attachments + footer);
 		}
 
 		/// <summary>
@@ -718,6 +754,40 @@ namespace CSC.CSClassroom.Service.Communications
 				+ "Do not reply to this e-mail. Instead, click "
 				+ $"<a href=\"{conversationUrl}\">here</a> "
 				+ "to reply.";
+		}
+
+		/// <summary>
+		/// Returns the e-mail threading information.
+		/// </summary>
+		private ThreadInfo GetEmailThreadInfo(Message message)
+		{
+			var otherMessages = message.Conversation.Messages
+				.Where(m => m != message)
+				.Where(m => m.Sent.HasValue)
+				.OrderBy(m => m.Sent)
+				.ToList();
+			
+			return new ThreadInfo
+			(
+				GetMessageId(message),
+				otherMessages.Any() 
+					? GetMessageId(otherMessages[otherMessages.Count - 1]) 
+					: null,
+				otherMessages.Any() 
+					? otherMessages.Select(GetMessageId).ToList()
+					: null
+			);
+		}
+
+		/// <summary>
+		/// Returns the message ID for a message sent at the given time.
+		/// </summary>
+		private string GetMessageId(Message message)
+		{
+			var domain = _emailProvider.DefaultFromAddress
+				.Substring(_emailProvider.DefaultFromAddress.IndexOf("@") + 1);
+
+			return $"{message.Sent.Value.Ticks}.{message.AuthorId}@{domain}";
 		}
 
 		/// <summary>
