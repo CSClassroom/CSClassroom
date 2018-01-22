@@ -60,22 +60,6 @@
             @Model.Subject
         </td>
     </tr>
-    @if (ShowOwner)
-    {
-        string ownerText = Model.Owner != null ? $"{Model.Owner.FirstName} {Model.Owner.LastName}" : "None";
-        string ownerColor = Model.Owner != null ? (Model.Owner.Id == User.Id ? "green" : "black") : "#a5042f";
-        string ownerFontWeight = (Model.Owner == null || Model.Owner.Id == User.Id) ? "bold" : "normal";
-        <tr>
-            <td class="summary-col-heading">
-                Owner:
-            </td>
-            <td class="summary-col-value">
-                <span id="ownerName" style="margin-right: 3px; line-height: 1.0; vertical-align: text-middle"></span>
-                <input type="button" id="ownerButton" value="Take Ownership" class="btn-sm btn-default" style="display: inline; vertical-align: top; line-height: 1.0; margin-right: 3px; display: none"/>
-                <img id="ownerProgress" style="display: none; vertical-align: initial" src="~/images/ajax-loader.gif">
-            </td>
-        </tr>
-    }
     @if (ShowActionRequiredToggle)
     {
         <tr>
@@ -152,18 +136,32 @@
         .FirstOrDefault(m => !m.Sent.HasValue && m.AuthorId == User.Id)
         ?.Contents;
 }
-
+<hr/>
+@if (AnySentMessages)
+{
+    <h2>Reply</h2>
+    if (ShowOwner)
+    {
+        string ownerText = Model.Owner != null ? $"{Model.Owner.FirstName} {Model.Owner.LastName}" : "None";
+        string ownerColor = Model.Owner != null ? (Model.Owner.Id == User.Id ? "green" : "black") : "#a5042f";
+        string ownerFontWeight = (Model.Owner == null || Model.Owner.Id == User.Id) ? "bold" : "normal";
+        <table class="summary-table">
+            <tr>
+                <td class="summary-col-heading">
+                    Owner:
+                </td>
+                <td class="summary-col-value">
+                    <span id="ownerName" style="margin-right: 3px; line-height: 1.0; vertical-align: text-middle"></span>
+                    <input type="button" id="ownerButton" value="Take Ownership" class="btn-sm btn-default" style="display: inline; vertical-align: top; line-height: 1.0; margin-right: 3px; display: none"/>
+                    <img id="ownerProgress" style="display: none; vertical-align: initial" src="~/images/ajax-loader.gif">
+                </td>
+            </tr>
+        </table>
+    }
+    <br>
+}
 <form asp-action="SendReply" id="replyForm" enctype="multipart/form-data">
     <div class="form-horizontal">
-        <hr/>
-        @if (AnySentMessages)
-        {
-            <h2>Reply</h2>
-            <br>
-        }
-        <div id="mustOwnBeforeReply" class="alert alert-danger max-width" style="display: none">
-            You are not the owner of this message.
-        </div>
         <div class="form-group">
             <div class="col-md-10">
                 <textarea id="contents" name="messageContents">
@@ -256,13 +254,11 @@
                     function updateEditorStatus(readonly) {
                         delayPromise(0).then(() => {
                             if (readonly) {
-                                $("#mustOwnBeforeReply").show();
                                 $("#replyForm :input").prop('disabled', true);
                                 if (!tinymce.get('contents').readonly) {
                                     tinymce.get('contents').setMode('readonly');
                                 }
                             } else {
-                                $("#mustOwnBeforeReply").hide();
                                 $("#replyForm :input").prop('disabled', false);
                                 if (tinymce.get('contents').readonly) {
                                     tinymce.get('contents').setMode('design');
