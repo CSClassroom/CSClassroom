@@ -50,6 +50,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 	/// <summary>
 	/// The base class for all controllers in the web app.
 	/// </summary>
+	[CheckExistence]
 	public class BaseController : Controller
 	{
 		/// <summary>
@@ -108,12 +109,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			await InitializeAsync();
 
-			if (!DoesResourceExist())
-			{
-				context.Result = NotFound();
-				return;
-			}
-
 			await next();
 		}
 
@@ -132,7 +127,8 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// <summary>
 		/// Returns whether or not the resource exists.
 		/// </summary>
-		protected virtual bool DoesResourceExist()
+		[NonAction]
+		public virtual bool DoesResourceExist()
 		{
 			// Subclasses should override this method if they are managing
 			// a resource that might not exist.

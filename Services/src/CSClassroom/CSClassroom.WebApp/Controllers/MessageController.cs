@@ -57,7 +57,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// <summary>
 		/// Returns whether or not the resource exists.
 		/// </summary>
-		protected override bool DoesResourceExist()
+		public override bool DoesResourceExist()
 		{
 			var anySections = ClassroomMembership.SectionMemberships
 				?.Any(sm => sm.Section.AllowStudentMessages) 
