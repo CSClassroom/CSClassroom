@@ -85,7 +85,7 @@ namespace CSC.Common.Infrastructure.Email
 				
 				if (threadInfo.InReplyTo != null)
 				{
-					msg.Headers["In-Reply-To"] = $"<{threadInfo.InReplyTo}";
+					msg.Headers["In-Reply-To"] = $"<{threadInfo.InReplyTo}>";
 				}
 
 				if (threadInfo.References != null)

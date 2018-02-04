@@ -670,7 +670,7 @@ namespace CSC.CSClassroom.Service.Communications
 
 			if (message.Conversation.Messages.Count > 1)
 			{
-				subject = $"RE: {subject}";
+				subject = $"Re: {subject}";
 			}
 
 			return subject;
@@ -787,7 +787,10 @@ namespace CSC.CSClassroom.Service.Communications
 			var domain = _emailProvider.DefaultFromAddress
 				.Substring(_emailProvider.DefaultFromAddress.IndexOf("@") + 1);
 
-			return $"{message.Sent.Value.Ticks}.{message.AuthorId}@{domain}";
+			var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+			var ms = Convert.ToInt64((message.Sent.Value - epoch).TotalMilliseconds);
+		
+			return $"{ms}.{message.AuthorId}@{domain}";
 		}
 
 		/// <summary>

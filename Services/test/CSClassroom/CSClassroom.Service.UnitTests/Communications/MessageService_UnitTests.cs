@@ -705,7 +705,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 			(
 				"First1 Last1 (CS Classroom)",
 				new [] { "Student1Email", "Teacher1Email" },
-				"RE: [Class1 | First1 Last1]: Subject",
+				"Re: [Class1 | First1 Last1]: Subject",
 				"Sanitized",
 				previousSentMessages: 1
 			);
@@ -932,6 +932,22 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 			return imageProcessor;
 		}
 
+		private static bool RecipientMatches(IList<EmailRecipient> to, ICollection<string> recipients) {
+			return to.Select(r => r.EmailAddress)
+								.ToHashSet()
+								.SetEquals(recipients);
+		}
+
+		private static bool ThreadInfoMatches(ThreadInfo ti, int previousSentMessages) {
+			return ti.MessageId != ti.InReplyTo && 
+							      !ti.References.Contains(ti.MessageId) &&
+							      ti.References.Count == previousSentMessages;
+		}
+
+		private static bool SenderMatches(EmailSender sender, string senderName) {
+			return sender.Name == senderName;
+		}
+
 		/// <summary>
 		/// Returns a mock e-mail provider.
 		/// </summary>
@@ -953,18 +969,14 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 					(
 						It.Is<IList<EmailRecipient>>
 						(
-							to => to.Select(r => r.EmailAddress)
-								.ToHashSet()
-								.SetEquals(recipients)
+							to => RecipientMatches(to, recipients)
 						),
 						subject,
 						message,
-						It.Is<EmailSender>(sender => sender.Name == senderName),
+						It.Is<EmailSender>(si => SenderMatches(si, senderName)),
 						It.Is<ThreadInfo>
 						(
-							ti => ti.MessageId != ti.InReplyTo && 
-							      !ti.References.Contains(ti.MessageId) &&
-							      ti.References.Count == previousSentMessages
+							ti => ThreadInfoMatches(ti, previousSentMessages)
 						)
 					)
 				).Returns(Task.CompletedTask);
