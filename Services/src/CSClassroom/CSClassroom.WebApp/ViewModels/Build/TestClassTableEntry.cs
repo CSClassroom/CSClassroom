@@ -108,7 +108,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Build
 						checkpoint?.TestClasses
 							?.FirstOrDefault(tc => tc.TestClass.ClassName == group.Key)
 							?.Required ?? false,
-						group.ToList(),
+						group.OrderBy(t => t.TestName).ToList(),
 						testUrlBuilder
 					)
 				).ToList();
