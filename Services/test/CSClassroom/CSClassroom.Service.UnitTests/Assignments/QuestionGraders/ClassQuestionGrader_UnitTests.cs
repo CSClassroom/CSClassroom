@@ -264,13 +264,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var grader = new ClassQuestionGrader(question, codeRunnerService);
 			var result = await grader.GradeSubmissionAsync(submission);
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
-			var methodMissingError = codeQuestionResult.Errors
-				.Cast<MethodMissingError>()
+			var methodCountError = codeQuestionResult.Errors
+				.Cast<MethodCountError>()
 				.Single();
 
 			Assert.Equal(0.0, result.Score);
-			Assert.Equal("ExpectedClass", methodMissingError.ClassName);
-			Assert.Equal("requiredMethod", methodMissingError.ExpectedMethodName);
+			Assert.Equal("ExpectedClass", methodCountError.ClassName);
+			Assert.Equal("requiredMethod", methodCountError.ExpectedMethodName);
 		}
 
 		/// <summary>
@@ -290,13 +290,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var grader = new ClassQuestionGrader(question, codeRunnerService);
 			var result = await grader.GradeSubmissionAsync(submission);
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
-			var methodVisibilityError = codeQuestionResult.Errors
-				.Cast<MethodVisibilityError>()
+			var methodDefinitionError = codeQuestionResult.Errors
+				.Cast<MethodDefinitionError>()
 				.Single();
 
 			Assert.Equal(0.0, result.Score);
-			Assert.Equal("requiredMethod", methodVisibilityError.MethodName);
-			Assert.True(methodVisibilityError.ExpectedPublic);
+			Assert.Equal("requiredMethod", methodDefinitionError.ExpectedMethodName);
+			Assert.True(methodDefinitionError.ExpectedPublic);
 		}
 
 		/// <summary>
@@ -316,13 +316,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var grader = new ClassQuestionGrader(question, codeRunnerService);
 			var result = await grader.GradeSubmissionAsync(submission);
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
-			var methodStaticError = codeQuestionResult.Errors
-				.Cast<MethodStaticError>()
+			var methodDefinitionError = codeQuestionResult.Errors
+				.Cast<MethodDefinitionError>()
 				.Single();
 
 			Assert.Equal(0.0, result.Score);
-			Assert.Equal("requiredMethod", methodStaticError.MethodName);
-			Assert.False(methodStaticError.ExpectedStatic);
+			Assert.Equal("requiredMethod", methodDefinitionError.ExpectedMethodName);
+			Assert.False(methodDefinitionError.ExpectedStatic);
 		}
 
 		/// <summary>
@@ -342,14 +342,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var grader = new ClassQuestionGrader(question, codeRunnerService);
 			var result = await grader.GradeSubmissionAsync(submission);
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
-			var methodReturnTypeError = codeQuestionResult.Errors
-				.Cast<MethodReturnTypeError>()
+			var methodDefinitionError = codeQuestionResult.Errors
+				.Cast<MethodDefinitionError>()
 				.Single();
 
 			Assert.Equal(0.0, result.Score);
-			Assert.Equal("requiredMethod", methodReturnTypeError.MethodName);
-			Assert.Equal("String", methodReturnTypeError.ExpectedReturnType);
-			Assert.Equal("boolean", methodReturnTypeError.ActualReturnType);
+			Assert.Equal("requiredMethod", methodDefinitionError.ExpectedMethodName);
+			Assert.Equal("String", methodDefinitionError.ExpectedReturnType);
 		}
 
 		/// <summary>
@@ -369,25 +368,21 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var grader = new ClassQuestionGrader(question, codeRunnerService);
 			var result = await grader.GradeSubmissionAsync(submission);
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
-			var methodParameterTypesError = codeQuestionResult.Errors
-				.Cast<MethodParameterTypesError>()
+			var methodDefinitionError = codeQuestionResult.Errors
+				.Cast<MethodDefinitionError>()
 				.Single();
 
 			Assert.Equal(0.0, result.Score);
-			Assert.Equal("requiredMethod", methodParameterTypesError.MethodName);
-			Assert.Equal(2, methodParameterTypesError.ExpectedParamTypes.Count);
-			Assert.Equal("int", methodParameterTypesError.ExpectedParamTypes[0]);
-			Assert.Equal("int", methodParameterTypesError.ExpectedParamTypes[1]);
-			Assert.Equal("int", methodParameterTypesError.ActualParamTypes[0]);
-			Assert.Equal("double", methodParameterTypesError.ActualParamTypes[1]);
+			Assert.Equal("requiredMethod", methodDefinitionError.ExpectedMethodName);
+			Assert.Equal("int, int", methodDefinitionError.ExpectedParamTypes);
 		}
 
 		/// <summary>
 		/// Verifies that an error is returned if the submission contains
-		/// an incorrect number of overloads for a required overloaded method.
+		/// too few overloads for a required overloaded method.
 		/// </summary>
 		[Fact]
-		public async Task GradeSubmissionAsync_WrongOverloadCount_Error()
+		public async Task GradeSubmissionAsync_TooFewOverloads_Error()
 		{
 			var question = GetClassQuestion(overloadedMethods: true);
 			var submission = new CodeQuestionSubmission() { Contents = "Submission" };
@@ -400,13 +395,41 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var result = await grader.GradeSubmissionAsync(submission);
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 			var methodOverloadCountError = codeQuestionResult.Errors
-				.Cast<MethodOverloadCountError>()
+				.Cast<MethodCountError>()
 				.Single();
 
 			Assert.Equal(0.0, result.Score);
 			Assert.Equal("ExpectedClass", methodOverloadCountError.ClassName);
 			Assert.Equal("requiredOverloadedMethod", methodOverloadCountError.ExpectedMethodName);
-			Assert.Equal(2, methodOverloadCountError.ExpectedOverloadCount);
+			Assert.Equal(2, methodOverloadCountError.ExpectedCount);
+			Assert.False(methodOverloadCountError.ExpectedStatic);
+		}
+
+		/// <summary>
+		/// Verifies that an error is returned if the submission contains
+		/// too many overloads for a required overloaded method.
+		/// </summary>
+		[Fact]
+		public async Task GradeSubmissionAsync_TooManyOverloads_Error()
+		{
+			var question = GetClassQuestion(overloadedMethods: true);
+			var submission = new CodeQuestionSubmission() { Contents = "Submission" };
+			question.RequiredMethods.RemoveAt(0);
+
+			var classJobResult = GetClassJobResult(success: false, overloadedMethods: true);
+
+			var codeRunnerService = GetCodeRunnerService(classJobResult);
+			var grader = new ClassQuestionGrader(question, codeRunnerService);
+			var result = await grader.GradeSubmissionAsync(submission);
+			var codeQuestionResult = (CodeQuestionResult)result.Result;
+			var methodOverloadCountError = codeQuestionResult.Errors
+				.Cast<MethodCountError>()
+				.Single();
+
+			Assert.Equal(0.0, result.Score);
+			Assert.Equal("ExpectedClass", methodOverloadCountError.ClassName);
+			Assert.Equal("requiredOverloadedMethod", methodOverloadCountError.ExpectedMethodName);
+			Assert.Equal(1, methodOverloadCountError.ExpectedCount);
 			Assert.False(methodOverloadCountError.ExpectedStatic);
 		}
 
@@ -428,7 +451,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var result = await grader.GradeSubmissionAsync(submission);
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 			var methodOverloadDefinitionError = codeQuestionResult.Errors
-				.Cast<MethodOverloadDefinitionError>()
+				.Cast<MethodDefinitionError>()
 				.Single();
 
 			Assert.Equal(0.0, result.Score);
@@ -464,24 +487,31 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 		/// Verifies that a correct submission gets a correct score of 1.0.
 		/// </summary>
 		[Theory]
-		[InlineData(false, false)]
-		[InlineData(false, true)]
-		[InlineData(true, false)]
-		[InlineData(true, true)]
+		[InlineData(false, false, false)]
+		[InlineData(false, false, true)]
+		[InlineData(false, true, false)]
+		[InlineData(false, true, true)]
+		[InlineData(true, false, false)]
+		[InlineData(true, false, true)]
+		[InlineData(true, true, false)]
+		[InlineData(true, true, true)]
 		public async Task GradeSubmissionAsync_CorrectSubmission_CorrectScore(
 			bool constructor,
-			bool useGenerics)
+			bool useGenerics,
+			bool overloadedMethods)
 		{
 			var question = GetClassQuestion
 			(
 				constructor: constructor, 
-				useGenerics: useGenerics
+				useGenerics: useGenerics, 
+				overloadedMethods: overloadedMethods
 			);
 			var classJobResult = GetClassJobResult
 			(
 				success: true, 
 				constructor: constructor, 
-				useGenerics: useGenerics
+				useGenerics: useGenerics, 
+				overloadedMethods: overloadedMethods
 			);
 			var submission = new CodeQuestionSubmission() { Contents = "Submission" };
 			var codeRunnerService = GetCodeRunnerService(classJobResult);
@@ -493,7 +523,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			Assert.Equal(1.0, result.Score);
 			Assert.Empty(codeQuestionResult.Errors);
 		}
-		
+
 		/// <summary>
 		/// Returns a new class question.
 		/// </summary>

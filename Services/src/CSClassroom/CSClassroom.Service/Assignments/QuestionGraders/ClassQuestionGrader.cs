@@ -98,28 +98,9 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 			{
 				foreach (var requiredMethodGroup in Question.RequiredMethods.GroupBy(rm => rm.Name))
 				{
-					IEnumerable<CodeQuestionError> methodDefinitionErrors;
+					var errors = GetMethodDefinitionErrors(requiredMethodGroup, submittedClass);
 
-					if (requiredMethodGroup.Count() == 1)
-					{
-						var requiredMethod = requiredMethodGroup.First();
-
-						methodDefinitionErrors = GetSingleMethodDefinitionErrors
-						(
-							requiredMethod, 
-							submittedClass
-						);
-					}
-					else
-					{
-						methodDefinitionErrors = GetOverloadedMethodDefinitionErrors
-						(
-							requiredMethodGroup,
-							submittedClass
-						);
-					}
-
-					foreach (var error in methodDefinitionErrors)
+					foreach (var error in errors)
 					{
 						yield return error;
 					}					
@@ -128,102 +109,35 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 		}
 
 		/// <summary>
-		/// Returns method definition errors when a single method is expected.
+		/// Returns any method definition errors.
 		/// </summary>
-		private IEnumerable<CodeQuestionError> GetSingleMethodDefinitionErrors(
-			RequiredMethod requiredMethod, 
-			ClassDefinition submittedClass)
-		{
-			var submittedMethod = submittedClass.Methods
-						.SingleOrDefault(method => method.Name == requiredMethod.Name);
-
-			if (submittedMethod == null)
-			{
-				yield return new MethodMissingError
-				(
-					Question.ClassName,
-					requiredMethod.Name,
-					requiredMethod.IsStatic
-				);
-
-				yield break;
-			}
-
-			if (submittedMethod.IsPublic != requiredMethod.IsPublic)
-			{
-				yield return new MethodVisibilityError
-				(
-					requiredMethod.Name,
-					requiredMethod.IsPublic
-				);
-			}
-
-			if (submittedMethod.IsStatic != requiredMethod.IsStatic)
-			{
-				yield return new MethodStaticError
-				(
-					requiredMethod.Name,
-					requiredMethod.IsStatic
-				);
-			}
-
-			if (submittedMethod.ReturnType != StripGenericsFromType(requiredMethod.ReturnType))
-			{
-				yield return new MethodReturnTypeError
-				(
-					requiredMethod.Name,
-					requiredMethod.ReturnType,
-					submittedMethod.ReturnType
-				);
-			}
-
-			var paramTypesMatch = submittedMethod
-				.ParameterTypes
-				.SequenceEqual
-				(
-					requiredMethod.ParamTypeList.Select(StripGenericsFromType)
-				);
-
-			if (!paramTypesMatch)
-			{
-				yield return new MethodParameterTypesError
-				(
-					requiredMethod.Name,
-					requiredMethod.ParamTypeList,
-					submittedMethod.ParameterTypes
-				);
-			}
-		}
-
-		/// <summary>
-		/// Returns method definition errors when a single method is expected.
-		/// </summary>
-		private IEnumerable<CodeQuestionError> GetOverloadedMethodDefinitionErrors(
-			IGrouping<string, RequiredMethod> requiredOverloads,
+		private IEnumerable<CodeQuestionError> GetMethodDefinitionErrors(
+			IGrouping<string, RequiredMethod> requiredMethods,
 			ClassDefinition submittedClass)
 		{
 			var submittedOverloads = submittedClass.Methods
-				.Where(m => m.Name == requiredOverloads.Key);
+				.Where(m => m.Name == requiredMethods.Key);
 
-			if (requiredOverloads.Count() != submittedOverloads.Count())
+			if (requiredMethods.Count() != submittedOverloads.Count())
 			{
-				yield return new MethodOverloadCountError
+				yield return new MethodCountError
 				(
 					Question.ClassName,
-					requiredOverloads.Key,
-					requiredOverloads.First().IsStatic,
-					requiredOverloads.Count()
+					requiredMethods.Key,
+					requiredMethods.First().IsStatic,
+					requiredMethods.Count()
 				);
 
 				yield break;
 			}
 
-			foreach (var requiredMethod in requiredOverloads)
+			foreach (var requiredMethod in requiredMethods)
 			{
-				var submittedOverload = submittedClass.Methods.FirstOrDefault
+				var matchingSubmittedMethod = submittedClass.Methods.FirstOrDefault
 				(
 					submittedMethod => 
-						   submittedMethod.IsPublic == requiredMethod.IsPublic
+						   submittedMethod.Name == requiredMethod.Name
+						&& submittedMethod.IsPublic == requiredMethod.IsPublic
 						&& submittedMethod.IsStatic == requiredMethod.IsStatic
 						&& submittedMethod.ReturnType == StripGenericsFromType(requiredMethod.ReturnType)
 						&& submittedMethod.ParameterTypes.SequenceEqual
@@ -232,9 +146,9 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 							)
 				);
 
-				if (submittedOverload == null)
+				if (matchingSubmittedMethod == null)
 				{
-					yield return new MethodOverloadDefinitionError
+					yield return new MethodDefinitionError
 					(
 						submittedClass.Name,
 						requiredMethod.Name,
