@@ -87,6 +87,27 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 		}
 
 		/// <summary>
+		/// Returns the given type without generic type parameters.
+		/// </summary>
+		protected string StripGenericsFromType(string type) 
+		{
+			if (type == null) 
+			{
+				return null;
+			}
+
+			int genericIndex = type.IndexOf("<");
+			if (genericIndex != -1) 
+			{
+				return type.Substring(0, genericIndex);
+			}
+			else 
+			{
+				return type;
+			}
+		}
+
+		/// <summary>
 		/// Grades the question submission.
 		/// </summary>
 		public override sealed async Task<ScoredQuestionResult> GradeSubmissionAsync(QuestionSubmission submission)

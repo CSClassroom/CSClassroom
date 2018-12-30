@@ -302,15 +302,35 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 			var testResult = codeQuestionResult.TestResults.Single();
 
+			Assert.Equal("expectedMethod(1, 2)", testResult.Description);
+		}
+
+		/// <summary>
+		/// Verifies that the correct score is returned when there are no errors.
+		/// </summary>
+		[Theory]
+		[InlineData(false)]
+		[InlineData(true)]
+		public async Task GradeSubmissionAsync_CorrectSubmission_CorrectScore(bool useGenerics)
+		{
+			var question = GetMethodQuestion(useGenerics);
+			var submission = new CodeQuestionSubmission() { Contents = "Submission" };
+			var methodJobResult = GetSuccessfulMethodJobResult(useGenerics);
+			var codeRunnerService = GetCodeRunnerService(methodJobResult);
+
+			var grader = new MethodQuestionGrader(question, codeRunnerService);
+			var result = await grader.GradeSubmissionAsync(submission);
+			var codeQuestionResult = (CodeQuestionResult)result.Result;
+			var testResult = codeQuestionResult.TestResults.Single();
+
 			Assert.Equal(1.0, result.Score);
 			Assert.Empty(codeQuestionResult.Errors);
-			Assert.Equal("expectedMethod(1, 2)", testResult.Description);
 		}
 
 		/// <summary>
 		/// Returns a new method question.
 		/// </summary>
-		public MethodQuestion GetMethodQuestion()
+		public MethodQuestion GetMethodQuestion(bool useGenerics = false)
 		{
 			return new MethodQuestion()
 			{
@@ -319,8 +339,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 				(
 					new ImportedClass() { ClassName = "package.classToImport" }
 				),
-				ParameterTypes = "int, int",
-				ReturnType = "int",
+				ParameterTypes = useGenerics 
+					? "ArrayList<Integer>, ArrayList<Integer>" 
+					: "int, int",
+				ReturnType = useGenerics ? "ArrayList<Integer>" : "int",
 				Tests = Collections.CreateList
 				(
 					new MethodQuestionTest()
@@ -338,7 +360,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 		/// <summary>
 		/// Returns a successful method job result.
 		/// </summary>
-		public MethodJobResult GetSuccessfulMethodJobResult()
+		public MethodJobResult GetSuccessfulMethodJobResult(bool useGenerics = false)
 		{
 			return new MethodJobResult()
 			{
@@ -349,8 +371,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 					Name = "expectedMethod",
 					IsPublic = true,
 					IsStatic = true,
-					ParameterTypes = Collections.CreateList("int", "int"),
-					ReturnType = "int"
+					ParameterTypes = useGenerics 
+						? Collections.CreateList("ArrayList", "ArrayList")
+						: Collections.CreateList("int", "int"),
+					ReturnType = useGenerics ? "ArrayList" : "int"
 				},
 				TestsCompilationResult = new CompilationResult() { Success = true },
 				TestResults = Collections.CreateList

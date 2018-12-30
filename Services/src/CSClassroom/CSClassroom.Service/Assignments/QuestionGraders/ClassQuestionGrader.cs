@@ -167,7 +167,7 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 				);
 			}
 
-			if (submittedMethod.ReturnType != requiredMethod.ReturnType)
+			if (submittedMethod.ReturnType != StripGenericsFromType(requiredMethod.ReturnType))
 			{
 				yield return new MethodReturnTypeError
 				(
@@ -177,7 +177,14 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 				);
 			}
 
-			if (!submittedMethod.ParameterTypes.SequenceEqual(requiredMethod.ParamTypeList))
+			var paramTypesMatch = submittedMethod
+				.ParameterTypes
+				.SequenceEqual
+				(
+					requiredMethod.ParamTypeList.Select(StripGenericsFromType)
+				);
+
+			if (!paramTypesMatch)
 			{
 				yield return new MethodParameterTypesError
 				(
@@ -218,8 +225,11 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 					submittedMethod => 
 						   submittedMethod.IsPublic == requiredMethod.IsPublic
 						&& submittedMethod.IsStatic == requiredMethod.IsStatic
-						&& submittedMethod.ReturnType == requiredMethod.ReturnType
-						&& submittedMethod.ParameterTypes.SequenceEqual(requiredMethod.ParamTypeList)
+						&& submittedMethod.ReturnType == StripGenericsFromType(requiredMethod.ReturnType)
+						&& submittedMethod.ParameterTypes.SequenceEqual
+							(
+								requiredMethod.ParamTypeList.Select(StripGenericsFromType)
+							)
 				);
 
 				if (submittedOverload == null)

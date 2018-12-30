@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace CSC.CSClassroom.Model.Assignments
 {
@@ -115,5 +116,14 @@ namespace CSC.CSClassroom.Model.Assignments
 		{
 			return questionVisitor.Visit(this, param1);
 		}
+
+		/// <summary>
+		/// A list of parameter types.
+		/// </summary>
+		public IList<string> ParamTypeList =>
+			ParameterTypes
+				?.Split(',')
+				?.Select(paramType => paramType.Trim())
+				?.ToList() ?? new List<string>();
 	}
 }

@@ -84,19 +84,18 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 				yield return new MethodStaticError(Question.MethodName, expectedStatic: true);
 			}
 
-			if (submittedMethod.ReturnType != Question.ReturnType)
+			if (StripGenericsFromType(Question.ReturnType) != submittedMethod.ReturnType)
 			{
 				yield return new MethodReturnTypeError(Question.MethodName, Question.ReturnType, submittedMethod.ReturnType); 
 			}
 
-			var expectedParamTypes = Question.ParameterTypes
-				.Split(',')
-				.Select(paramType => paramType.Trim())
-				.ToList();
+			var paramTypesEqual = Question.ParamTypeList
+				.Select(StripGenericsFromType)
+				.SequenceEqual(submittedMethod.ParameterTypes);
 
-			if (!expectedParamTypes.SequenceEqual(submittedMethod.ParameterTypes))
+			if (!paramTypesEqual)
 			{
-				yield return new MethodParameterTypesError(Question.MethodName, expectedParamTypes, submittedMethod.ParameterTypes);
+				yield return new MethodParameterTypesError(Question.MethodName, Question.ParamTypeList, submittedMethod.ParameterTypes);
 			}
 		}
 

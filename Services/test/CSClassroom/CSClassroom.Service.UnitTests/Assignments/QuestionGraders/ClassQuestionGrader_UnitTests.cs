@@ -457,17 +457,51 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			var codeQuestionResult = (CodeQuestionResult)result.Result;
 			var testResult = codeQuestionResult.TestResults.Single();
 
-			Assert.Equal(1.0, result.Score);
-			Assert.Empty(codeQuestionResult.Errors);
 			Assert.Equal("Description", testResult.Description);
 		}
 
 		/// <summary>
+		/// Verifies that a correct submission gets a correct score of 1.0.
+		/// </summary>
+		[Theory]
+		[InlineData(false, false)]
+		[InlineData(false, true)]
+		[InlineData(true, false)]
+		[InlineData(true, true)]
+		public async Task GradeSubmissionAsync_CorrectSubmission_CorrectScore(
+			bool constructor,
+			bool useGenerics)
+		{
+			var question = GetClassQuestion
+			(
+				constructor: constructor, 
+				useGenerics: useGenerics
+			);
+			var classJobResult = GetClassJobResult
+			(
+				success: true, 
+				constructor: constructor, 
+				useGenerics: useGenerics
+			);
+			var submission = new CodeQuestionSubmission() { Contents = "Submission" };
+			var codeRunnerService = GetCodeRunnerService(classJobResult);
+
+			var grader = new ClassQuestionGrader(question, codeRunnerService);
+			var result = await grader.GradeSubmissionAsync(submission);
+			var codeQuestionResult = (CodeQuestionResult)result.Result;
+
+			Assert.Equal(1.0, result.Score);
+			Assert.Empty(codeQuestionResult.Errors);
+		}
+		
+		/// <summary>
 		/// Returns a new class question.
 		/// </summary>
 		public ClassQuestion GetClassQuestion(
-			bool allowPublicFields = false, 
-			bool overloadedMethods = false)
+			bool allowPublicFields = false,
+			bool overloadedMethods = false,
+			bool useGenerics = false,
+			bool constructor = false)
 		{
 			return new ClassQuestion()
 			{
@@ -492,30 +526,52 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 						(
 							new RequiredMethod()
 							{
-								Name = "requiredOverloadedMethod",
+								Name = constructor 
+									? "ExpectedClass" 
+									: "requiredOverloadedMethod",
 								IsPublic = true,
 								IsStatic = false,
-								ParamTypes = "int",
-								ReturnType = "boolean"
+								ParamTypes = useGenerics 
+									? "ArrayList<Integer>" 
+									: "int",
+								ReturnType = constructor 
+									? null 
+									: useGenerics 
+										? "ArrayList<Boolean>" 
+										: "boolean"
 							},
 							new RequiredMethod()
 							{
-								Name = "requiredOverloadedMethod",
+								Name = constructor
+									? "ExpectedClass"
+									: "requiredOverloadedMethod",
 								IsPublic = true,
 								IsStatic = false,
 								ParamTypes = "double",
-								ReturnType = "String"
+								ReturnType = constructor
+									? null
+									: useGenerics
+										? "ArrayList<String>"
+										: "String"
 							}
 						)
 					: Collections.CreateList
 						(
 							new RequiredMethod()
 							{
-								Name = "requiredMethod",
+								Name = constructor
+									? "ExpectedClass"
+									: "requiredMethod",
 								IsPublic = true,
 								IsStatic = false,
-								ParamTypes = "int, int",
-								ReturnType = "String"
+								ParamTypes = useGenerics 
+									? "ArrayList<Integer>, ArrayList<Integer>" 
+									: "int, int",
+								ReturnType = constructor
+									? null
+									: useGenerics 
+										? "ArrayList<String>" 
+										: "String"
 							}
 						),
 
@@ -528,7 +584,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 						Description = "Description",
 						MethodBody = "Method Body",
 						ReturnType = "String",
-						ExpectedReturnValue = "expectedReturnValue",
+						ExpectedReturnValue = constructor 
+							? null 
+							: "expectedReturnValue",
 						ExpectedOutput = "expectedOutput"
 					}
 				)
@@ -538,7 +596,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 		/// <summary>
 		/// Returns a successful class job result.
 		/// </summary>
-		public ClassJobResult GetClassJobResult(bool success, bool overloadedMethods = false)
+		public ClassJobResult GetClassJobResult(
+			bool success,
+			bool overloadedMethods = false,
+			bool useGenerics = false,
+			bool constructor = false)
 		{
 			return new ClassJobResult()
 			{
@@ -555,30 +617,55 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 							(
 								new MethodDefinition()
 								{
-									Name = "requiredOverloadedMethod",
+									Name = constructor
+										? "ExpectedClass"
+										: "requiredOverloadedMethod",
 									IsPublic = true,
 									IsStatic = false,
-									ParameterTypes = Collections.CreateList("int"),
-									ReturnType = "boolean"
+									ParameterTypes = Collections.CreateList
+						            (
+							        	useGenerics ? "ArrayList" : "int"
+							        ),
+									ReturnType = constructor 
+										? null 
+										: useGenerics 
+											? "ArrayList" 
+											: "boolean"
 								},
 								new MethodDefinition()
 								{
-									Name = "requiredOverloadedMethod",
+									Name = constructor
+										? "ExpectedClass"
+										: "requiredOverloadedMethod",
 									IsPublic = true,
 									IsStatic = false,
 									ParameterTypes = Collections.CreateList("double"),
-									ReturnType = "String"
+									ReturnType = constructor 
+										? null 
+										: useGenerics 
+											? "ArrayList" 
+											: "String"
 								}
 							)
 						: Collections.CreateList
 							(
 								new MethodDefinition()
 								{
-									Name = "requiredMethod",
+									Name = constructor 
+										? "ExpectedClass" 
+										: "requiredMethod",
 									IsPublic = true,
 									IsStatic = false,
-									ParameterTypes = Collections.CreateList("int", "int"),
-									ReturnType = "String"
+									ParameterTypes = Collections.CreateList
+									(
+							            useGenerics ? "ArrayList" : "int",
+										useGenerics ? "ArrayList" : "int"
+									),
+									ReturnType = constructor 
+										? null 
+										: useGenerics 
+											? "ArrayList" 
+											: "String"
 								}
 							)
 				},
@@ -605,7 +692,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 								Name = "test1",
 								Completed = true,
 								Output = "expectedOutput",
-								ReturnValue = "expectedReturnValue"
+								ReturnValue = constructor 
+									? null 
+									: "expectedReturnValue"
 							}
 						)
 					: null
