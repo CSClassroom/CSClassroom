@@ -47,12 +47,12 @@ namespace CSC.CSClassroom.WebApp.Logging
 			var classroomName = (string)actionContext?.RouteData?.Values["className"];
 
 			if (classroomName != null)
-				telemetry.Context.Properties["Classroom"] = classroomName;
+				telemetry.Context.GlobalProperties["Classroom"] = classroomName;
 
 			var sectionName = (string)actionContext?.RouteData?.Values["sectionName"];
 
 			if (sectionName != null)
-				telemetry.Context.Properties["Section"] = sectionName;
+				telemetry.Context.GlobalProperties["Section"] = sectionName;
 		}
 	}
 }

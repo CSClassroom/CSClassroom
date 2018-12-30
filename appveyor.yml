@@ -1,4 +1,5 @@
 version: '1.0.{build}'
+image: Visual Studio 2017
 configuration:
   - Release
 platform: Any CPU
@@ -48,10 +49,10 @@ test_script:
   - mvn test
   - cd ..\..
   - cd Services\test\BuildService\BuildService.Service.UnitTests
-  - dotnet xunit -configuration %CONFIGURATION%
+  - dotnet test --configuration %CONFIGURATION%
   - cd ..\..\..\..
   - cd Services\test\CSClassroom\CSClassroom.Service.UnitTests
-  - dotnet xunit -configuration %CONFIGURATION%
+  - dotnet test --configuration %CONFIGURATION%
   - cd ..\..\..\..
 cache:
   - Services\src\CSClassroom\CSClassroom.WebApp\node_modules # project npm modules

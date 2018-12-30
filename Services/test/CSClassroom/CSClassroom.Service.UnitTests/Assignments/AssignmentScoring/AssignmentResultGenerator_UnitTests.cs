@@ -545,7 +545,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 					new SubmissionStatus
 					(
 						Completion.Completed, 
-						scoresAndStatus.MaxBy(s => s.Item1).Item2
+						scoresAndStatus.MaxBy(s => s.Item1).First().Item2
 					)
 				);
 		}
@@ -594,7 +594,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.AssignmentScoring
 				new SubmissionStatus
 				(
 					Completion.Completed, 
-					submissions.MaxBy(s => s.Score).Status.Late
+					submissions.MaxBy(s => s.Score).First().Status.Late
 				),
 				submissionResults: null
 			);

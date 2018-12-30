@@ -1,4 +1,4 @@
-FROM csclassroom/buildservice.endpoint.base:2.0
+FROM csclassroom/buildservice.endpoint.base:2.2
 ARG source
 WORKDIR /app
 EXPOSE 80

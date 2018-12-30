@@ -17,8 +17,8 @@
     <ProjectReference Include="../CSClassroom.Service.Interfaces/CSClassroom.Service.Interfaces.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
-    <PackageReference Include="morelinq" Version="2.8.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.3.1" />
+    <PackageReference Include="morelinq" Version="3.1.0" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
 </Project>

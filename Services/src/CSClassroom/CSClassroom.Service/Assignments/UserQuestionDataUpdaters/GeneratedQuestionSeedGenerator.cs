@@ -43,6 +43,7 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 			{
 				newSeed = existingSeeds
 					.MinBy(kvp => kvp.Value)
+					.First()
 					.Key;
 			}
 			else

@@ -19,10 +19,10 @@
     "ApiKey": "REPLACE-WITH-SENDGRID-API-KEY"
   },
   "ConnectionStrings": {
-    "PostgresDefaultConnection": "User ID=postgres;Password=postgres;Host=dockerhost;Port=5432;Database=csclassroom;Pooling=true;"
+    "PostgresDefaultConnection": "User ID=postgres;Password=postgres;Host=host.docker.internal;Port=5432;Database=csclassroom;Pooling=true;"
   },
   "BuildService": {
-    "Host": "http://dockerhost:10001"
+    "Host": "http://host.docker.internal:10001"
   },
   "ApplicationInsights": {
     "InstrumentationKey": "REPLACE-WITH-APPLICATION-INSIGHTS-KEY"

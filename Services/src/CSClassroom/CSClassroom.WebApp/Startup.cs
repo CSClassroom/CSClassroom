@@ -91,7 +91,6 @@ namespace CSC.CSClassroom.WebApp
 			builder.RegisterImageProcessor();
 			services.AddCSClassroomDatabase(DatabaseConnectionString);
 			services.AddHangfireQueue(DatabaseConnectionString, _loggerFactory);
-			services.AddPaging();
 
 			builder.Populate(services);
 			_container = builder.Build();

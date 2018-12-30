@@ -69,7 +69,12 @@ namespace CSC.Common.Infrastructure.Serialization
 		private static JsonProperty CamelCaseEnumValues(JsonProperty property)
 		{
 			if (property.PropertyType.GetTypeInfo().IsEnum)
-				property.Converter = new StringEnumConverter(camelCaseText: true);
+			{
+				property.Converter = new StringEnumConverter
+				(
+					new CamelCaseNamingStrategy()
+				);
+			}
 
 			return property;
 		}

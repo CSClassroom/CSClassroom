@@ -35,7 +35,7 @@ gulp.task("copyFiles", function () {
     }));
 });
 
-gulp.task("default", ["createJsBundles", "createCssBundles", "copyFiles"]);
+gulp.task("default", gulp.parallel("createJsBundles", "createCssBundles", "copyFiles"));
 
 gulp.task("clean", function () {
     return del("./wwwroot");

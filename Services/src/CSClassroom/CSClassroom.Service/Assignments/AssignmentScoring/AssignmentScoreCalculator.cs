@@ -87,6 +87,7 @@ namespace CSC.CSClassroom.Service.Assignments.AssignmentScoring
 
 			return assignmentSubmissionResults
 				.MaxBy(asr => asr.Score)
+				.First()
 				.Status;
 		}
 	}

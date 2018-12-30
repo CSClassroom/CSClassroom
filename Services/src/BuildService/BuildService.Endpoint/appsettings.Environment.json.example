@@ -4,7 +4,7 @@
     "ProjectJobResultHost": "http://dockerhost:10000"
   },
   "ConnectionStrings": {
-    "PostgresDefaultConnection": "User ID=postgres;Password=postgres;Host=dockerhost;Port=5432;Database=csclassroom;Pooling=true;"
+    "PostgresDefaultConnection": "User ID=postgres;Password=postgres;Host=host.docker.internal;Port=5432;Database=csclassroom;Pooling=true;"
   },
   "ApplicationInsights": {
     "InstrumentationKey": "REPLACE-WITH-APPLICATION-INSIGHTS-KEY"

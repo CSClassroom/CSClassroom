@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <DebugType>portable</DebugType>
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <AssemblyName>CSClassroom.WebApp</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>CSClassroom.WebApp</PackageId>
-    <UserSecretsId>aspnet-CSClassroom-a2fee68c-e90e-4167-a7a7-9fc8d0e5f5db</UserSecretsId>
     <MvcRazorCompileOnPublish>true</MvcRazorCompileOnPublish>
     <DockerComposeProjectPath>..\..\..\vsdocker\docker-compose.dcproj</DockerComposeProjectPath>
     <RootNamespace>CSC.CSClassroom.WebApp</RootNamespace>
@@ -30,33 +29,26 @@
     <ProjectReference Include="..\..\BuildService\BuildService.Service.Interfaces\BuildService.Service.Interfaces.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AsyncFriendlyStackTrace" Version="1.5.0" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.6.17" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
-    <PackageReference Include="Microsoft.DotNet.Watcher.Tools" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
-    <PackageReference Include="morelinq" Version="2.8.0" />
-    <PackageReference Include="Sendgrid" Version="9.9.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="2.1.0" />
+    <PackageReference Include="AsyncFriendlyStackTrace" Version="1.6.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.3.1" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.6.21" />
+    <PackageReference Include="Microsoft.AspNetCore.All" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
+    <PackageReference Include="morelinq" Version="3.1.0" />
+    <PackageReference Include="Sendgrid" Version="9.10.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.2" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="3.0.1" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1" />
-    <PackageReference Include="NodaTime" Version="2.2.3" />
-    <PackageReference Include="ReflectionIT.Mvc.Paging" Version="2.3.0" />
-    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="2.5.0" />
+    <PackageReference Include="NodaTime" Version="2.4.3" />
+    <PackageReference Include="ReflectionIT.Mvc.Paging" Version="3.3.0" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="2.6.0" />
   </ItemGroup>
   <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
     <Exec Command="npm install" />
     <Exec Command="npm run gulp-$(Configuration)" />
   </Target>
-  <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.0" />
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
-    <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.0" />
-  </ItemGroup>
   <ItemGroup>
     <None Update="entrypoint-vs.sh">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

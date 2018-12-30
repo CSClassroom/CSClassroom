@@ -4,7 +4,7 @@
   "private": true,
   "devDependencies": {
     "del": "^2.2.1",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-bro": "^0.3.1",
     "gulp-changed": "^1.3.2",
     "gulp-concat": "^2.6.0",
@@ -19,32 +19,30 @@
     "vinyl-source-stream": "^1.1.0",
     "yargs": "^6.5.0"
   },
-
   "dependencies": {
     "ace-builds": "1.2.5",
     "bootstrap": "3.3.6",
     "bootstrap-toggle": "^2.2.2",
-    "cheerio": "^0.20.0",
+    "cheerio": "^0.22.0",
     "cookie": "^0.3.1",
+    "d3": "3.5.17",
     "datatables.net": "1.10.11",
     "datatables.net-jqui": "1.10.11",
-    "d3": "3.5.17",
     "fs": "^0.0.2",
     "highlight.js": "^9.6.0",
-    "jquery": "2.2.0",
+    "jquery": "^3.3.1",
+    "jquery-form": "3.50.0",
+    "jquery-multifile": "^2.2.2",
     "jquery-ui-dist": "1.12.1",
     "jquery-ui-themes": "1.12.0",
     "jquery-validation": "1.14.0",
     "jquery-validation-unobtrusive": "3.2.6",
-    "jquery-form": "3.50.0",
-    "jquery-multifile": "^2.2.2", 
     "marked": "^0.3.6",
     "nvd3": "1.8.5",
     "pagedown": "^1.1.0",
-    "tinymce": "4.6.6", 
-    "sanitize-html": "^1.13.0"
+    "sanitize-html": "^1.13.0",
+    "tinymce": "4.6.6"
   },
-
   "scripts": {
     "gulp-clean": "gulp clean",
     "gulp-Debug": "gulp",

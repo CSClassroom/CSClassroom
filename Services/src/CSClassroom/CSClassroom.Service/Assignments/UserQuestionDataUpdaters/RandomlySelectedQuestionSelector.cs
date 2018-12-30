@@ -56,6 +56,7 @@ namespace CSC.CSClassroom.Service.Assignments.UserQuestionDataUpdaters
 				return seenQuestionIds
 					.Where(kvp => validQuestionIds.Contains(kvp.Key))
 					.MinBy(kvp => kvp.Value)
+					.First()
 					.Key;
 			}
 		}
