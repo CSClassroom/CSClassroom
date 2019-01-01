@@ -93,33 +93,13 @@ namespace CSC.CSClassroom.Model.Projects.ServiceResults
 			CommitDaysLate = currentSubmission.GetDaysLate(section, currentSubmission.Commit.PushDate);
 			SubmissionDaysLate = currentSubmission.GetDaysLate(section, currentSubmission.DateSubmitted);
 			PullRequestNumber = currentSubmission.PullRequestNumber;
+			RequiredTestsPassed = currentSubmission.GetRequiredTestsPassed();
 			Feedback = currentSubmission.Feedback;
 			FeedbackSent = currentSubmission.FeedbackSent;
 			Build = currentSubmission.Commit.Build;
 			PastSubmissions = pastSubmissions
 				.Select(ps => new PastSubmissionResult(ps, section))
 				.ToList();
-
-			RequiredTestsPassed = 
-				currentSubmission.Commit.Build.Status == BuildStatus.Completed &&
-				currentSubmission.Commit.Build.TestResults
-					.Select
-					(
-						tr => new
-						{
-							Required = currentSubmission.Checkpoint
-								.TestClasses
-								.FirstOrDefault
-								(
-									tc => tc.TestClass.ClassName == tr.ClassName
-								)?.Required ?? false,
-							Passed = tr.Succeeded
-						}
-					)
-					.All
-					(
-						tr => !tr.Required || tr.Passed
-					);
 		}
 	}
 }

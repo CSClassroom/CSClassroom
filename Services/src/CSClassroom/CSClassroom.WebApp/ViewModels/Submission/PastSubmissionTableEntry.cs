@@ -33,6 +33,12 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		public string Submitted { get; }
 
 		/// <summary>
+		/// Whether or not the submission passes all required tests.
+		/// </summary>
+		[TableColumn("Tests")]
+		public string RequiredTestsPassed { get; }
+
+		/// <summary>
 		/// The date of the submission.
 		/// </summary>
 		[TableColumn("Pull Request")]
@@ -77,6 +83,22 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 				null /*buildUrl*/,
 				timeZoneProvider
 			);
+
+			RequiredTestsPassed = result.RequiredTestsPassed
+				? GetColoredText
+					(
+						"green",
+						"Passed",
+						bold: false,
+						preventWrapping: true
+					)
+				: GetColoredText
+					(
+						"red", 
+						"Failed", 
+						bold: true,
+						preventWrapping: true
+					);
 
 			PullRequest = GetLink
 			(

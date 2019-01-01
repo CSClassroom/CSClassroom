@@ -275,6 +275,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			Assert.Equal(SubmissionDates[0], results[0].PastSubmissions[0].SubmitDate);
 			Assert.Equal(0, results[0].PastSubmissions[0].CommitDaysLate);
 			Assert.Equal(4, results[0].PastSubmissions[0].SubmitDaysLate);
+			Assert.True(results[0].PastSubmissions[0].RequiredTestsPassed);
 			Assert.Equal("Feedback1", results[0].PastSubmissions[0].Feedback);
 			Assert.NotNull(results[0].PastSubmissions[0].Build.TestResults);
 
@@ -294,6 +295,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			Assert.Equal(SubmissionDates[0], results[1].PastSubmissions[0].SubmitDate);
 			Assert.Equal(0, results[1].PastSubmissions[0].CommitDaysLate);
 			Assert.Equal(4, results[1].PastSubmissions[0].SubmitDaysLate);
+			Assert.True(results[1].PastSubmissions[0].RequiredTestsPassed);
 			Assert.Equal("Feedback1", results[1].PastSubmissions[0].Feedback);
 			Assert.NotNull(results[1].PastSubmissions[0].Build.TestResults);
 		}
@@ -337,6 +339,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			Assert.Equal(SubmissionDates[2], results[0].PastSubmissions[0].SubmitDate);
 			Assert.Equal(2, results[0].PastSubmissions[0].CommitDaysLate);
 			Assert.Equal(6, results[0].PastSubmissions[0].SubmitDaysLate);
+			Assert.True(results[0].PastSubmissions[0].RequiredTestsPassed);
 			Assert.Equal("Feedback3", results[0].PastSubmissions[0].Feedback);
 			Assert.NotNull(results[0].PastSubmissions[0].Build.TestResults);
 
@@ -345,6 +348,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			Assert.Equal(SubmissionDates[0], results[0].PastSubmissions[1].SubmitDate);
 			Assert.Equal(0, results[0].PastSubmissions[1].CommitDaysLate);
 			Assert.Equal(4, results[0].PastSubmissions[1].SubmitDaysLate);
+			Assert.True(results[0].PastSubmissions[1].RequiredTestsPassed);
 			Assert.Equal("Feedback1", results[0].PastSubmissions[1].Feedback);
 			Assert.NotNull(results[0].PastSubmissions[1].Build.TestResults);
 		}

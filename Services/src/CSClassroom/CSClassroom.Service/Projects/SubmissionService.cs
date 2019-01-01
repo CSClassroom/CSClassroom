@@ -619,6 +619,7 @@ namespace CSC.CSClassroom.Service.Projects
 				.Include(submission => submission.Commit.Build.TestResults)
 				.Include(submission => submission.Commit.User.ClassroomMemberships)
 				.Include(submission => submission.Checkpoint.SectionDates)
+				.Include(submission => submission.Checkpoint.TestClasses)
 				.ToListAsync();
 
 			return submissions

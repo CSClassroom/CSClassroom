@@ -34,6 +34,11 @@ namespace CSC.CSClassroom.Model.Projects.ServiceResults
 		public int SubmitDaysLate { get; }
 
 		/// <summary>
+		/// Whether or not the submission passes all required tests.
+		/// </summary>
+		public bool RequiredTestsPassed { get; }
+
+		/// <summary>
 		/// The pull request number.
 		/// </summary>
 		public int? PullRequestNumber { get; }
@@ -58,6 +63,7 @@ namespace CSC.CSClassroom.Model.Projects.ServiceResults
 			CommitDaysLate = submission.GetDaysLate(section, submission.Commit.PushDate);
 			SubmitDate = submission.DateSubmitted;
 			SubmitDaysLate = submission.GetDaysLate(section, submission.DateSubmitted);
+			RequiredTestsPassed = submission.GetRequiredTestsPassed();
 			PullRequestNumber = submission.PullRequestNumber;
 			Feedback = submission.Feedback;
 			Build = submission.Commit.Build;

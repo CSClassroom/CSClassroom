@@ -83,5 +83,31 @@ namespace CSC.CSClassroom.Model.Projects
 				)
 			);
 		}
+
+		/// <summary>
+		/// Returns whether or not the submission passes all required tests.
+		/// </summary>
+		public bool GetRequiredTestsPassed()
+		{
+			return Commit.Build.Status == BuildStatus.Completed &&
+				Commit.Build.TestResults
+					.Select
+					(
+						tr => new
+						{
+							Required = Checkpoint
+								.TestClasses
+								.FirstOrDefault
+								(
+									tc => tc.TestClass.ClassName == tr.ClassName
+								)?.Required ?? false,
+							Passed = tr.Succeeded
+						}
+					)
+					.All
+					(
+						tr => !tr.Required || tr.Passed
+					);
+		}
 	}
 }
