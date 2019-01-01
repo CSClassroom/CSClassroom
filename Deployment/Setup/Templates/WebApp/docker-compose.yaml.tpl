@@ -3,6 +3,7 @@ services:
   webapp:
     image: csclassroom/csclassroom.webapp
     restart: always
+    mem_limit: {{ webapp_memory_limit }}
     hostname: {{ inventory_hostname }}
     volumes:
       - ~/webapp/appsettings.Environment.json:/app/appsettings.Environment.json

@@ -3,6 +3,7 @@ services:
   buildservice:
     image: csclassroom/buildservice.endpoint
     restart: always
+    mem_limit: {{ buildservice_memory_limit }}
     hostname: {{ inventory_hostname }}
     ports:
       - "{{ hostvars[inventory_hostname].private_ipv4 }}:80:80"
