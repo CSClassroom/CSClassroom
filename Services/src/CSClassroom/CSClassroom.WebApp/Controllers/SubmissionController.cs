@@ -305,7 +305,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 					(
 						"BuildResult",
 						"Build",
-						new {buildId}
+						new { buildId }
 					),
 					(commit, pullRequestNumber) => Url.GitHub().PullRequest
 					(
