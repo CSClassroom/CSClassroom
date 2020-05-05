@@ -8,32 +8,33 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 {
     public class DownloadSubmissionViewModel
     {
-		[Display
-		(
-			Name = "Project",
-			Description = "TODO: Project name"
-		)]
-		public string ProjectName { get; set; }
+		/// <summary>
+		/// The category of submission components to download
+		/// </summary>
+		public enum DownloadFormat
+		{
+			[Display(Name = "Flat file list")]
+			Flat,
+
+			[Display(Name = "Eclipse projects")]
+			Eclipse,
+
+			[Display(Name = "All")]
+			All,
+		}
 
 		[Display
 		(
-			Name = "Format",
-			Description = "Select a download format."
+			Name = "Components to download",
+			Description = "Select which components of the student submissions to include in the download."
 		)]
-		public string Format { get; set; }
+		public DownloadFormat Format { get; set; }
 
 		[Display
 		(
 			Name = "Sections",
 			Description = "Select the sections to download."
 		)]
-		public string MultipleSections { get; set; }
-
-		[Display
-		(
-			Name = "Section",
-			Description = "TODO: section name"
-		)]
-		public string SingleSection { get; set; }
+		public List<string> SectionNames { get; set; }
 	}
 }

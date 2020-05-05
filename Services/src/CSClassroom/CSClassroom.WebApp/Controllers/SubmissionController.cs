@@ -232,14 +232,32 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		}
 
 		/// <summary>
-		/// Downloads all submissions for the given section.
+		/// Asks the user to select the submission components to download.
 		/// </summary>
 		[Route("Submissions/{sectionName}/Download")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> Download(string sectionName)
 		{
+			DownloadSubmissionViewModel viewModel = new DownloadSubmissionViewModel()
+			{
+				Format = DownloadSubmissionViewModel.DownloadFormat.All,
+				SectionNames = new string[] { "hard-coded section 1", "hard-coded section 2" }.ToList()
+			};
+
+			return View("Download", viewModel);
+		}
+
+		/// <summary>
+		/// Downloads the submissions to the client.
+		/// </summary>
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		[Route("Submissions/{sectionName}/Download")]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
+		public async Task<IActionResult> Download(DownloadSubmissionViewModel downloadSubmissionViewModel)
+		{
 			var section = Classroom.Sections
-				.SingleOrDefault(s => s.Name == sectionName);
+				.SingleOrDefault(s => s.Name == "" /*sectionName*/);
 
 			if (section == null)
 			{
@@ -251,7 +269,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				ClassroomName,
 				ProjectName,
 				CheckpointName,
-				sectionName
+				"" //sectionName
 			);
 
 			var timestamp = TimeZoneProvider.ToUserLocalTime(DateTime.UtcNow)
@@ -261,6 +279,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			return File(archiveContents, "application/zip", filename);
 		}
+
 
 		/// <summary>
 		/// Submits a checkpoint.
