@@ -238,11 +238,36 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> Download(string sectionName)
 		{
+			ViewBag.DownloadFormats = new List<SelectListItem>
+			(
+				Enum.GetValues(typeof(DownloadSubmissionViewModel.DownloadFormat))
+				.Cast<DownloadSubmissionViewModel.DownloadFormat>()
+				.Select
+				(
+					format => new SelectListItem()
+					{
+						Text = format.ToString(),
+						Value = format.ToString(),
+						Selected = (format == DownloadSubmissionViewModel.DownloadFormat.All)
+					}
+				)
+			);
+
 			DownloadSubmissionViewModel viewModel = new DownloadSubmissionViewModel()
 			{
 				Format = DownloadSubmissionViewModel.DownloadFormat.All,
-				SectionNames = new string[] { "hard-coded section 1", "hard-coded section 2" }.ToList()
-			};
+				SectionNames = this.Classroom.Sections.Select
+				(
+					section => new SelectListItem()
+					{
+						Text = section.DisplayName,
+						Value = section.Name,
+
+						// TODO: Only select current section.  Can't figure out how to get it though
+						Selected = true
+					}
+				).ToList()
+            };
 
 			return View("Download", viewModel);
 		}

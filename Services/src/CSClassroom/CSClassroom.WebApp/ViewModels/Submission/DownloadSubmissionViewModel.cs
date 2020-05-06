@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 {
@@ -35,6 +36,6 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 			Name = "Sections",
 			Description = "Select the sections to download."
 		)]
-		public List<string> SectionNames { get; set; }
+		public List<SelectListItem> SectionNames { get; set; }
 	}
 }
