@@ -57,7 +57,9 @@ namespace CSC.CSClassroom.Service.Projects
 			string classroomName,
 			string projectName,
 			string checkpointName,
-			string sectionName);
+			IList<string> sectionName,
+			bool includeEclipseProjects,
+			bool includeFlatFiles);
 
 		/// <summary>
 		/// Returns submissions for grading.

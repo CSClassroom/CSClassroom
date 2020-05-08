@@ -230,7 +230,7 @@ namespace CSC.CSClassroom.Service.Projects
 		}
 
 		/// <summary>
-		/// Downloads all submissions for a given checkpoint in a section,
+		/// Downloads all submissions for a given checkpoint from the sections,
 		/// in the form of a zip archive. The archive will also include
 		/// the latest state of repositories for which there is no submission. 
 		/// </summary>
@@ -238,9 +238,12 @@ namespace CSC.CSClassroom.Service.Projects
 			string classroomName,
 			string projectName,
 			string checkpointName,
-			string sectionName)
-		{
-			var section = await LoadSectionAsync(classroomName, sectionName);
+            IList<string> sectionNames,
+            bool includeEclipseProjects,
+	        bool includeFlatFiles)
+
+        {
+            var sections = await LoadSectionsAsync(classroomName, sectionNames);
 			var checkpoint = await LoadCheckpointAsync
 			(
 				classroomName,
@@ -253,15 +256,18 @@ namespace CSC.CSClassroom.Service.Projects
 				(
 					cm => cm.SectionMemberships.Any
 					(
-						sm => sm.SectionId == section.Id
-						      && sm.Role == SectionRole.Student
+						sm => sections.Any
+						(
+							sec => sec.Id == sm.SectionId
+						)						
+						&& sm.Role == SectionRole.Student
 					)
 				)
 				.Include(cm => cm.User)
 				.ToListAsync();
 
 			var allCheckpointSubmissions =
-				await GetCheckpointSubmissionsQuery(checkpoint, section)
+				await GetCheckpointSubmissionsQuery(checkpoint, sections)
 					.ToListAsync();
 
 			var usersWithSubmissions = new HashSet<User>
@@ -297,7 +303,9 @@ namespace CSC.CSClassroom.Service.Projects
 			(
 				checkpoint.Project,
 				templateContents,
-				submissionContents
+				submissionContents,
+				includeEclipseProjects,
+				includeFlatFiles
 			);
 		}
 
@@ -687,7 +695,8 @@ namespace CSC.CSClassroom.Service.Projects
 		}
 
 		/// <summary>
-		/// Returns a query for all submissions in a given checkpoint.
+		/// Returns a query for all submissions in a given checkpoint
+		/// for a single section.
 		/// </summary>
 		private IQueryable<Submission> GetCheckpointSubmissionsQuery(
 			Checkpoint checkpoint,
@@ -704,6 +713,35 @@ namespace CSC.CSClassroom.Service.Projects
 							(
 								sm => sm.SectionId == section.Id
 								      && sm.Role == SectionRole.Student
+							)
+						)
+				)
+				.Include(submission => submission.Commit.User.ClassroomMemberships)
+				.Include(submission => submission.Commit.Build);
+		}
+
+		/// <summary>
+		/// Returns a query for all submissions in a given checkpoint
+		/// for potentially multiple sections.
+		/// </summary>
+		private IQueryable<Submission> GetCheckpointSubmissionsQuery(
+			Checkpoint checkpoint,
+			List<Section> sections)
+		{
+			return _dbContext.Submissions
+				.Where
+				(
+					submission =>
+						submission.CheckpointId == checkpoint.Id &&
+						submission.Commit.User.ClassroomMemberships.Any
+						(
+							cm => cm.SectionMemberships.Any
+							(
+								sm => sections.Any
+								(
+									sec => sm.SectionId == sec.Id
+								)
+								&& sm.Role == SectionRole.Student
 							)
 						)
 				)
@@ -744,7 +782,7 @@ namespace CSC.CSClassroom.Service.Projects
 		}
 
 		/// <summary>
-		/// Loads a section from the database.
+		/// Loads a single section from the database.
 		/// </summary>
 		private async Task<Section> LoadSectionAsync(
 			string classroomName,
@@ -754,6 +792,19 @@ namespace CSC.CSClassroom.Service.Projects
 				.Where(s => s.Classroom.Name == classroomName)
 				.Include(s => s.Classroom)
 				.SingleAsync(s => s.Name == sectionName);
+		}
+
+		/// <summary>
+		/// Loads multiple sections from the database.
+		/// </summary>
+		private async Task<List<Section>> LoadSectionsAsync(
+			string classroomName,
+			IList<string> sectionNames)
+		{
+			return await _dbContext.Sections
+				.Where(s => (s.Classroom.Name == classroomName && sectionNames.Contains(s.Name)))
+				.Include(s => s.Classroom)
+				.ToListAsync();
 		}
 	}
 }

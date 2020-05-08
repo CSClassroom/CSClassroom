@@ -289,10 +289,13 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> Download(DownloadSubmissionViewModel downloadSubmissionViewModel)
 		{
-			var section = Classroom.Sections
-				.SingleOrDefault(s => s.Name == "" /*sectionName*/);
-
-			if (section == null)
+			// TODO: There was null checking for section.  What if no checkboxes are checked?
+			var selectedSections = downloadSubmissionViewModel.SectionNames.Where
+            (
+                sn => sn.Selected
+            ).ToList();
+            
+			if (selectedSections.Count == 0)
 			{
 				return NotFound();
 			}
@@ -302,7 +305,16 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				ClassroomName,
 				ProjectName,
 				CheckpointName,
-				"" //sectionName
+				selectedSections.Select
+				(
+					sn => sn.Value
+				).ToList(),
+				new DownloadSubmissionViewModel.DownloadFormat[] 
+					{ DownloadSubmissionViewModel.DownloadFormat.Eclipse, DownloadSubmissionViewModel.DownloadFormat.All }
+					.Contains(downloadSubmissionViewModel.Format),         // bool includeEclipseProjects
+				new DownloadSubmissionViewModel.DownloadFormat[]
+					{ DownloadSubmissionViewModel.DownloadFormat.Flat, DownloadSubmissionViewModel.DownloadFormat.All }
+					.Contains(downloadSubmissionViewModel.Format)          // bool includeFlatFiles
 			);
 
 			var timestamp = TimeZoneProvider.ToUserLocalTime(DateTime.UtcNow)

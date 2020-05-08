@@ -18,6 +18,8 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 		Task<Stream> BuildSubmissionArchiveAsync(
 			Project project,
 			IArchive templateContents,
-			IList<StudentSubmission> submissions);
+			IList<StudentSubmission> submissions,
+			bool includeEclipseProjects,
+			bool includeFlatFiles);
 	}
 }
