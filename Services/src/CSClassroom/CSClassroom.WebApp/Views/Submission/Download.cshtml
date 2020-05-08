@@ -16,7 +16,7 @@
             <label asp-for="Format" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <p asp-description-for="Format" class="form-control-static"></p>
-                <select asp-for="Format" asp-items="Html.GetEnumSelectList<DownloadSubmissionViewModel.DownloadFormat>()"></select>
+                <select asp-for="Format" onchange="onFormatChanged()" asp-items="Html.GetEnumSelectList<DownloadSubmissionViewModel.DownloadFormat>()"></select>
                 <span asp-validation-for="Format" class="text-danger"></span>
             </div>
         </div>
@@ -45,30 +45,57 @@
             </div>
         </div>
 
-        @{ /*
-                    <div class="form-group">
-                        <label asp-for="SectionName" class="col-md-2 control-label"></label>
-                        <div class="col-md-10">
-                            <p asp-description-for="SectionName" class="form-control-static"></p>
-                            <select asp-for="SectionName" class="form-control" asp-items="ViewBag.SectionNames"></select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="AssignmentGroupName" class="col-md-2 control-label"></label>
-                        <div class="col-md-10">
-                            <p asp-description-for="AssignmentGroupName" class="form-control-static"></p>
-                            <select asp-for="AssignmentGroupName" class="form-control" asp-items="ViewBag.AssignmentGroups"></select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="GradebookName" class="col-md-2 control-label"></label>
-                        <div class="col-md-10">
-                            <p asp-description-for="GradebookName" class="form-control-static"></p>
-                            <select asp-for="GradebookName" class="form-control" asp-items="ViewBag.GradebookNames"></select>
-                        </div>
-                    </div>
+        <script type="text/javascript">
 
-                            */
+            function onFormatChanged()
+            {
+                var formatListId = @Html.IdFor(model => model.Format);
+                var formatList = $('#' + formatListId);
+
+                // TODO: don't hard-code string here
+                var formatAllSelected = (formatList.value == "All");
+
+                @for (int i = 0; i < Model.SectionNames.Count; i++)
+                {
+                    @:var curCheckboxId = @Html.IdFor(model => model.SectionNames[i].Selected);
+                    @:var curCheckbox = $('#' + curCheckboxId);
+                    if (i == Model.CurrentSection.Index)
+                    {
+
+                        @:curCheckbox.checked = true;
+                    }
+                    else
+                    {
+                        @:curCheckbox.checked = false;
+                    }
+                }
+            }
+        </script>
+
+        @{ /*
+                      <div class="form-group">
+                          <label asp-for="SectionName" class="col-md-2 control-label"></label>
+                          <div class="col-md-10">
+                              <p asp-description-for="SectionName" class="form-control-static"></p>
+                              <select asp-for="SectionName" class="form-control" asp-items="ViewBag.SectionNames"></select>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                          <label asp-for="AssignmentGroupName" class="col-md-2 control-label"></label>
+                          <div class="col-md-10">
+                              <p asp-description-for="AssignmentGroupName" class="form-control-static"></p>
+                              <select asp-for="AssignmentGroupName" class="form-control" asp-items="ViewBag.AssignmentGroups"></select>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                          <label asp-for="GradebookName" class="col-md-2 control-label"></label>
+                          <div class="col-md-10">
+                              <p asp-description-for="GradebookName" class="form-control-static"></p>
+                              <select asp-for="GradebookName" class="form-control" asp-items="ViewBag.GradebookNames"></select>
+                          </div>
+                      </div>
+
+                              */
         }
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">

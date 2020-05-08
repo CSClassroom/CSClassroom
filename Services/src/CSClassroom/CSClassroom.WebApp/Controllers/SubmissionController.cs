@@ -13,6 +13,7 @@ using CSC.CSClassroom.WebApp.ViewModels.Build;
 using CSC.CSClassroom.WebApp.ViewModels.Submission;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using CSC.CSClassroom.Model.Classrooms;
 
 namespace CSC.CSClassroom.WebApp.Controllers
 {
@@ -253,20 +254,27 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				)
 			);
 
-			DownloadSubmissionViewModel viewModel = new DownloadSubmissionViewModel()
-			{
-				Format = DownloadSubmissionViewModel.DownloadFormat.All,
-				SectionNames = this.Classroom.Sections.Select
+			List<SelectListItem> sectionNames = Classroom.Sections.Select
 				(
 					section => new SelectListItem()
 					{
 						Text = section.DisplayName,
 						Value = section.Name,
-
-						// TODO: Only select current section.  Can't figure out how to get it though
-						Selected = true
+						Selected = (section.Name == sectionName)
 					}
-				).ToList()
+				).ToList();
+
+			//Section currentSection = Classroom.Sections.Where(section => (section.Name == sectionName)).First();
+
+			DownloadSubmissionViewModel viewModel = new DownloadSubmissionViewModel()
+			{
+				Format = DownloadSubmissionViewModel.DownloadFormat.All,
+				SectionNames = sectionNames,
+				CurrentSection = new DownloadSubmissionViewModel.SectionInfo()
+				{
+					Name = sectionName,
+					Index = sectionNames.FindIndex(item => item.Value == sectionName)
+				}
             };
 
 			return View("Download", viewModel);

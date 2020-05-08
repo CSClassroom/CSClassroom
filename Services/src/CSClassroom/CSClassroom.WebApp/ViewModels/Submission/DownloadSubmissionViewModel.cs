@@ -37,5 +37,12 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 			Description = "Select the sections to download."
 		)]
 		public List<SelectListItem> SectionNames { get; set; }
+
+		public class SectionInfo
+		{
+			public string Name { get; set; }
+			public int Index { get; set; }
+		}
+        public SectionInfo CurrentSection { get; set; }
 	}
 }
