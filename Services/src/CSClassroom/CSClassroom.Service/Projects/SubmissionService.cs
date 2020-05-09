@@ -251,6 +251,7 @@ namespace CSC.CSClassroom.Service.Projects
 				checkpointName
 			);
 
+			// TODO: Study the query this generates.  Will it bring back unnecessary data?
 			var students = await _dbContext.ClassroomMemberships
 				.Where
 				(
@@ -264,6 +265,8 @@ namespace CSC.CSClassroom.Service.Projects
 					)
 				)
 				.Include(cm => cm.User)
+					.ThenInclude(user => user.ClassroomMemberships)
+						.ThenInclude(cm => cm.SectionMemberships)
 				.ToListAsync();
 
 			var allCheckpointSubmissions =

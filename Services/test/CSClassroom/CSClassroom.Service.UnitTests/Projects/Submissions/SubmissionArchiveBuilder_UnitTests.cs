@@ -48,7 +48,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 			(
 				project,
 				templateContents,
-				GetSubmissions(GetSubmission(student, submissionContents))
+				GetSubmissions(GetSubmission(student, submissionContents)),
+				true,       // includeEclipseProjects
+				true        // includeFlatFiles
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -95,7 +97,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 			(
 				project,
 				templateContents,
-				GetSubmissions(GetSubmission(student, submissionContents))
+				GetSubmissions(GetSubmission(student, submissionContents)),
+				true,       // includeEclipseProjects
+				true        // includeFlatFiles
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -136,7 +140,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 			(
 				project,
 				templateContents,
-				GetSubmissions(GetSubmission(student, submissionContents))
+				GetSubmissions(GetSubmission(student, submissionContents)),
+				true,       // includeEclipseProjects
+				true        // includeFlatFiles
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -183,7 +189,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 			(
 				project,
 				templateContents,
-				GetSubmissions(GetSubmission(student, submissionContents))
+				GetSubmissions(GetSubmission(student, submissionContents)),
+				true,       // includeEclipseProjects
+				true        // includeFlatFiles
 			);
 
 			var archiveContents = GetArchiveContents(archive);

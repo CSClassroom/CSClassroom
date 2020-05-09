@@ -63,7 +63,7 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 						templateContents,
 						result.Contents,
 						includeEclipseProjects,
-						true
+						includeFlatFiles
 					);
 
 					result.Contents.Dispose();

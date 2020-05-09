@@ -232,7 +232,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				"Class1",
 				"Project1",
 				"Checkpoint2",
-				"Period1"
+				new String[] { "Period1" }.ToList(),
+				true,		// includeEclipseProjects
+				true		// includeFlatFiles
 			);
 
 			Assert.Equal(result, expectedResult);
@@ -930,7 +932,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					(
 						It.Is<Project>(p => p.Name == "Project1"),
 						templateContents,
-						studentSubmissions
+						studentSubmissions,
+						true,       // includeEclipseProjects
+						true        // includeFlatFiles
 					)
 				).ReturnsAsync(expectedArchive);
 
