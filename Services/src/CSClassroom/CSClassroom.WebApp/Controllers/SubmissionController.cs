@@ -253,9 +253,9 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				)
 			);
 
-			List<SectionStudentsToDownload> sectionStudents = Classroom.Sections.Select
+			List<SectionsAndStudents> sectionStudents = Classroom.Sections.Select
 				(
-					section => new SectionStudentsToDownload()
+					section => new SectionsAndStudents()
 					{
 						SectionName = new SelectListItem()
 						{
@@ -274,7 +274,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			{
 				IndexForSectionStudentsView = -1,
 				Format = DownloadFormat.All,
-				SectionStudents = sectionStudents,
+				SectionsAndStudents = sectionStudents,
 				CurrentSection = new SectionInfo()
 				{
 					Name = sectionName,
@@ -294,7 +294,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public Task<IActionResult> Download(DownloadSubmissionViewModel downloadSubmissionViewModel)
 		{
-			int iSectionStudents = downloadSubmissionViewModel.SectionStudents.FindIndex
+			int iSectionStudents = downloadSubmissionViewModel.SectionsAndStudents.FindIndex
 			(
 				ss => ss.SubmitButton != null
 			);
@@ -320,7 +320,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		public async Task<IActionResult> DownloadSubmissionsAsync(DownloadSubmissionViewModel downloadSubmissionViewModel)
 		{
             // TODO: There was null checking for section.  What if no checkboxes are checked?
-            var selectedSections = downloadSubmissionViewModel.SectionStudents.Where
+            var selectedSections = downloadSubmissionViewModel.SectionsAndStudents.Where
             (
                 ss => ss.SectionName.Selected
 			).ToList();

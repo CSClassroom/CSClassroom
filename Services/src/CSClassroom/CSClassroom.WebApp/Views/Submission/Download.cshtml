@@ -10,16 +10,16 @@
 }
 else
 {
-    <h2>Select Students To Download From @Model.SectionStudents[Model.IndexForSectionStudentsView].SectionName.Text</h2>
+    <h2>Select Students To Download From @Model.SectionsAndStudents[Model.IndexForSectionStudentsView].SectionName.Text</h2>
 }
 
 
 <form asp-action="DownloadSubmissions">
-    <div class="form-horizontal">
+    <div id="mainDownloadSubmissionsForm" class="form-horizontal">
         <hr />
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-        <div class="@Model.HideMainForm">
+        <div class="form-group">
             <label asp-for="Format" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <p asp-description-for="Format" class="form-control-static"></p>
@@ -28,125 +28,85 @@ else
             </div>
         </div>
 
-        <div class="@Model.HideMainForm">
-            <label asp-for="SectionStudents" class="col-md-2 control-label"></label>
+        <div class="form-group">
+            <label asp-for="SectionsAndStudents" class="col-md-2 control-label"></label>
             <div class="col-md-10">
-                <p asp-description-for="SectionStudents" class="form-control-static"></p>
+                <p asp-description-for="SectionsAndStudents" class="form-control-static"></p>
                 <table class="table-condensed">
-                    @for (int i = 0; i < Model.SectionStudents.Count; i++)
+                    @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
                     {
                         <tr>
                             <td>
-                                <input type="checkbox" asp-for="@Model.SectionStudents[i].SectionName.Selected" onchange="onCheckboxChanged(this, @Html.IdFor(model => model.SectionStudents[i].SubmitButton) )" />
+                                <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onCheckboxChanged(this, @Html.IdFor(model => model.SectionsAndStudents[i].SubmitButton) )" />
                             </td>
                             <td>
-                                @Model.SectionStudents[i].SectionName.Text
-                                <input type="hidden" asp-for="@Model.SectionStudents[i].SectionName.Text" />
-                                <input type="hidden" asp-for="@Model.SectionStudents[i].SectionName.Value" />
+                                @Model.SectionsAndStudents[i].SectionName.Text
+                                <input type="hidden" asp-for="@Model.SectionsAndStudents[i].SectionName.Text" />
+                                <input type="hidden" asp-for="@Model.SectionsAndStudents[i].SectionName.Value" />
                             </td>
                             <td>
-                                <input asp-for="@Model.SectionStudents[i].SubmitButton" type="submit"
-                                       value="@Model.SectionStudents[i].StudentDisplayList" class="btn btn-link" />
+                                <input asp-for="@Model.SectionsAndStudents[i].SubmitButton" type="submit"
+                                       value="@Model.SectionsAndStudents[i].StudentDisplayList" class="btn btn-link" />
                             </td>
-
-                            @*
-                                               id="@Model.SectionStudents[i].ChangeStudentDisplayListButton"
-                                               name="@Model.SectionStudents[i].ChangeStudentDisplayListButton"
-
-                <a asp-controller="Submission"
-                   asp-action="SelectSectionStudents"
-                   asp-route-selectSectionName="@Model.SectionStudents[i].SectionName.Text">@Model.SectionStudents[i].SelectSectionStudentsURL</a>
-                            *@
                         </tr>
                     }
                 </table>
             </div>
         </div>
 
-        <div class="@Model.HideMainForm">
+        <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Download" class="btn btn-default" />
             </div>
         </div>
-
-        <script type="text/javascript">
-            window.onload = onLoad();
-
-            function onLoad()
-            {
-                @for (int i = 0; i < Model.SectionStudents.Count; i++)
-                {
-                    @:onCheckboxChanged(@Html.IdFor(model => model.SectionStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionStudents[i].SubmitButton));
-                }
-            }
-
-            function onCheckboxChanged(checkbox, selectStudentsButton)
-            {
-                //alert("onCheckboxChanged: " + selectStudentsButton.className);
-                selectStudentsButton.className = checkbox.checked ? "btn btn-link" : "hidden";
-
-                @* var selectStudentsButton = @Html.IdFor(model => model.SectionStudents[i].SubmitButton); *@
-            }
-        </script>
-
-
-        @*
-
-                onchange="onFormatChanged()"
-                <!--
-            <script type="text/javascript">
-
-                function onFormatChanged()
-                {
-                    var formatListId = @Html.IdFor(model => model.Format);
-                    var formatList = $('#' + formatListId);
-
-                    // TODO: don't hard-code string here
-                    var formatAllSelected = (formatList.value == "All");
-
-                    @for (int i = 0; i < Model.SectionNames.Count; i++)
-                    {
-                        @:var curCheckboxId = @Html.IdFor(model => model.SectionNames[i].Selected);
-                        @:var curCheckbox = $('#' + curCheckboxId);
-                        if (i == Model.CurrentSection.Index)
-                        {
-
-                            @:curCheckbox.checked = true;
-                        }
-                        else
-                        {
-                            @:curCheckbox.checked = false;
-                        }
-                    }
-                }
-            </script>
-                -->
-        *@
-
-        @{ /*
-                           <div class="form-group">
-                               <label asp-for="SectionName" class="col-md-2 control-label"></label>
-                               <div class="col-md-10">
-                                   <p asp-description-for="SectionName" class="form-control-static"></p>
-                                   <select asp-for="SectionName" class="form-control" asp-items="ViewBag.SectionNames"></select>
-                               </div>
-                           </div>
-                           <div class="form-group">
-                               <label asp-for="AssignmentGroupName" class="col-md-2 control-label"></label>
-                               <div class="col-md-10">
-                                   <p asp-description-for="AssignmentGroupName" class="form-control-static"></p>
-                                   <select asp-for="AssignmentGroupName" class="form-control" asp-items="ViewBag.AssignmentGroups"></select>
-                               </div>
-                           </div>
-                           <div class="form-group">
-                               <label asp-for="GradebookName" class="col-md-2 control-label"></label>
-                               <div class="col-md-10">
-                                   <p asp-description-for="GradebookName" class="form-control-static"></p>
-                                   <select asp-for="GradebookName" class="form-control" asp-items="ViewBag.GradebookNames"></select>
-                               </div>
-                           </div>
-
-                                   */
-        }
     </div>
+
+    <div id="studentSelectionForm" class="form-horizontal">
+        <hr />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Continue" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+
 </form>
+
+<script type="text/javascript">
+    $(document).ready(() => { onDocumentReady(); });
+
+    function onDocumentReady()
+    {
+        // TODO: Should I use a different div or span to contain these
+        // controls rather than the current div which also contains validation?
+
+        // Hide / unhide the primary download form controls and the
+        // student selection form controls
+        var mainDownloadSubmissionsForm = $("#mainDownloadSubmissionsForm");
+        var studentSelectionForm = $("#studentSelectionForm");
+        if (@Model.IndexForSectionStudentsView == -1)
+        {
+            mainDownloadSubmissionsForm.show();
+            studentSelectionForm.hide();
+        }
+        else
+        {
+            mainDownloadSubmissionsForm.hide();
+            studentSelectionForm.show();
+        }
+
+        // Hide / unhide the student selection links based on the
+        // section checkbox state
+        @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
+        {
+            @:onCheckboxChanged(@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionsAndStudents[i].SubmitButton));
+        }
+    }
+
+    function onCheckboxChanged(checkbox, selectStudentsButton)
+    {
+        selectStudentsButton.className = checkbox.checked ? "btn btn-link" : "hidden";
+    }
+</script>

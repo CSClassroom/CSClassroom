@@ -18,22 +18,6 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// </summary>
 		public int IndexForSectionStudentsView {get; set; }
 
-		public string HideMainForm
-		{
-			get
-			{
-				return IndexForSectionStudentsView == -1 ? "form-group" : "hidden";
-			}
-		}
-
-		public string HideSelectStudentsForm
-		{
-			get
-			{
-				return IndexForSectionStudentsView != -1 ? "form-group" : "hidden";
-			}
-		}
-
 		[Display
 		(
 			Name = "Components to download",
@@ -46,8 +30,12 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 			Name = "Sections",
 			Description = "Select the sections to download."
 		)]
-		public List<SectionStudentsToDownload> SectionStudents { get; set; }
+		public List<SectionsAndStudents> SectionsAndStudents { get; set; }
 
+		/// <summary>
+		///  The section originally active from the submissions view when the user
+		///  clicked download.  This informs the default options to be selected
+		/// </summary>
 		public SectionInfo CurrentSection { get; set; }
 	}
 
@@ -90,7 +78,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 	/// Info on each section to download, including the students within
 	/// that section to download.
 	/// </summary>
-	public class SectionStudentsToDownload
+	public class SectionsAndStudents
 	{
 		private const int c_maxStudentsToDisplayInSelectionLink = 3;
 
@@ -109,14 +97,9 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// </summary>
 		public List<StudentToDownload> SelectedStudents { get; set; }
 
-		public string ChangeStudentDisplayListButton
-		{
-			get
-			{
-				return "ChangeStudents" + SectionName.Value;
-			}
-		}
-
+		/// <summary>
+		/// Text to use in the link to edit the list of students to download for this section
+		/// </summary>
         public string StudentDisplayList
         {
             get
