@@ -8,6 +8,50 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 {
 	/// <summary>
+	/// The master view model for the download submission page, used for downloading
+	/// Eclipse projects and flat file lists from student project repos
+	/// </summary>
+	public class DownloadSubmissionViewModel
+	{
+		/// <summary>
+		/// TODO: Determines type of form to render
+		/// </summary>
+		public int IndexForSectionStudentsView {get; set; }
+
+		public string HideMainForm
+		{
+			get
+			{
+				return IndexForSectionStudentsView == -1 ? "form-group" : "hidden";
+			}
+		}
+
+		public string HideSelectStudentsForm
+		{
+			get
+			{
+				return IndexForSectionStudentsView != -1 ? "form-group" : "hidden";
+			}
+		}
+
+		[Display
+		(
+			Name = "Components to download",
+			Description = "Select which components of the student submissions to include in the download."
+		)]
+		public DownloadFormat Format { get; set; }
+
+		[Display
+		(
+			Name = "Sections",
+			Description = "Select the sections to download."
+		)]
+		public List<SectionStudentsToDownload> SectionStudents { get; set; }
+
+		public SectionInfo CurrentSection { get; set; }
+	}
+
+	/// <summary>
 	/// The category of submission components to download
 	/// </summary>
 	public enum DownloadFormat
@@ -48,6 +92,8 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 	/// </summary>
 	public class SectionStudentsToDownload
 	{
+		private const int c_maxStudentsToDisplayInSelectionLink = 3;
+
 		/// <summary>
 		///  Name of section selected for download
 		/// </summary>
@@ -62,28 +108,50 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		///  Students selected by user to download
 		/// </summary>
 		public List<StudentToDownload> SelectedStudents { get; set; }
-	}
 
-	/// <summary>
-	/// The master view model for the download submission page, used for downloading
-	/// Eclipse projects and flat file lists from student project repos
-	/// </summary>
-	public class DownloadSubmissionViewModel
-    {
-		[Display
-		(
-			Name = "Components to download",
-			Description = "Select which components of the student submissions to include in the download."
-		)]
-		public DownloadFormat Format { get; set; }
+		public string ChangeStudentDisplayListButton
+		{
+			get
+			{
+				return "ChangeStudents" + SectionName.Value;
+			}
+		}
 
-		[Display
-		(
-			Name = "Sections",
-			Description = "Select the sections to download."
-		)]
-		public List<SectionStudentsToDownload> SectionStudents { get; set; }
+        public string StudentDisplayList
+        {
+            get
+            {
+				if (AllStudents)
+				{
+					return "Students: All";
+				}
 
-        public SectionInfo CurrentSection { get; set; }
-	}
+				int numStudents = SelectedStudents == null ? 0 : SelectedStudents.Count;
+				if (numStudents == 0)
+				{
+					// TODO: This should be caught earlier and should cause the checkbox to be unchecked
+					// and this link to be disabled / hidden
+					return "Students: None";
+				}
+
+				// TODO: Does this do last name first?
+				string ret = "Students: " + SelectedStudents[0].StudentName;
+				for (int i=1; i < Math.Min(c_maxStudentsToDisplayInSelectionLink, numStudents); i++)
+				{
+					ret += ", " + SelectedStudents[i].StudentName;
+				}
+
+				int remaining = numStudents - c_maxStudentsToDisplayInSelectionLink;
+				if (remaining > 0)
+				{
+					ret += ", and " + remaining + " more";
+				}
+
+				return ret;
+			}
+        }
+
+		public string SubmitButton { get; set; }
+
+    }
 }

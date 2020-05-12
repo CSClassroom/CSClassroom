@@ -4,7 +4,14 @@
 
 @model CSC.CSClassroom.WebApp.ViewModels.Submission.DownloadSubmissionViewModel
 
-<h2>Download @Project.Name @Checkpoint.DisplayName Submissions</h2>
+@if (Model.IndexForSectionStudentsView == -1)
+{
+    <h2>Download @Project.Name @Checkpoint.DisplayName Submissions</h2>
+}
+else
+{
+    <h2>Select Students To Download From @Model.SectionStudents[Model.IndexForSectionStudentsView].SectionName.Text</h2>
+}
 
 
 <form asp-action="DownloadSubmissions">
@@ -12,7 +19,7 @@
         <hr />
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-        <div class="form-group">
+        <div class="@Model.HideMainForm">
             <label asp-for="Format" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <p asp-description-for="Format" class="form-control-static"></p>
@@ -21,7 +28,7 @@
             </div>
         </div>
 
-        <div class="form-group">
+        <div class="@Model.HideMainForm">
             <label asp-for="SectionStudents" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <p asp-description-for="SectionStudents" class="form-control-static"></p>
@@ -31,84 +38,92 @@
                         <li>
                             <div class="checkbox">
                                 <input type="checkbox" asp-for="@Model.SectionStudents[i].SectionName.Selected" />
-                                <label asp-for="@Model.SectionStudents[i].SectionName.Text</label>
-                                <input type=" hidden" asp-for="@Model.SectionStudents[i].SectionName.Text" />
+                                <label asp-for="@Model.SectionStudents[i].SectionName.Selected">@Model.SectionStudents[i].SectionName.Text</label>
+                                <input type="hidden" asp-for="@Model.SectionStudents[i].SectionName.Text" />
                                 <input type="hidden" asp-for="@Model.SectionStudents[i].SectionName.Value" />
+                                @Model.SectionStudents[i].StudentDisplayList
+                                <input asp-for="@Model.SectionStudents[i].SubmitButton" type="submit"
+                                       value="Change..." class="btn btn-default" />
+
+                                @*
+                                                           id="@Model.SectionStudents[i].ChangeStudentDisplayListButton"
+                                                           name="@Model.SectionStudents[i].ChangeStudentDisplayListButton"
+
+                            <a asp-controller="Submission"
+                               asp-action="SelectSectionStudents"
+                               asp-route-selectSectionName="@Model.SectionStudents[i].SectionName.Text">@Model.SectionStudents[i].SelectSectionStudentsURL</a>
+                                *@
                             </div>
                         </li>
-
-
-
-
                     }
                 </ul>
+            </div>
+        </div>
+
+        <div class="@Model.HideMainForm">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Download" class="btn btn-default" />
             </div>
         </div>
 
 
         @*
 
-            onchange="onFormatChanged()"
-            <!--
-        <script type="text/javascript">
+                onchange="onFormatChanged()"
+                <!--
+            <script type="text/javascript">
 
-            function onFormatChanged()
-            {
-                var formatListId = @Html.IdFor(model => model.Format);
-                var formatList = $('#' + formatListId);
-
-                // TODO: don't hard-code string here
-                var formatAllSelected = (formatList.value == "All");
-
-                @for (int i = 0; i < Model.SectionNames.Count; i++)
+                function onFormatChanged()
                 {
-                    @:var curCheckboxId = @Html.IdFor(model => model.SectionNames[i].Selected);
-                    @:var curCheckbox = $('#' + curCheckboxId);
-                    if (i == Model.CurrentSection.Index)
-                    {
+                    var formatListId = @Html.IdFor(model => model.Format);
+                    var formatList = $('#' + formatListId);
 
-                        @:curCheckbox.checked = true;
-                    }
-                    else
+                    // TODO: don't hard-code string here
+                    var formatAllSelected = (formatList.value == "All");
+
+                    @for (int i = 0; i < Model.SectionNames.Count; i++)
                     {
-                        @:curCheckbox.checked = false;
+                        @:var curCheckboxId = @Html.IdFor(model => model.SectionNames[i].Selected);
+                        @:var curCheckbox = $('#' + curCheckboxId);
+                        if (i == Model.CurrentSection.Index)
+                        {
+
+                            @:curCheckbox.checked = true;
+                        }
+                        else
+                        {
+                            @:curCheckbox.checked = false;
+                        }
                     }
                 }
-            }
-        </script>
-            -->
+            </script>
+                -->
         *@
 
         @{ /*
-                         <div class="form-group">
-                             <label asp-for="SectionName" class="col-md-2 control-label"></label>
-                             <div class="col-md-10">
-                                 <p asp-description-for="SectionName" class="form-control-static"></p>
-                                 <select asp-for="SectionName" class="form-control" asp-items="ViewBag.SectionNames"></select>
-                             </div>
-                         </div>
-                         <div class="form-group">
-                             <label asp-for="AssignmentGroupName" class="col-md-2 control-label"></label>
-                             <div class="col-md-10">
-                                 <p asp-description-for="AssignmentGroupName" class="form-control-static"></p>
-                                 <select asp-for="AssignmentGroupName" class="form-control" asp-items="ViewBag.AssignmentGroups"></select>
-                             </div>
-                         </div>
-                         <div class="form-group">
-                             <label asp-for="GradebookName" class="col-md-2 control-label"></label>
-                             <div class="col-md-10">
-                                 <p asp-description-for="GradebookName" class="form-control-static"></p>
-                                 <select asp-for="GradebookName" class="form-control" asp-items="ViewBag.GradebookNames"></select>
-                             </div>
-                         </div>
+                           <div class="form-group">
+                               <label asp-for="SectionName" class="col-md-2 control-label"></label>
+                               <div class="col-md-10">
+                                   <p asp-description-for="SectionName" class="form-control-static"></p>
+                                   <select asp-for="SectionName" class="form-control" asp-items="ViewBag.SectionNames"></select>
+                               </div>
+                           </div>
+                           <div class="form-group">
+                               <label asp-for="AssignmentGroupName" class="col-md-2 control-label"></label>
+                               <div class="col-md-10">
+                                   <p asp-description-for="AssignmentGroupName" class="form-control-static"></p>
+                                   <select asp-for="AssignmentGroupName" class="form-control" asp-items="ViewBag.AssignmentGroups"></select>
+                               </div>
+                           </div>
+                           <div class="form-group">
+                               <label asp-for="GradebookName" class="col-md-2 control-label"></label>
+                               <div class="col-md-10">
+                                   <p asp-description-for="GradebookName" class="form-control-static"></p>
+                                   <select asp-for="GradebookName" class="form-control" asp-items="ViewBag.GradebookNames"></select>
+                               </div>
+                           </div>
 
-                                 */
+                                   */
         }
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Download" class="btn btn-default" />
-            </div>
-        </div>
-
     </div>
 </form>

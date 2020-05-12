@@ -241,26 +241,30 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		{
 			ViewBag.DownloadFormats = new List<SelectListItem>
 			(
-				Enum.GetValues(typeof(DownloadSubmissionViewModel.DownloadFormat))
-				.Cast<DownloadSubmissionViewModel.DownloadFormat>()
+				Enum.GetValues(typeof(DownloadFormat)).Cast<DownloadFormat>()
 				.Select
 				(
 					format => new SelectListItem()
 					{
 						Text = format.ToString(),
 						Value = format.ToString(),
-						Selected = (format == DownloadSubmissionViewModel.DownloadFormat.All)
+						Selected = (format == DownloadFormat.All)
 					}
 				)
 			);
 
-			List<SelectListItem> sectionNames = Classroom.Sections.Select
+			List<SectionStudentsToDownload> sectionStudents = Classroom.Sections.Select
 				(
-					section => new SelectListItem()
+					section => new SectionStudentsToDownload()
 					{
-						Text = section.DisplayName,
-						Value = section.Name,
-						Selected = (section.Name == sectionName)
+						SectionName = new SelectListItem()
+						{
+							Text = section.DisplayName,
+							Value = section.Name,
+							Selected = (section.Name == sectionName)
+						},
+						AllStudents = true,
+						SelectedStudents = null
 					}
 				).ToList();
 
@@ -268,12 +272,13 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			DownloadSubmissionViewModel viewModel = new DownloadSubmissionViewModel()
 			{
-				Format = DownloadSubmissionViewModel.DownloadFormat.All,
-				SectionNames = sectionNames,
-				CurrentSection = new DownloadSubmissionViewModel.SectionInfo()
+				IndexForSectionStudentsView = -1,
+				Format = DownloadFormat.All,
+				SectionStudents = sectionStudents,
+				CurrentSection = new SectionInfo()
 				{
 					Name = sectionName,
-					Index = sectionNames.FindIndex(item => item.Value == sectionName)
+					Index = sectionStudents.FindIndex(item => item.SectionName.Value == sectionName)
 				}
             };
 
@@ -287,13 +292,35 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ValidateAntiForgeryToken]
 		[Route("Submissions/{sectionName}/Download")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public async Task<IActionResult> Download(DownloadSubmissionViewModel downloadSubmissionViewModel)
+		public Task<IActionResult> Download(DownloadSubmissionViewModel downloadSubmissionViewModel)
 		{
-			// TODO: There was null checking for section.  What if no checkboxes are checked?
-			var selectedSections = downloadSubmissionViewModel.SectionNames.Where
+			int iSectionStudents = downloadSubmissionViewModel.SectionStudents.FindIndex
+			(
+				ss => ss.SubmitButton != null
+			);
+
+			if (iSectionStudents == -1)
+			{
+				return DownloadSubmissionsAsync(downloadSubmissionViewModel);
+			}
+
+			return SelectStudents(downloadSubmissionViewModel, iSectionStudents);
+		}
+
+		public async Task<IActionResult> SelectStudents(
+			DownloadSubmissionViewModel viewModel, 
+			int iSectionStudents)
+		{
+			return View("Download", viewModel);
+		}
+
+		public async Task<IActionResult> DownloadSubmissionsAsync(DownloadSubmissionViewModel downloadSubmissionViewModel)
+		{
+            // TODO: There was null checking for section.  What if no checkboxes are checked?
+            var selectedSections = downloadSubmissionViewModel.SectionStudents.Where
             (
-                sn => sn.Selected
-            ).ToList();
+                ss => ss.SectionName.Selected
+			).ToList();
             
 			if (selectedSections.Count == 0)
 			{
@@ -307,13 +334,11 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				CheckpointName,
 				selectedSections.Select
 				(
-					sn => sn.Value
+					ss => ss.SectionName.Value
 				).ToList(),
-				new DownloadSubmissionViewModel.DownloadFormat[] 
-					{ DownloadSubmissionViewModel.DownloadFormat.Eclipse, DownloadSubmissionViewModel.DownloadFormat.All }
+				new DownloadFormat[] { DownloadFormat.Eclipse, DownloadFormat.All }
 					.Contains(downloadSubmissionViewModel.Format),         // bool includeEclipseProjects
-				new DownloadSubmissionViewModel.DownloadFormat[]
-					{ DownloadSubmissionViewModel.DownloadFormat.Flat, DownloadSubmissionViewModel.DownloadFormat.All }
+				new DownloadFormat[] { DownloadFormat.Flat, DownloadFormat.All }
 					.Contains(downloadSubmissionViewModel.Format)          // bool includeFlatFiles
 			);
 
@@ -324,6 +349,16 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 			return File(archiveContents, "application/zip", filename);
 		}
+
+		///// <summary>
+		///// Asks the user to select students from the given section for whom to download submissions
+		///// </summary>
+		//[Route("Submissions/{sectionName}/Download/SelectSectionStudents/{selectSectionName}")]
+		//[ClassroomAuthorization(ClassroomRole.Admin)]
+		//public async Task<IActionResult> SelectSectionStudents(string sectionName)
+		//{
+		//	return View("SelectSectionStudents", viewModel);
+		//}
 
 
 		/// <summary>
