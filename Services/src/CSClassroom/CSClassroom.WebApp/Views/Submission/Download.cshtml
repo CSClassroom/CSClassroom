@@ -37,7 +37,7 @@ else
                     {
                         <tr>
                             <td>
-                                <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onCheckboxChanged(this, @Html.IdFor(model => model.SectionsAndStudents[i].SubmitButton) )" />
+                                <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onCheckboxChanged(this, @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton) )" />
                             </td>
                             <td>
                                 @Model.SectionsAndStudents[i].SectionName.Text
@@ -45,7 +45,7 @@ else
                                 <input type="hidden" asp-for="@Model.SectionsAndStudents[i].SectionName.Value" />
                             </td>
                             <td>
-                                <input asp-for="@Model.SectionsAndStudents[i].SubmitButton" type="submit"
+                                <input asp-for="@Model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton" type="submit"
                                        value="@Model.SectionsAndStudents[i].StudentDisplayList" class="btn btn-link" />
                             </td>
                         </tr>
@@ -56,7 +56,7 @@ else
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Download" class="btn btn-default" />
+                <input asp-for="@Model.DownloadSubmitButton" type="submit" value="Download" class="btn btn-default" />
             </div>
         </div>
     </div>
@@ -101,7 +101,7 @@ else
         // section checkbox state
         @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
         {
-            @:onCheckboxChanged(@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionsAndStudents[i].SubmitButton));
+            @:onCheckboxChanged(@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton));
         }
     }
 

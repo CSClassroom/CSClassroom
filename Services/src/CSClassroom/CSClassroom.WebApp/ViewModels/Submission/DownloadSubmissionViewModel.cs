@@ -37,6 +37,11 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		///  clicked download.  This informs the default options to be selected
 		/// </summary>
 		public SectionInfo CurrentSection { get; set; }
+
+		/// <summary>
+		/// The submit button to finally initiate the download
+		/// </summary>
+		public string DownloadSubmitButton { get; set; }
 	}
 
 	/// <summary>
@@ -98,9 +103,14 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		public List<StudentToDownload> SelectedStudents { get; set; }
 
 		/// <summary>
+		///  The submit button (rendered in link style) to display the form controls to select a student
+		/// </summary>
+		public string SectionsAndStudentsSubmitButton { get; set; }
+
+		/// <summary>
 		/// Text to use in the link to edit the list of students to download for this section
 		/// </summary>
-        public string StudentDisplayList
+		public string StudentDisplayList
         {
             get
             {
@@ -133,8 +143,5 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 				return ret;
 			}
         }
-
-		public string SubmitButton { get; set; }
-
     }
 }

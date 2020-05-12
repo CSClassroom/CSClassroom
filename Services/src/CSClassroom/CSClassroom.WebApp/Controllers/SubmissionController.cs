@@ -292,22 +292,33 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ValidateAntiForgeryToken]
 		[Route("Submissions/{sectionName}/Download")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
-		public Task<IActionResult> Download(DownloadSubmissionViewModel downloadSubmissionViewModel)
+		public async Task<IActionResult> Download(DownloadSubmissionViewModel downloadSubmissionViewModel)
 		{
 			int iSectionStudents = downloadSubmissionViewModel.SectionsAndStudents.FindIndex
 			(
-				ss => ss.SubmitButton != null
+				ss => ss.SectionsAndStudentsSubmitButton != null
 			);
 
 			downloadSubmissionViewModel.IndexForSectionStudentsView = iSectionStudents;
 
-			if (iSectionStudents == -1)
+			if (iSectionStudents != -1)
 			{
-				return DownloadSubmissionsAsync(downloadSubmissionViewModel);
+				// Display the "select students" form controls
+				// TODO: Remove second param since it's in view model?
+				return await SelectStudents(downloadSubmissionViewModel, iSectionStudents);
 			}
 
-			// TODO: Remove second param since it's in view model?
-			return SelectStudents(downloadSubmissionViewModel, iSectionStudents);
+			// Either we posted here from the select-a-student form, or from the primary
+			// download submissions form
+			if (downloadSubmissionViewModel.DownloadSubmitButton == null)
+			{
+				// We posted here from the select-a-student form, so render the
+				// main download form controls (with the updated student data)
+				return View("Download", downloadSubmissionViewModel);
+			}
+
+			// The download submission button was clicked, so we're finally ready to initiate the download
+			return await DownloadSubmissionsAsync(downloadSubmissionViewModel);
 		}
 
 		public async Task<IActionResult> SelectStudents(
