@@ -299,11 +299,14 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				ss => ss.SubmitButton != null
 			);
 
+			downloadSubmissionViewModel.IndexForSectionStudentsView = iSectionStudents;
+
 			if (iSectionStudents == -1)
 			{
 				return DownloadSubmissionsAsync(downloadSubmissionViewModel);
 			}
 
+			// TODO: Remove second param since it's in view model?
 			return SelectStudents(downloadSubmissionViewModel, iSectionStudents);
 		}
 
