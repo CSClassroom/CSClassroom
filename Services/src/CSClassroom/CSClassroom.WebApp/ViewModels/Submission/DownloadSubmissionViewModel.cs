@@ -75,8 +75,23 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
     /// </summary>
     public class StudentToDownload
 	{
-		public string StudentName { get; set; }
-		public int StudentID { get; set; }
+		[Display
+		(
+			Name = "IsSelected",
+			Description = "Download?"
+		)]
+		public Boolean Selected { get; set; }
+
+		/// <summary>
+		/// The unique ID for the user.
+		/// </summary>
+		//public int Id { get; set; }
+
+		[Display(Name = "Last Name")]
+		public string LastName { get; set; }
+
+		[Display(Name = "First Name")]
+		public string FirstName { get; set; }
 	}
 
 	/// <summary>
@@ -128,10 +143,10 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 				}
 
 				// TODO: Does this do last name first?
-				string ret = "Students: " + SelectedStudents[0].StudentName;
+				string ret = "Students: " + getStudentName(SelectedStudents[0]);
 				for (int i=1; i < Math.Min(c_maxStudentsToDisplayInSelectionLink, numStudents); i++)
 				{
-					ret += ", " + SelectedStudents[i].StudentName;
+					ret += ", " + getStudentName(SelectedStudents[i]);
 				}
 
 				int remaining = numStudents - c_maxStudentsToDisplayInSelectionLink;
@@ -143,5 +158,11 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 				return ret;
 			}
         }
-    }
+
+		private string getStudentName(StudentToDownload student)
+		{
+			return student.LastName + ", " + student.FirstName;
+		}
+
+	}
 }

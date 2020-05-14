@@ -304,8 +304,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			if (iSectionStudents != -1)
 			{
 				// Display the "select students" form controls
-				// TODO: Remove second param since it's in view model?
-				return await SelectStudents(downloadSubmissionViewModel, iSectionStudents);
+				return await SelectStudents(downloadSubmissionViewModel);
 			}
 
 			// Either we posted here from the select-a-student form, or from the primary
@@ -321,10 +320,29 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			return await DownloadSubmissionsAsync(downloadSubmissionViewModel);
 		}
 
-		public async Task<IActionResult> SelectStudents(
-			DownloadSubmissionViewModel viewModel, 
-			int iSectionStudents)
+		public async Task<IActionResult> SelectStudents(DownloadSubmissionViewModel viewModel)
 		{
+			viewModel.SectionsAndStudents[viewModel.IndexForSectionStudentsView].SelectedStudents =
+				ClassroomMembership.SectionMemberships
+				.Where
+				(
+					// TODO: Join on Section ID instead?
+					sm => sm.Section.Name == 
+						  viewModel.SectionsAndStudents[viewModel.IndexForSectionStudentsView].SectionName.Value
+                )
+                .Select
+				(
+					sm => new StudentToDownload()
+					{
+						Selected = true,
+						LastName = sm.ClassroomMembership.User.LastName,
+						FirstName = sm.ClassroomMembership.User.FirstName
+					}
+				)
+				.OrderBy(sd => sd.LastName)
+				.ThenBy(sd => sd.FirstName)
+				.ToList();
+
 			return View("Download", viewModel);
 		}
 

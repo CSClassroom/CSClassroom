@@ -4,17 +4,27 @@
 
 @model CSC.CSClassroom.WebApp.ViewModels.Submission.DownloadSubmissionViewModel
 
-@if (Model.IndexForSectionStudentsView == -1)
-{
-    <h2>Download @Project.Name @Checkpoint.DisplayName Submissions</h2>
+@{
+    int iSect = Model.IndexForSectionStudentsView;
+    List<StudentToDownload> students = null;
+    if (iSect == -1)
+    {
+        <h2>Download @Project.Name @Checkpoint.DisplayName Submissions</h2>
+    }
+    else
+    {
+        students = Model.SectionsAndStudents[iSect].SelectedStudents;
+        <h2>Select Students To Download From @Model.SectionsAndStudents[iSect].SectionName.Text</h2>
+    }
 }
-else
-{
-    <h2>Select Students To Download From @Model.SectionsAndStudents[Model.IndexForSectionStudentsView].SectionName.Text</h2>
-}
-
 
 <form asp-action="DownloadSubmissions">
+
+    @*
+         ----------------------------------------------------------
+          Form #1: The Main download submissions form
+        ----------------------------------------------------------
+    *@
     <div id="mainDownloadSubmissionsForm" class="form-horizontal">
         <hr />
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -61,52 +71,95 @@ else
         </div>
     </div>
 
+    @*
+         ----------------------------------------------------------
+          Form #2: The select-students-from-section form
+        ----------------------------------------------------------
+    *@
+
     <div id="studentSelectionForm" class="form-horizontal">
-        <hr />
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Continue" class="btn btn-default" />
+        @if (iSect != -1)
+        {
+            <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].Selected)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].LastName)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].FirstName)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* TODO: TRY using the students variable to simplify the code *@
+                        @for (int i = 0; i < Model.SectionsAndStudents[iSect].SelectedStudents.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
+                                    @* TODO: Do I need hidden controls in here to make the checkboxes work?*@
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].LastName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-        </div>
-    </div>
 
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Continue" class="btn btn-default" />
+                </div>
+            </div>
+        }
+    </div>
 </form>
 
 <script type="text/javascript">
-    $(document).ready(() => { onDocumentReady(); });
+            $(document).ready(() => { onDocumentReady(); });
 
-    function onDocumentReady()
-    {
-        // TODO: Should I use a different div or span to contain these
-        // controls rather than the current div which also contains validation?
+            function onDocumentReady()
+            {
+                // TODO: Should I use a different div or span to contain these
+                // controls rather than the current div which also contains validation?
 
-        // Hide / unhide the primary download form controls and the
-        // student selection form controls
-        var mainDownloadSubmissionsForm = $("#mainDownloadSubmissionsForm");
-        var studentSelectionForm = $("#studentSelectionForm");
-        if (@Model.IndexForSectionStudentsView == -1)
-        {
-            mainDownloadSubmissionsForm.show();
-            studentSelectionForm.hide();
-        }
-        else
-        {
-            mainDownloadSubmissionsForm.hide();
-            studentSelectionForm.show();
-        }
+                // Hide / unhide the primary download form controls and the
+                // student selection form controls
+                var mainDownloadSubmissionsForm = $("#mainDownloadSubmissionsForm");
+                var studentSelectionForm = $("#studentSelectionForm");
+                if (@iSect == -1)
+                {
+                    mainDownloadSubmissionsForm.show();
+                    studentSelectionForm.hide();
+                }
+                else
+                {
+                    mainDownloadSubmissionsForm.hide();
+                    studentSelectionForm.show();
+                }
 
-        // Hide / unhide the student selection links based on the
-        // section checkbox state
-        @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
-        {
-            @:onCheckboxChanged(@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton));
-        }
-    }
+                // Hide / unhide the student selection links based on the
+                // section checkbox state
+                @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
+                {
+                    @:onCheckboxChanged(@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton));
+                }
+            }
 
-    function onCheckboxChanged(checkbox, selectStudentsButton)
-    {
-        selectStudentsButton.className = checkbox.checked ? "btn btn-link" : "hidden";
-    }
+            function onCheckboxChanged(checkbox, selectStudentsButton)
+            {
+                selectStudentsButton.className = checkbox.checked ? "btn btn-link" : "hidden";
+            }
 </script>
