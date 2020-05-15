@@ -115,6 +115,11 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// <summary>
 		///  Students selected by user to download
 		/// </summary>
+		[Display
+		(
+			Name = "Students",
+			Description = "Select the students to download."
+		)]
 		public List<StudentToDownload> SelectedStudents { get; set; }
 
 		/// <summary>
@@ -125,7 +130,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// <summary>
 		/// Text to use in the link to edit the list of students to download for this section
 		/// </summary>
-		public string StudentDisplayList
+		public string StudentSummaryDisplay
         {
             get
             {
@@ -142,17 +147,32 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 					return "Students: None";
 				}
 
-				// TODO: Does this do last name first?
-				string ret = "Students: " + getStudentName(SelectedStudents[0]);
-				for (int i=1; i < Math.Min(c_maxStudentsToDisplayInSelectionLink, numStudents); i++)
+				string ret = "Students: ";
+				int numStudentsAppended = 0;
+				foreach (StudentToDownload student in SelectedStudents)
 				{
-					ret += ", " + getStudentName(SelectedStudents[i]);
+					if (!student.Selected)
+					{
+						continue;
+					}
+
+					if (numStudentsAppended > 0)
+					{
+						ret += "; ";
+					}
+					
+					ret += getStudentName(student);
+					numStudentsAppended++;
+					if (numStudentsAppended == c_maxStudentsToDisplayInSelectionLink)
+					{
+						break;
+					}
 				}
 
-				int remaining = numStudents - c_maxStudentsToDisplayInSelectionLink;
+				int remaining = numStudentsAppended - c_maxStudentsToDisplayInSelectionLink;
 				if (remaining > 0)
 				{
-					ret += ", and " + remaining + " more";
+					ret += "; and " + remaining + " more";
 				}
 
 				return ret;

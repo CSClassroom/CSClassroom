@@ -56,7 +56,7 @@
                             </td>
                             <td>
                                 <input asp-for="@Model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton" type="submit"
-                                       value="@Model.SectionsAndStudents[i].StudentDisplayList" class="btn btn-link" />
+                                       value="@Model.SectionsAndStudents[i].StudentSummaryDisplay" class="btn btn-link" />
                             </td>
                         </tr>
                     }
@@ -78,44 +78,53 @@
     *@
 
     <div id="studentSelectionForm" class="form-horizontal">
+        @* TODO: Iterate through all sections with non-null SelectedStudents, 
+            and client-side hide all but the one for iSect when iSect != -1*@
         @if (iSect != -1)
         {
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <div class="form-group">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>
-                                @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].Selected)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].LastName)
-                            </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].FirstName)
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @* TODO: TRY using the students variable to simplify the code *@
-                        @for (int i = 0; i < Model.SectionsAndStudents[iSect].SelectedStudents.Count; i++)
-                        {
+                <label asp-for="SectionsAndStudents[iSect].SelectedStudents" class="col-md-2 control-label"></label>
+                <div class="col-md-10">
+                    <p asp-description-for="SectionsAndStudents[iSect].SelectedStudents" class="form-control-static"></p>
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td>
-                                    <input type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
-                                    @* TODO: Do I need hidden controls in here to make the checkboxes work?*@
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].LastName)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName)
-                                </td>
+                                <th>
+                                    Download?
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].LastName)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].FirstName)
+                                </th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @* TODO: TRY using the students variable to simplify the code *@
+                            @for (int i = 0; i < Model.SectionsAndStudents[iSect].SelectedStudents.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
+                                        @* TODO: Do I need hidden controls in here to make the checkboxes work?*@
+                                        <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].LastName" />
+                                        <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName" />
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].LastName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="form-group">

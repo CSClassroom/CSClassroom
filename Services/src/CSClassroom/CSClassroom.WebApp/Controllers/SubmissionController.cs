@@ -322,27 +322,31 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 		public async Task<IActionResult> SelectStudents(DownloadSubmissionViewModel viewModel)
 		{
-			viewModel.SectionsAndStudents[viewModel.IndexForSectionStudentsView].SelectedStudents =
-				ClassroomMembership.SectionMemberships
-				.Where
-				(
-					// TODO: Join on Section ID instead?
-					sm => sm.Section.Name == 
-						  viewModel.SectionsAndStudents[viewModel.IndexForSectionStudentsView].SectionName.Value
-                )
-                .Select
-				(
-					sm => new StudentToDownload()
-					{
-						Selected = true,
-						LastName = sm.ClassroomMembership.User.LastName,
-						FirstName = sm.ClassroomMembership.User.FirstName
-					}
-				)
-				.OrderBy(sd => sd.LastName)
-				.ThenBy(sd => sd.FirstName)
-				.ToList();
+			if (viewModel.SectionsAndStudents[viewModel.IndexForSectionStudentsView].SelectedStudents == null)
+			{
+				// Student list not yet obtained from the database, so grab it now, and default
+				// each student to Selected=true
 
+				var studentList = await SubmissionService.GetStudentListFromSectionAsync(
+					ClassroomName,
+					viewModel.SectionsAndStudents[viewModel.IndexForSectionStudentsView].SectionName.Value);
+
+				viewModel.SectionsAndStudents[viewModel.IndexForSectionStudentsView].SelectedStudents =
+					studentList.Select
+					(
+						student => new StudentToDownload()
+						{
+							Selected = true,
+							LastName = student.LastName,
+							FirstName = student.FirstName
+						}
+					).ToList();
+			}
+			else
+			{
+				// (otherwise, no-op: keep the list we already obtained, with the Selected
+				// states already chosen by the user)
+			}
 			return View("Download", viewModel);
 		}
 

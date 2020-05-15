@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using CSC.CSClassroom.Model.Classrooms;
+using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
 
@@ -60,6 +61,8 @@ namespace CSC.CSClassroom.Service.Projects
 			IList<string> sectionName,
 			bool includeEclipseProjects,
 			bool includeFlatFiles);
+
+		Task<IList<User>> GetStudentListFromSectionAsync(string classroomName, string sectionName);
 
 		/// <summary>
 		/// Returns submissions for grading.

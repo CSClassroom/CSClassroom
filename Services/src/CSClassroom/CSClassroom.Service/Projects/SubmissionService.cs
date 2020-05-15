@@ -312,6 +312,34 @@ namespace CSC.CSClassroom.Service.Projects
 			);
 		}
 
+		public async Task<IList<User>> GetStudentListFromSectionAsync(
+			string classroomName, 
+			string sectionName)
+		{
+			var section = await LoadSectionAsync(classroomName, sectionName);
+			return await GetStudentsAsync(section);
+			//// TODO: Join on Section ID instead?
+			//return await _dbContext.SectionMemberships
+			//	.Where(sm => sm.Section.Name == sectionName)
+			//	.Include(sm => sm.ClassroomMembership)
+			//		.ThenInclude(cm => cm.User)
+			//			.ThenInclude(user => user.LastName)
+			//	.Include(sm => sm.ClassroomMembership)
+			//		.ThenInclude(cm => cm.User)
+			//			.ThenInclude(user => user.FirstName)
+   //             .Select
+			//	(
+			//		sm => new User()
+			//		{
+			//			LastName = sm.ClassroomMembership.User.LastName,
+			//			FirstName = sm.ClassroomMembership.User.LastName,
+			//		}
+			//	)
+			//	.OrderBy(user => user.LastName)
+			//	.ThenBy(user => user.FirstName)
+			//	.ToListAsync();
+		}
+
 		/// <summary>
 		/// Returns submissions for grading.
 		/// </summary>
