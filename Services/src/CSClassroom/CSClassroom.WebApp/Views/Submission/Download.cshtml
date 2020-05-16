@@ -5,16 +5,16 @@
 @model CSC.CSClassroom.WebApp.ViewModels.Submission.DownloadSubmissionViewModel
 
 @{
-    int iSect = Model.IndexForSectionStudentsView;
+    int iSectionClicked = Model.IndexForSectionStudentsView;
     List<StudentToDownload> students = null;
-    if (iSect == -1)
+    if (iSectionClicked == -1)
     {
         <h2>Download @Project.Name @Checkpoint.DisplayName Submissions</h2>
     }
     else
     {
-        students = Model.SectionsAndStudents[iSect].SelectedStudents;
-        <h2>Select Students To Download From @Model.SectionsAndStudents[iSect].SectionName.Text</h2>
+        students = Model.SectionsAndStudents[iSectionClicked].SelectedStudents;
+        <h2>Select Students To Download From @Model.SectionsAndStudents[iSectionClicked].SectionName.Text</h2>
     }
 }
 
@@ -22,7 +22,7 @@
 
     @*
          ----------------------------------------------------------
-          Form #1: The Main download submissions form
+          Form Option #1: The Main download submissions form
         ----------------------------------------------------------
     *@
     <div id="mainDownloadSubmissionsForm" class="form-horizontal">
@@ -35,6 +35,15 @@
                 <p asp-description-for="Format" class="form-control-static"></p>
                 <select asp-for="Format" asp-items="Html.GetEnumSelectList<DownloadFormat>()"></select>
                 <span asp-validation-for="Format" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="IncludeUnsubmitted" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="IncludeUnsubmitted" class="form-control-static"></p>
+                <input asp-for="IncludeUnsubmitted" />
+                <span asp-validation-for="IncludeUnsubmitted" class="text-danger"></span>
             </div>
         </div>
 
@@ -73,15 +82,18 @@
 
     @*
          ----------------------------------------------------------
-          Form #2: The select-students-from-section form
+          Form Option #2: The select-students-from-section form
         ----------------------------------------------------------
     *@
 
-    <div id="studentSelectionForm" class="form-horizontal">
-        @* TODO: Iterate through all sections with non-null SelectedStudents, 
-            and client-side hide all but the one for iSect when iSect != -1*@
-        @if (iSect != -1)
+    @for (int iSect = 0; iSect < Model.SectionsAndStudents.Count; iSect++)
+    {
+        if (Model.SectionsAndStudents[iSect] == null || Model.SectionsAndStudents[iSect].SelectedStudents == null)
         {
+            continue;
+        }
+
+        <div id="studentSelectionForm_@(iSect)" class="form-horizontal">
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -132,43 +144,57 @@
                     <input type="submit" value="Continue" class="btn btn-default" />
                 </div>
             </div>
-        }
-    </div>
+        </div>
+    }
 </form>
 
 <script type="text/javascript">
-            $(document).ready(() => { onDocumentReady(); });
+    $(document).ready(() => { onDocumentReady(); });
 
-            function onDocumentReady()
-            {
-                // TODO: Should I use a different div or span to contain these
-                // controls rather than the current div which also contains validation?
+    function onDocumentReady()
+    {
+        // TODO: Should I use a different div or span to contain these
+        // controls rather than the current div which also contains validation?
 
-                // Hide / unhide the primary download form controls and the
-                // student selection form controls
-                var mainDownloadSubmissionsForm = $("#mainDownloadSubmissionsForm");
-                var studentSelectionForm = $("#studentSelectionForm");
-                if (@iSect == -1)
+        // Primary download form: Hide / unhide entire form
+        var mainDownloadSubmissionsForm = $("#mainDownloadSubmissionsForm");
+        if (@iSectionClicked == -1)
+        {
+            mainDownloadSubmissionsForm.show();
+        }
+        else
+        {
+            mainDownloadSubmissionsForm.hide();
+        }
+
+        // Primary download form: hide / unhide the student selection links based on the
+        // section checkbox state
+        @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
+        {
+            @:onCheckboxChanged(@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton));
+        }
+
+        // Student selection forms: Hide / unhide each section's student selection form,
+        // depending on which student selection link brought us here, if any
+        @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
+        {
+            @:var studentSelectionForm = $("#studentSelectionForm_@(i)");
+            @:if (studentSelectionForm.length)
+            @:{
+                if (i == iSectionClicked)
                 {
-                    mainDownloadSubmissionsForm.show();
-                    studentSelectionForm.hide();
+                    @:studentSelectionForm.show();
                 }
                 else
                 {
-                    mainDownloadSubmissionsForm.hide();
-                    studentSelectionForm.show();
+                    @:studentSelectionForm.hide();
                 }
+            @:}
+        }
+    }
 
-                // Hide / unhide the student selection links based on the
-                // section checkbox state
-                @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
-                {
-                    @:onCheckboxChanged(@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton));
-                }
-            }
-
-            function onCheckboxChanged(checkbox, selectStudentsButton)
-            {
-                selectStudentsButton.className = checkbox.checked ? "btn btn-link" : "hidden";
-            }
+    function onCheckboxChanged(checkbox, selectStudentsButton)
+    {
+        selectStudentsButton.className = checkbox.checked ? "btn btn-link" : "hidden";
+    }
 </script>
