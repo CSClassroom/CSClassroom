@@ -340,6 +340,84 @@ namespace CSC.CSClassroom.Service.Projects
 			//	.ToListAsync();
 		}
 
+		public async Task<IList<CheckpointDownloadCandidateResult>> GetCheckpointDownloadCandidateListAsync(
+			string classroomName,
+			string projectName,
+			string checkpointName)
+        {
+			//List<CheckpointDownloadCandidateResult> result;
+			//result.map
+			// TODO: REPLACE TRUE WITH SUBMITTED
+			// TODO: SHOULDN'T I USE MY PARAMETERS?
+			var result = _dbContext.SectionMemberships
+				.GroupBy
+				(
+					sm => sm.Section,
+					sm => new UserDownloadCandidateResult(sm.ClassroomMembership.User, true),
+					(section2, users) => new CheckpointDownloadCandidateResult(
+						section2,
+						users.ToList())
+				).ToList();
+					
+					
+					new CheckpointDownloadCandidateResult()
+					{
+						Section = 
+					}
+				)
+            var section = await LoadSectionAsync(classroomName, sectionName);
+			var checkpoint = await LoadCheckpointAsync
+			(
+				classroomName,
+				projectName,
+				checkpointName
+			);
+
+			var students = await GetStudentsAsync(section);
+			var dueDate = checkpoint
+				.SectionDates
+				.Single(sd => sd.SectionId == section.Id)
+				.DueDate;
+
+			var submissions = await GetSubmissionsForGrading(checkpoint, section, dueDate);
+
+			return students
+				.Select
+				(
+					student => new
+					{
+						User = student,
+						Submissions = GroupSubmissions(section, submissions, student)
+					}
+				)
+				.Where
+				(
+					studentSubmissions => studentSubmissions
+						.Submissions
+						.Any(s => s.Key.Id == checkpoint.Id)
+				)
+				.Select
+				(
+					studentSubmissions => new GradeSubmissionResult
+					(
+						studentSubmissions.User,
+						section,
+						studentSubmissions.Submissions
+							.Single(group => group.Key == checkpoint)
+							.First(),
+						studentSubmissions.Submissions
+							.SelectMany
+							(
+								group => group.Where
+								(
+									s => (s == group.First() && s.Checkpoint != checkpoint)
+										 || (s != group.First() && !string.IsNullOrEmpty(s.Feedback))
+								)
+							).ToList()
+					)
+				).ToList();
+		}
+
 		/// <summary>
 		/// Returns submissions for grading.
 		/// </summary>

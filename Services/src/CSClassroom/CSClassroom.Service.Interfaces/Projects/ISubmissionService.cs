@@ -64,6 +64,12 @@ namespace CSC.CSClassroom.Service.Projects
 
 		Task<IList<User>> GetStudentListFromSectionAsync(string classroomName, string sectionName);
 
+		Task<IList<CheckpointDownloadCandidateResult>> GetCheckpointDownloadCandidateListAsync(
+			string classroomName,
+			string projectName,
+			string checkpointName);
+
+
 		/// <summary>
 		/// Returns submissions for grading.
 		/// </summary>

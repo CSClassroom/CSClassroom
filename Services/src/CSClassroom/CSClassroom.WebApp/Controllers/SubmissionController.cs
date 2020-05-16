@@ -253,7 +253,38 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				)
 			);
 
-			List<SectionsAndStudents> sectionStudents = Classroom.Sections.Select
+			var downloadCandidates = await SubmissionService.GetCheckpointDownloadCandidateListAsync(
+				ClassroomName,
+				ProjectName,
+				CheckpointName);
+
+
+			List<SectionsAndStudents> sectionStudents = downloadCandidates.Select
+				(
+					dc => new SectionsAndStudents()
+					{
+						SectionName = new SelectListItem()
+						{
+							Text = dc.Section.DisplayName,
+							Value = dc.Section.Name,
+							Selected = (dc.Section.Name == sectionName)
+						},
+						AllStudents = true,
+						SelectedStudents = dc.Users.Select
+						(
+							user => new StudentToDownload()
+							{
+								Selected = true,
+								FirstName = user.User.FirstName,
+								LastName = user.User.LastName,
+								Submitted = user.Submitted
+							}
+						).ToList()
+					}
+				).ToList();
+
+				/*
+				Classroom.Sections.Select
 				(
 					section => new SectionsAndStudents()
 					{
@@ -266,7 +297,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 						AllStudents = true,
 						SelectedStudents = null
 					}
-				).ToList();
+				).ToList(); */
 
 			//Section currentSection = Classroom.Sections.Where(section => (section.Name == sectionName)).First();
 
@@ -313,6 +344,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			{
 				// We posted here from the select-a-student form, so render the
 				// main download form controls (with the updated student data)
+				// TODO: Update AllStudents bool if necessary
 				return View("Download", downloadSubmissionViewModel);
 			}
 

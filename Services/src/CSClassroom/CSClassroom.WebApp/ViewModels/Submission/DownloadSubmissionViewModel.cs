@@ -27,8 +27,8 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 
 		[Display
 		(
-			Name = "Unsubmitted code",
-			Description = "Check this to include the latest commit from students who did not turn in their code.  Leave this unchecked to skip downloading those students' code."
+			Name = "Include unsubmitted code",
+			Description = "Check this to include the latest commit from students who did not turn in their code.  Uncheck this to skip downloading those students' code."
 		)]
 		public bool IncludeUnsubmitted { get; set; }
 
@@ -99,6 +99,9 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 
 		[Display(Name = "First Name")]
 		public string FirstName { get; set; }
+
+		[Display(Name = "Submitted?")]
+		public Boolean Submitted { get; set; }
 	}
 
 	/// <summary>
@@ -117,7 +120,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// <summary>
 		/// If true, download ALL students from this section, and ignore SelectedStudents
 		/// </summary>
-		public Boolean AllStudents { get; set; }
+		public bool AllStudents { get; set; }
 
 		/// <summary>
 		///  Students selected by user to download

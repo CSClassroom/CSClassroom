@@ -113,16 +113,20 @@
                                 <th>
                                     @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].FirstName)
                                 </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].Submitted)
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             @* TODO: TRY using the students variable to simplify the code *@
                             @for (int i = 0; i < Model.SectionsAndStudents[iSect].SelectedStudents.Count; i++)
                             {
-                                <tr>
+                                bool disabled = !Model.IncludeUnsubmitted && !Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted;
+                                string displayForSubmitted = Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted ? "yes" : "no";
+                                <tr class=@(disabled ? "disabled" : "")>
                                     <td>
                                         <input type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
-                                        @* TODO: Do I need hidden controls in here to make the checkboxes work?*@
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].LastName" />
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName" />
                                     </td>
@@ -132,9 +136,12 @@
                                     <td>
                                         @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName)
                                     </td>
+                                    <td>
+                                        @(displayForSubmitted)
+                                    </td>
                                 </tr>
-                            }
-                        </tbody>
+                             }
+                            </tbody>
                     </table>
                 </div>
             </div>
