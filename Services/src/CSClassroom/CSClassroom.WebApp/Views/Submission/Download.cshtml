@@ -42,7 +42,7 @@
             <label asp-for="IncludeUnsubmitted" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <p asp-description-for="IncludeUnsubmitted" class="form-control-static"></p>
-                <input asp-for="IncludeUnsubmitted" />
+                <input type="checkbox" asp-for="IncludeUnsubmitted" onchange="onIncludeUnsubmittedChanged()" />
                 <span asp-validation-for="IncludeUnsubmitted" class="text-danger"></span>
             </div>
         </div>
@@ -56,7 +56,7 @@
                     {
                         <tr>
                             <td>
-                                <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onStudentSelectionChanged(this, @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton) )" />
+                                <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onStudentSelectionChanged(this, '@Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton)' )" />
                             </td>
                             <td>
                                 @Model.SectionsAndStudents[i].SectionName.Text
@@ -124,9 +124,9 @@
                             {
                                 bool disabled = !Model.IncludeUnsubmitted && !Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted;
                                 string displayForSubmitted = Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted ? "yes" : "no";
-                                <tr class=@(disabled ? "disabled" : "")>
+                                <tr class="@(disabled ? "disabled" : "")">
                                     <td>
-                                        <input type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
+                                        <input type="checkbox" id="Dave_SelectedStudents_@(iSect)_@(i)" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].LastName" />
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName" />
                                     </td>
@@ -179,7 +179,7 @@
         // section checkbox state
         @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
         {
-            @:onStudentSelectionChanged(@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton));
+            @:onStudentSelectionChanged($("#@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected)")[0], "@Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton)");
         }
 
         // Student selection forms: Hide / unhide each section's student selection form,
@@ -201,25 +201,49 @@
         }
     }
 
-    function onStudentSelectionChanged(checkbox, selectStudentsButton)
+    function onStudentSelectionChanged(checkbox, selectStudentsButtonId)
     {
-        selectStudentsButton.className = checkbox.checked ? "btn btn-link" : "hidden";
+        $("#" + selectStudentsButtonId).prop("className", checkbox.checked ? "btn btn-link" : "hidden");
     }
 
-    function onIncludeUnsubmittedChanged()
-    {
-        var includeUnsubmittedCheckbox = $("#" + @Html.IdFor(model => model.IncludeUnsubmitted));
-        var includeUnsubmitted = includeUnsubmittedCheckbox.checked;
+    function onIncludeUnsubmittedChanged() {
+        alert("onIncludeUnsubmittedChanged()");
+        var c_maxStudentsToDisplayInSelectionLink = 3;
+        var includeUnsubmittedCheckbox = $("#@Html.IdFor(model => model.IncludeUnsubmitted)");
+        var includeUnsubmitted = includeUnsubmittedCheckbox.prop("checked");
+
         @for (int iSect = 0; iSect < Model.SectionsAndStudents.Count; iSect++)
         {
-            @:var studentsSubmitButton = $("#" + @Html.IdFor(model => model.SectionsAndStudents[iSect].SectionsAndStudentsSubmitButton));
-            @:updateStudentSummaryDisplay(includeUnsubmitted, studentsSubmitButton);
+            @:{
+                @:var studentsSubmitButton = $("#@Html.IdFor(model => model.SectionsAndStudents[iSect].SectionsAndStudentsSubmitButton)");
+                @:var studentSummaryDisplay = "Students: ";
+                @:var numStudentsAppended = 0;
+                @:var downloadAllFromSection = true;
+                for (int iStudent = 0; iStudent < Model.SectionsAndStudents[iSect].SelectedStudents.Count; iStudent++)
+                {
+                    @:{
+                        @:var idStudentSelected = "@Html.IdFor(model => model.SectionsAndStudents[iSect].SelectedStudents[iStudent])";
+                        @:var ctlStudentSelected = $("#" + idStudentSelected);
+                        @:if (ctlStudentSelected.prop("checked") && (includeUnsubmitted || @(Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Submitted ? "true" : "false"))) {
+                        @:  if (numStudentsAppended < c_maxStudentsToDisplayInSelectionLink) {
+                        @:          if (numStudentsAppended > 0) {
+                        @:              studentSummaryDisplay += "; ";
+                        @:          }
+                        @:          studentSummaryDisplay += "@Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].LastName";
+                        @:          studentSummaryDisplay += ", ";
+                        @:          studentSummaryDisplay += "@Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].FirstName";
+                        @:          numStudentsAppended++;
+                        @:  }
+                        @:}
+                    @:}
+                }
+                @:var remaining = numStudentsAppended - c_maxStudentsToDisplayInSelectionLink;
+                @:if (remaining > 0) {
+                @:  studentSummaryDisplay += "; and " + remaining + " more";
+                @:}
+                @:studentsSubmitButton.prop("value", studentSummaryDisplay);
+            @:}
         }
-    }
-
-    function updateStudentSummaryDisplay(includeUnsubmitted, studentsSubmitButton)
-    {
-
     }
 
 </script>
