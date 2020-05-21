@@ -269,7 +269,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 							Value = dc.Section.Name,
 							Selected = (dc.Section.Name == sectionName)
 						},
-						AllStudents = true,
 						SelectedStudents = dc.Users.Select
 						(
 							user => new StudentToDownload()

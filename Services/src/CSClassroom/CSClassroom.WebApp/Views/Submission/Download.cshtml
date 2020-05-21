@@ -56,7 +56,7 @@
                     {
                         <tr>
                             <td>
-                                <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onCheckboxChanged(this, @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton) )" />
+                                <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onStudentSelectionChanged(this, @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton) )" />
                             </td>
                             <td>
                                 @Model.SectionsAndStudents[i].SectionName.Text
@@ -65,7 +65,7 @@
                             </td>
                             <td>
                                 <input asp-for="@Model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton" type="submit"
-                                       value="@Model.SectionsAndStudents[i].StudentSummaryDisplay" class="btn btn-link" />
+                                       value="..." class="btn btn-link" />
                             </td>
                         </tr>
                     }
@@ -137,6 +137,7 @@
                                         @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName)
                                     </td>
                                     <td>
+                                        <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted" />
                                         @(displayForSubmitted)
                                     </td>
                                 </tr>
@@ -178,7 +179,7 @@
         // section checkbox state
         @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
         {
-            @:onCheckboxChanged(@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton));
+            @:onStudentSelectionChanged(@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected), @Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton));
         }
 
         // Student selection forms: Hide / unhide each section's student selection form,
@@ -200,8 +201,25 @@
         }
     }
 
-    function onCheckboxChanged(checkbox, selectStudentsButton)
+    function onStudentSelectionChanged(checkbox, selectStudentsButton)
     {
         selectStudentsButton.className = checkbox.checked ? "btn btn-link" : "hidden";
     }
+
+    function onIncludeUnsubmittedChanged()
+    {
+        var includeUnsubmittedCheckbox = $("#" + @Html.IdFor(model => model.IncludeUnsubmitted));
+        var includeUnsubmitted = includeUnsubmittedCheckbox.checked;
+        @for (int iSect = 0; iSect < Model.SectionsAndStudents.Count; iSect++)
+        {
+            @:var studentsSubmitButton = $("#" + @Html.IdFor(model => model.SectionsAndStudents[iSect].SectionsAndStudentsSubmitButton));
+            @:updateStudentSummaryDisplay(includeUnsubmitted, studentsSubmitButton);
+        }
+    }
+
+    function updateStudentSummaryDisplay(includeUnsubmitted, studentsSubmitButton)
+    {
+
+    }
+
 </script>

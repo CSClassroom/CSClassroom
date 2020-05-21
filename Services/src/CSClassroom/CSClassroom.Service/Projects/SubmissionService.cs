@@ -345,77 +345,38 @@ namespace CSC.CSClassroom.Service.Projects
 			string projectName,
 			string checkpointName)
         {
-			//List<CheckpointDownloadCandidateResult> result;
-			//result.map
-			// TODO: REPLACE TRUE WITH SUBMITTED
-			// TODO: SHOULDN'T I USE MY PARAMETERS?
-			var result = _dbContext.SectionMemberships
-				.GroupBy
-				(
-					sm => sm.Section,
-					sm => new UserDownloadCandidateResult(sm.ClassroomMembership.User, true),
-					(section2, users) => new CheckpointDownloadCandidateResult(
-						section2,
-						users.ToList())
-				).ToList();
-					
-					
-					new CheckpointDownloadCandidateResult()
-					{
-						Section = 
-					}
-				)
-            var section = await LoadSectionAsync(classroomName, sectionName);
-			var checkpoint = await LoadCheckpointAsync
-			(
-				classroomName,
-				projectName,
-				checkpointName
-			);
-
-			var students = await GetStudentsAsync(section);
-			var dueDate = checkpoint
-				.SectionDates
-				.Single(sd => sd.SectionId == section.Id)
-				.DueDate;
-
-			var submissions = await GetSubmissionsForGrading(checkpoint, section, dueDate);
-
-			return students
+			return await _dbContext.SectionMemberships
 				.Select
 				(
-					student => new
-					{
-						User = student,
-						Submissions = GroupSubmissions(section, submissions, student)
-					}
+					sm => sm
 				)
 				.Where
 				(
-					studentSubmissions => studentSubmissions
-						.Submissions
-						.Any(s => s.Key.Id == checkpoint.Id)
+					sm => sm.ClassroomMembership.Classroom.Name == classroomName &&
+						  sm.Role == SectionRole.Student
 				)
-				.Select
+				.GroupBy
 				(
-					studentSubmissions => new GradeSubmissionResult
-					(
-						studentSubmissions.User,
+					sm => sm.Section,
+					sm => new UserDownloadCandidateResult(
+						sm.ClassroomMembership.User,
+						_dbContext.Submissions.Select
+						(
+							sub => sub
+						)
+						.Where
+						(
+							// TODO: Indices on names?  Should I make a separate query to get IDs
+							// to join on them instead?
+							sub => sub.Commit.UserId == sm.ClassroomMembership.User.Id &&
+								   sub.Checkpoint.Project.Name == projectName &&
+								   sub.Checkpoint.Name == checkpointName
+						).Any()
+					),
+					(section, users) => new CheckpointDownloadCandidateResult(
 						section,
-						studentSubmissions.Submissions
-							.Single(group => group.Key == checkpoint)
-							.First(),
-						studentSubmissions.Submissions
-							.SelectMany
-							(
-								group => group.Where
-								(
-									s => (s == group.First() && s.Checkpoint != checkpoint)
-										 || (s != group.First() && !string.IsNullOrEmpty(s.Feedback))
-								)
-							).ToList()
-					)
-				).ToList();
+						users.ToList())
+				).ToListAsync();
 		}
 
 		/// <summary>

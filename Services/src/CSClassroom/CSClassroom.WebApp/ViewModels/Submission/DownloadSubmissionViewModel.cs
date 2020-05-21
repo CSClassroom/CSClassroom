@@ -117,15 +117,10 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// </summary>
 		public SelectListItem SectionName { get; set; }
 
-		/// <summary>
-		/// If true, download ALL students from this section, and ignore SelectedStudents
-		/// </summary>
-		public bool AllStudents { get; set; }
-
-		/// <summary>
-		///  Students selected by user to download
-		/// </summary>
-		[Display
+        /// <summary>
+        ///  Students selected by user to download
+        /// </summary>
+        [Display
 		(
 			Name = "Students",
 			Description = "Select the students to download."
@@ -137,59 +132,62 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// </summary>
 		public string SectionsAndStudentsSubmitButton { get; set; }
 
-		/// <summary>
-		/// Text to use in the link to edit the list of students to download for this section
-		/// </summary>
-		public string StudentSummaryDisplay
+        /// <summary>
+        /// Text to use in the link to edit the list of students to download for this section
+        /// </summary>
+        public string getStudentSummaryDisplay(bool includeUnsubmitted)
         {
-            get
+			// Decides if downloading a student is allowable on the basis of the existence of their submission
+			Func<StudentToDownload, bool> allowable = (student => includeUnsubmitted || student.Submitted);
+
+			// True if all allowable students are selected
+			bool downloadAll = !SelectedStudents.Any(student => allowable(student) && !student.Selected);
+
+            if (downloadAll)
             {
-				if (AllStudents)
-				{
-					return "Students: All";
-				}
+                return "Students: All" + (includeUnsubmitted ? "" : "(except unsubmitted)");
+            }
 
-				int numStudents = SelectedStudents == null ? 0 : SelectedStudents.Count;
-				if (numStudents == 0)
-				{
-					// TODO: This should be caught earlier and should cause the checkbox to be unchecked
-					// and this link to be disabled / hidden
-					return "Students: None";
-				}
+            int numStudents = SelectedStudents.Count(student => allowable(student) && student.Selected);
+            if (numStudents == 0)
+            {
+                // TODO: This should be caught earlier and should cause the checkbox to be unchecked
+                // and this link to be disabled / hidden
+                return "Students: None";
+            }
 
-				string ret = "Students: ";
-				int numStudentsAppended = 0;
-				foreach (StudentToDownload student in SelectedStudents)
-				{
-					if (!student.Selected)
-					{
-						continue;
-					}
+            string ret = "Students: ";
+            int numStudentsAppended = 0;
+            foreach (StudentToDownload student in SelectedStudents)
+            {
+                if (!student.Selected || !allowable(student))
+                {
+                    continue;
+                }
 
-					if (numStudentsAppended > 0)
-					{
-						ret += "; ";
-					}
-					
-					ret += getStudentName(student);
-					numStudentsAppended++;
-					if (numStudentsAppended == c_maxStudentsToDisplayInSelectionLink)
-					{
-						break;
-					}
-				}
+                if (numStudentsAppended > 0)
+                {
+                    ret += "; ";
+                }
 
-				int remaining = numStudentsAppended - c_maxStudentsToDisplayInSelectionLink;
-				if (remaining > 0)
-				{
-					ret += "; and " + remaining + " more";
-				}
+                ret += getStudentName(student);
+                numStudentsAppended++;
+                if (numStudentsAppended == c_maxStudentsToDisplayInSelectionLink)
+                {
+                    break;
+                }
+            }
 
-				return ret;
-			}
+            int remaining = numStudentsAppended - c_maxStudentsToDisplayInSelectionLink;
+            if (remaining > 0)
+            {
+                ret += "; and " + remaining + " more";
+            }
+
+            return ret;
         }
 
-		private string getStudentName(StudentToDownload student)
+        private string getStudentName(StudentToDownload student)
 		{
 			return student.LastName + ", " + student.FirstName;
 		}
