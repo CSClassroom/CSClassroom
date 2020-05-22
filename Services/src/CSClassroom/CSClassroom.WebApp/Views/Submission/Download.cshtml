@@ -65,7 +65,7 @@
                             </td>
                             <td>
                                 <input asp-for="@Model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton" type="submit"
-                                       value="..." class="btn btn-link" />
+                                       style="max-width: 100%" value="..." class="btn btn-link" />
                             </td>
                         </tr>
                     }
@@ -126,7 +126,7 @@
                                 string displayForSubmitted = Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted ? "yes" : "no";
                                 <tr class="@(disabled ? "disabled" : "")">
                                     <td>
-                                        <input type="checkbox" id="Dave_SelectedStudents_@(iSect)_@(i)" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
+                                        <input type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].LastName" />
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName" />
                                     </td>
@@ -199,6 +199,7 @@
                 }
             @:}
         }
+        onIncludeUnsubmittedChanged();
     }
 
     function onStudentSelectionChanged(checkbox, selectStudentsButtonId)
@@ -207,7 +208,6 @@
     }
 
     function onIncludeUnsubmittedChanged() {
-        alert("onIncludeUnsubmittedChanged()");
         var c_maxStudentsToDisplayInSelectionLink = 3;
         var includeUnsubmittedCheckbox = $("#@Html.IdFor(model => model.IncludeUnsubmitted)");
         var includeUnsubmitted = includeUnsubmittedCheckbox.prop("checked");
@@ -222,10 +222,11 @@
                 for (int iStudent = 0; iStudent < Model.SectionsAndStudents[iSect].SelectedStudents.Count; iStudent++)
                 {
                     @:{
-                        @:var idStudentSelected = "@Html.IdFor(model => model.SectionsAndStudents[iSect].SelectedStudents[iStudent])";
+                        @:var idStudentSelected = "@Html.IdFor(model => model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Selected)";
                         @:var ctlStudentSelected = $("#" + idStudentSelected);
-                        @:if (ctlStudentSelected.prop("checked") && (includeUnsubmitted || @(Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Submitted ? "true" : "false"))) {
-                        @:  if (numStudentsAppended < c_maxStudentsToDisplayInSelectionLink) {
+                        @:if (includeUnsubmitted || @(Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Submitted ? "true" : "false")) {
+                        @:  if (ctlStudentSelected.prop("checked")) {
+                        @:      if (numStudentsAppended < c_maxStudentsToDisplayInSelectionLink) {
                         @:          if (numStudentsAppended > 0) {
                         @:              studentSummaryDisplay += "; ";
                         @:          }
@@ -233,12 +234,22 @@
                         @:          studentSummaryDisplay += ", ";
                         @:          studentSummaryDisplay += "@Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].FirstName";
                         @:          numStudentsAppended++;
+                        @:      }
+                        @:  } else { // !tlStudentSelected.prop("checked")
+                        @:      downloadAllFromSection = false;
                         @:  }
                         @:}
                     @:}
                 }
                 @:var remaining = numStudentsAppended - c_maxStudentsToDisplayInSelectionLink;
-                @:if (remaining > 0) {
+                @:if (downloadAllFromSection) {
+                @:      studentSummaryDisplay = "Students: All";
+                @:      if (!includeUnsubmitted) {
+                @:          studentSummaryDisplay += " (except unsubmitted)";
+                @:      }
+                @:} else if (numStudentsAppended == 0) {
+                @:      studentSummaryDisplay = "Students: None";
+                @:} else if (remaining > 0) {
                 @:  studentSummaryDisplay += "; and " + remaining + " more";
                 @:}
                 @:studentsSubmitButton.prop("value", studentSummaryDisplay);
