@@ -2,18 +2,22 @@
     ViewData["Title"] = "Download Project Checkpoint Submissions";
 }
 
+@*
+    This page dynamically decides which controls to show, and which to hide, giving the appearance
+    of multiple forms.  See the comments in DownloadSubmissionViewModel.cs for more info.
+*@
 @model CSC.CSClassroom.WebApp.ViewModels.Submission.DownloadSubmissionViewModel
 
 @{
     int iSectionClicked = Model.IndexForSectionStudentsView;
-    List<StudentToDownload> students = null;
     if (iSectionClicked == -1)
     {
+        // Form Option #1: The Main download submissions form
         <h2>Download @Project.Name @Checkpoint.DisplayName Submissions</h2>
     }
     else
     {
-        students = Model.SectionsAndStudents[iSectionClicked].SelectedStudents;
+        // Form Option #2: The select-students-from-section form
         <h2>Select Students To Download From @Model.SectionsAndStudents[iSectionClicked].SectionName.Text</h2>
     }
 }
@@ -56,7 +60,7 @@
                     {
                         <tr>
                             <td>
-                                <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onStudentSelectionChanged(this, '@Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton)' )" />
+                                <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onSectionSelectionChanged(this, '@Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton)' )" />
                             </td>
                             <td>
                                 @Model.SectionsAndStudents[i].SectionName.Text
@@ -64,6 +68,11 @@
                                 <input type="hidden" asp-for="@Model.SectionsAndStudents[i].SectionName.Value" />
                             </td>
                             <td>
+                                @*
+                                    Although this is a form submit button, it appears like (and is referred to as) a link.
+                                    Its text shows the students currently selected.  Clicking it hides the main download
+                                    form and unhides the "select students" form for the corresponding section
+                                *@
                                 <input asp-for="@Model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton" type="submit"
                                        style="max-width: 100%" value="..." class="btn btn-link" />
                             </td>
@@ -119,11 +128,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @* TODO: TRY using the students variable to simplify the code *@
                             @for (int i = 0; i < Model.SectionsAndStudents[iSect].SelectedStudents.Count; i++)
                             {
                                 bool disabled = !Model.IncludeUnsubmitted && !Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted;
-                                string displayForSubmitted = Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted ? "yes" : "no";
                                 <tr class="@(disabled ? "disabled" : "")">
                                     <td>
                                         <input type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
@@ -138,11 +145,11 @@
                                     </td>
                                     <td>
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted" />
-                                        @(displayForSubmitted)
+                                        @(Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted ? "yes" : "no")
                                     </td>
                                 </tr>
-                             }
-                            </tbody>
+                            }
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -161,9 +168,6 @@
 
     function onDocumentReady()
     {
-        // TODO: Should I use a different div or span to contain these
-        // controls rather than the current div which also contains validation?
-
         // Primary download form: Hide / unhide entire form
         var mainDownloadSubmissionsForm = $("#mainDownloadSubmissionsForm");
         if (@iSectionClicked == -1)
@@ -179,7 +183,9 @@
         // section checkbox state
         @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
         {
-            @:onStudentSelectionChanged($("#@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected)")[0], "@Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton)");
+            @:onSectionSelectionChanged(
+            @:  $("#@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected)")[0],
+            @:  "@Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton)");
         }
 
         // Student selection forms: Hide / unhide each section's student selection form,
@@ -188,44 +194,59 @@
         {
             @:var studentSelectionForm = $("#studentSelectionForm_@(i)");
             @:if (studentSelectionForm.length)
-            @:{
-                if (i == iSectionClicked)
-                {
-                    @:studentSelectionForm.show();
-                }
-                else
-                {
-                    @:studentSelectionForm.hide();
-                }
-            @:}
+            if (i == iSectionClicked)
+            {
+                @:studentSelectionForm.show();
+            }
+            else
+            {
+                @:studentSelectionForm.hide();
+            }
         }
         onIncludeUnsubmittedChanged();
     }
 
-    function onStudentSelectionChanged(checkbox, selectStudentsButtonId)
+    // Called when user checks or unchecks an entire section from the
+    // main download submissions form
+    function onSectionSelectionChanged(checkbox, selectStudentsButtonId)
     {
+        // The "select students" link should be hidden if the section is unchecked
         $("#" + selectStudentsButtonId).prop("className", checkbox.checked ? "btn btn-link" : "hidden");
     }
 
-    function onIncludeUnsubmittedChanged() {
+    // Called when the user checks or unchecks the "include unsubmitted code" checkbox to dynamically
+    // update the student list based on which students clicked "Turn In" for the checkpoint.
+    function onIncludeUnsubmittedChanged()
+    {
         var c_maxStudentsToDisplayInSelectionLink = 3;
         var includeUnsubmittedCheckbox = $("#@Html.IdFor(model => model.IncludeUnsubmitted)");
         var includeUnsubmitted = includeUnsubmittedCheckbox.prop("checked");
 
+        @* For each section, determine the text to show on the "select students" link *@
         @for (int iSect = 0; iSect < Model.SectionsAndStudents.Count; iSect++)
         {
             @:{
                 @:var studentsSubmitButton = $("#@Html.IdFor(model => model.SectionsAndStudents[iSect].SectionsAndStudentsSubmitButton)");
                 @:var studentSummaryDisplay = "Students: ";
+                @:var numStudentsSelected = 0;
                 @:var numStudentsAppended = 0;
                 @:var downloadAllFromSection = true;
+
+                @* 
+                    For each student in the section, count whether the student is checked, allowable to be checked,
+                    and adjust the text of the "select students" link as appropriate
+                *@
                 for (int iStudent = 0; iStudent < Model.SectionsAndStudents[iSect].SelectedStudents.Count; iStudent++)
                 {
                     @:{
                         @:var idStudentSelected = "@Html.IdFor(model => model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Selected)";
                         @:var ctlStudentSelected = $("#" + idStudentSelected);
+
+                        // Is this student "allowable" to be selected, on the basis of whether they clicked "Turn In"?
                         @:if (includeUnsubmitted || @(Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Submitted ? "true" : "false")) {
+                        // Is this student actually checked by the user?
                         @:  if (ctlStudentSelected.prop("checked")) {
+                        @:      numStudentsSelected++;
                         @:      if (numStudentsAppended < c_maxStudentsToDisplayInSelectionLink) {
                         @:          if (numStudentsAppended > 0) {
                         @:              studentSummaryDisplay += "; ";
@@ -235,13 +256,14 @@
                         @:          studentSummaryDisplay += "@Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].FirstName";
                         @:          numStudentsAppended++;
                         @:      }
-                        @:  } else { // !tlStudentSelected.prop("checked")
+                        @:  } else { // !ctlStudentSelected.prop("checked")
                         @:      downloadAllFromSection = false;
                         @:  }
                         @:}
                     @:}
                 }
-                @:var remaining = numStudentsAppended - c_maxStudentsToDisplayInSelectionLink;
+                // Done iterating through users of this section; construct the final link text
+                @:var remaining = numStudentsSelected - c_maxStudentsToDisplayInSelectionLink;
                 @:if (downloadAllFromSection) {
                 @:      studentSummaryDisplay = "Students: All";
                 @:      if (!includeUnsubmitted) {

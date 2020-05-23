@@ -9,12 +9,18 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 {
 	/// <summary>
 	/// The master view model for the download submission page, used for downloading
-	/// Eclipse projects and flat file lists from student project repos
+	/// Eclipse projects and flat file lists from student project repos.  The download submissions
+	/// page is a form which dynamically decides which controls to show, and which to hide.
+	/// Initially, the "main download form" controls are visible, which give the top-level
+	/// options.  When the user clicks one of the "select students" link, the form is redrawn
+	/// with the main download options hidden, and a checklist of students from the specified
+	/// section shown.
 	/// </summary>
 	public class DownloadSubmissionViewModel
 	{
 		/// <summary>
-		/// TODO: Determines type of form to render
+		/// If -1, render the main Download form controls; else, render the "select students" form
+		/// controls for the section represented by SectionsAndStudents[IndexForSectionStudentsView]
 		/// </summary>
 		public int IndexForSectionStudentsView {get; set; }
 
@@ -110,8 +116,6 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 	/// </summary>
 	public class SectionsAndStudents
 	{
-		private const int c_maxStudentsToDisplayInSelectionLink = 3;
-
 		/// <summary>
 		///  Name of section selected for download
 		/// </summary>
@@ -131,66 +135,5 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		///  The submit button (rendered in link style) to display the form controls to select a student
 		/// </summary>
 		public string SectionsAndStudentsSubmitButton { get; set; }
-
-        /// <summary>
-        /// Text to use in the link to edit the list of students to download for this section
-        /// </summary>
-        public string getStudentSummaryDisplay(bool includeUnsubmitted)
-        {
-			// Decides if downloading a student is allowable on the basis of the existence of their submission
-			Func<StudentToDownload, bool> allowable = (student => includeUnsubmitted || student.Submitted);
-
-			// True if all allowable students are selected
-			bool downloadAll = !SelectedStudents.Any(student => allowable(student) && !student.Selected);
-
-            if (downloadAll)
-            {
-                return "Students: All" + (includeUnsubmitted ? "" : "(except unsubmitted)");
-            }
-
-            int numStudents = SelectedStudents.Count(student => allowable(student) && student.Selected);
-            if (numStudents == 0)
-            {
-                // TODO: This should be caught earlier and should cause the checkbox to be unchecked
-                // and this link to be disabled / hidden
-                return "Students: None";
-            }
-
-            string ret = "Students: ";
-            int numStudentsAppended = 0;
-            foreach (StudentToDownload student in SelectedStudents)
-            {
-                if (!student.Selected || !allowable(student))
-                {
-                    continue;
-                }
-
-                if (numStudentsAppended > 0)
-                {
-                    ret += "; ";
-                }
-
-                ret += getStudentName(student);
-                numStudentsAppended++;
-                if (numStudentsAppended == c_maxStudentsToDisplayInSelectionLink)
-                {
-                    break;
-                }
-            }
-
-            int remaining = numStudentsAppended - c_maxStudentsToDisplayInSelectionLink;
-            if (remaining > 0)
-            {
-                ret += "; and " + remaining + " more";
-            }
-
-            return ret;
-        }
-
-        private string getStudentName(StudentToDownload student)
-		{
-			return student.LastName + ", " + student.FirstName;
-		}
-
 	}
 }
