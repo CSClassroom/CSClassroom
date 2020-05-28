@@ -131,16 +131,16 @@
                             @for (int i = 0; i < Model.SectionsAndStudents[iSect].SelectedStudents.Count; i++)
                             {
                                 bool disabled = !Model.IncludeUnsubmitted && !Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted;
-                                <tr class="@(disabled ? "disabled" : "")">
+                                <tr>
                                     <td>
-                                        <input type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
+                                        <input class="@(disabled ? "disabled" : "")" type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].LastName" />
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName" />
                                     </td>
-                                    <td>
+                                    <td class="@(disabled ? "disabled" : "")">
                                         @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].LastName)
                                     </td>
-                                    <td>
+                                    <td class="@(disabled ? "disabled" : "")">
                                         @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName)
                                     </td>
                                     <td>
@@ -204,6 +204,11 @@
             }
         }
         onIncludeUnsubmittedChanged();
+
+        // Student selection forms: Disable students who didn't submit if user
+        // unchecked "include unsubmitted"
+        $('input[class="disabled"]').prop("disabled", true).css("color", "graytext");
+        $('td[class="disabled"]').prop("disabled", true).css("color", "graytext");
     }
 
     // Called when user checks or unchecks an entire section from the
