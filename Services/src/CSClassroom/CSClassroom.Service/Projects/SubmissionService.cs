@@ -230,20 +230,19 @@ namespace CSC.CSClassroom.Service.Projects
 		}
 
 		/// <summary>
-		/// Downloads all submissions for a given checkpoint from the sections,
-		/// in the form of a zip archive. The archive will also include
-		/// the latest state of repositories for which there is no submission. 
+		/// Downloads the submissions for a given checkpoint, according to the
+		/// options specified by the user, in the form of a zip archive. 
 		/// </summary>
 		public async Task<Stream> DownloadSubmissionsAsync(
 			string classroomName,
 			string projectName,
 			string checkpointName,
-            IList<string> sectionNames,
+			IList<SectionSubmissionDownloadRequest> selectedDownloadCandidates,
             bool includeEclipseProjects,
 	        bool includeFlatFiles)
 
         {
-            var sections = await LoadSectionsAsync(classroomName, sectionNames);
+            //var sections = await LoadSectionsAsync(classroomName, sectionNames);
 			var checkpoint = await LoadCheckpointAsync
 			(
 				classroomName,
@@ -255,13 +254,12 @@ namespace CSC.CSClassroom.Service.Projects
 			var students = await _dbContext.ClassroomMemberships
 				.Where
 				(
-					cm => cm.SectionMemberships.Any
+					cm => selectedDownloadCandidates.Any
 					(
-						sm => sections.Any
+						sdc => sdc.UserIds.Any
 						(
-							sec => sec.Id == sm.SectionId
-						)						
-						&& sm.Role == SectionRole.Student
+							sdcUserId => sdcUserId == cm.User.Id
+						)
 					)
 				)
 				.Include(cm => cm.User)
@@ -270,8 +268,13 @@ namespace CSC.CSClassroom.Service.Projects
 				.ToListAsync();
 
 			var allCheckpointSubmissions =
-				await GetCheckpointSubmissionsQuery(checkpoint, sections)
-					.ToListAsync();
+				await GetCheckpointSubmissionsQuery(
+					checkpoint,
+					selectedDownloadCandidates.Select
+					(
+						sdc => sdc.SectionId
+					).ToList()
+				).ToListAsync();
 
 			var usersWithSubmissions = new HashSet<User>
 			(
@@ -796,7 +799,7 @@ namespace CSC.CSClassroom.Service.Projects
 		/// </summary>
 		private IQueryable<Submission> GetCheckpointSubmissionsQuery(
 			Checkpoint checkpoint,
-			List<Section> sections)
+			List<int> sectionIds)
 		{
 			return _dbContext.Submissions
 				.Where
@@ -807,9 +810,9 @@ namespace CSC.CSClassroom.Service.Projects
 						(
 							cm => cm.SectionMemberships.Any
 							(
-								sm => sections.Any
+								sm => sectionIds.Any
 								(
-									sec => sm.SectionId == sec.Id
+									secId => sm.SectionId == secId
 								)
 								&& sm.Role == SectionRole.Student
 							)

@@ -14,6 +14,9 @@ using CSC.CSClassroom.WebApp.ViewModels.Submission;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using CSC.CSClassroom.Model.Classrooms;
+using Octokit;
+using CSC.CSClassroom.Model.Projects.ServiceResults;
+using CSC.CSClassroom.Model.Projects;
 
 namespace CSC.CSClassroom.WebApp.Controllers
 {
@@ -265,6 +268,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				(
 					dc => new SectionsAndStudents()
 					{
+						SectionId = dc.Section.Id,
 						SectionName = new SelectListItem()
 						{
 							Text = dc.Section.DisplayName,
@@ -278,6 +282,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 								Selected = true,
 								FirstName = user.User.FirstName,
 								LastName = user.User.LastName,
+								Id = user.User.Id,
 								Submitted = user.Submitted
 							}
 						).ToList()
@@ -393,9 +398,21 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				ClassroomName,
 				ProjectName,
 				CheckpointName,
-				selectedSections.Select
+				downloadSubmissionViewModel.SectionsAndStudents.Where
 				(
-					ss => ss.SectionName.Value
+					sas => sas.SectionName.Selected
+				).Select
+				(
+					sas => new SectionSubmissionDownloadRequest(
+						sas.SectionId,
+						sas.SelectedStudents.Where
+						(
+							ss => ss.Selected
+						).Select
+						(
+							ss => ss.Id
+						).ToList()
+					)
 				).ToList(),
 				new DownloadFormat[] { DownloadFormat.Eclipse, DownloadFormat.All }
 					.Contains(downloadSubmissionViewModel.Format),         // bool includeEclipseProjects

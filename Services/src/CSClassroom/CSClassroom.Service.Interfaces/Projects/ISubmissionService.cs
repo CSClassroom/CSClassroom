@@ -58,7 +58,7 @@ namespace CSC.CSClassroom.Service.Projects
 			string classroomName,
 			string projectName,
 			string checkpointName,
-			IList<string> sectionName,
+			IList<SectionSubmissionDownloadRequest> selectedDownloadCandidates,
 			bool includeEclipseProjects,
 			bool includeFlatFiles);
 

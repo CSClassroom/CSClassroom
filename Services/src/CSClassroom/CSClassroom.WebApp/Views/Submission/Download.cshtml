@@ -61,6 +61,7 @@
                         <tr>
                             <td>
                                 <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onSectionSelectionChanged(this, '@Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton)' )" />
+                                <input type="hidden" asp-for="@Model.SectionsAndStudents[i].SectionId" />
                             </td>
                             <td>
                                 @Model.SectionsAndStudents[i].SectionName.Text
@@ -136,6 +137,7 @@
                                         <input class="@(disabled ? "disabled" : "")" type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].LastName" />
                                         <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName" />
+                                        <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Id" />
                                     </td>
                                     <td class="@(disabled ? "disabled" : "")">
                                         @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].LastName)

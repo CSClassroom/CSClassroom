@@ -98,7 +98,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// <summary>
 		/// The unique ID for the user.
 		/// </summary>
-		//public int Id { get; set; }
+		public int Id { get; set; }
 
 		[Display(Name = "Last Name")]
 		public string LastName { get; set; }
@@ -120,6 +120,8 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		///  Name of section selected for download
 		/// </summary>
 		public SelectListItem SectionName { get; set; }
+
+		public int SectionId { get; set; }
 
         /// <summary>
         ///  Students selected by user to download
