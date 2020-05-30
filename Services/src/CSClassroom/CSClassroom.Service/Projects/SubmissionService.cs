@@ -315,34 +315,11 @@ namespace CSC.CSClassroom.Service.Projects
 			);
 		}
 
-		public async Task<IList<User>> GetStudentListFromSectionAsync(
-			string classroomName, 
-			string sectionName)
-		{
-			var section = await LoadSectionAsync(classroomName, sectionName);
-			return await GetStudentsAsync(section);
-			//// TODO: Join on Section ID instead?
-			//return await _dbContext.SectionMemberships
-			//	.Where(sm => sm.Section.Name == sectionName)
-			//	.Include(sm => sm.ClassroomMembership)
-			//		.ThenInclude(cm => cm.User)
-			//			.ThenInclude(user => user.LastName)
-			//	.Include(sm => sm.ClassroomMembership)
-			//		.ThenInclude(cm => cm.User)
-			//			.ThenInclude(user => user.FirstName)
-   //             .Select
-			//	(
-			//		sm => new User()
-			//		{
-			//			LastName = sm.ClassroomMembership.User.LastName,
-			//			FirstName = sm.ClassroomMembership.User.LastName,
-			//		}
-			//	)
-			//	.OrderBy(user => user.LastName)
-			//	.ThenBy(user => user.FirstName)
-			//	.ToListAsync();
-		}
-
+		/// <summary>
+		/// Fetches list of sections and students with commits that the user
+		/// might want to download.  These can be displayed to the user as lists
+		/// with checkboxes to select from.
+		/// </summary>
 		public async Task<IList<CheckpointDownloadCandidateResult>> GetCheckpointDownloadCandidateListAsync(
 			string classroomName,
 			string projectName,
@@ -865,19 +842,6 @@ namespace CSC.CSClassroom.Service.Projects
 				.Where(s => s.Classroom.Name == classroomName)
 				.Include(s => s.Classroom)
 				.SingleAsync(s => s.Name == sectionName);
-		}
-
-		/// <summary>
-		/// Loads multiple sections from the database.
-		/// </summary>
-		private async Task<List<Section>> LoadSectionsAsync(
-			string classroomName,
-			IList<string> sectionNames)
-		{
-			return await _dbContext.Sections
-				.Where(s => (s.Classroom.Name == classroomName && sectionNames.Contains(s.Name)))
-				.Include(s => s.Classroom)
-				.ToListAsync();
 		}
 	}
 }

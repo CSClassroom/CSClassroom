@@ -227,12 +227,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				submissionArchiveBuilder: submissionArchiveBuilder.Object
 			);
 
+			// TODO: RECOVER TO CHANGES
 			var result = await submissionService.DownloadSubmissionsAsync
 			(
 				"Class1",
 				"Project1",
 				"Checkpoint2",
-				new String[] { "Period1" }.ToList(),
+				null, //new String[] { "Period1" }.ToList(),
 				true,		// includeEclipseProjects
 				true		// includeFlatFiles
 			);

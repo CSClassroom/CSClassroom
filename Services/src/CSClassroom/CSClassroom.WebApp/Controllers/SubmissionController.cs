@@ -237,8 +237,8 @@ namespace CSC.CSClassroom.WebApp.Controllers
 
 		/// <summary>
 		/// Renders initial entry to the Download Submissions form.  Asks the user to select
-		/// which submission files to download, along with which sections and students to download
-		/// them for.
+		/// the download format--the components to include in the archive--along with which
+		/// sections and students to download them for.
 		/// </summary>
 		[Route("Submissions/{sectionName}/Download")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
@@ -315,6 +315,8 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> Download(DownloadSubmissionViewModel downloadSubmissionViewModel)
 		{
+			// Will be > -1 if we got here because user clicked one of the student selection links
+			// next to one of the section names
 			int iSectionStudents = downloadSubmissionViewModel.SectionsAndStudents.FindIndex
 			(
 				ss => ss.SectionsAndStudentsSubmitButton != null
@@ -325,7 +327,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			if (iSectionStudents != -1)
 			{
 				// Display the "select students" form controls
-				return await SelectStudents(downloadSubmissionViewModel);
+				return View("Download", downloadSubmissionViewModel);
 			}
 
 			// Either we posted here from the select-a-student form, or from the primary
@@ -342,42 +344,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		}
 
 		/// <summary>
-		/// Upon clicking one of the "select students" links, this renders the download submission
-		/// form with the student selection controls visible
-		/// </summary>
-		/// <param name="viewModel">ViewModel for the form</param>
-		public async Task<IActionResult> SelectStudents(DownloadSubmissionViewModel viewModel)
-		{
-			//if (viewModel.SectionsAndStudents[viewModel.IndexForSectionStudentsView].SelectedStudents == null)
-			//{
-			//	// Student list not yet obtained from the database, so grab it now, and default
-			//	// each student to Selected=true
-
-			//	var studentList = await SubmissionService.GetStudentListFromSectionAsync(
-			//		ClassroomName,
-			//		viewModel.SectionsAndStudents[viewModel.IndexForSectionStudentsView].SectionName.Value);
-
-			//	viewModel.SectionsAndStudents[viewModel.IndexForSectionStudentsView].SelectedStudents =
-			//		studentList.Select
-			//		(
-			//			student => new StudentToDownload()
-			//			{
-			//				Selected = true,
-			//				LastName = student.LastName,
-			//				FirstName = student.FirstName
-			//			}
-			//		).ToList();
-			//}
-			//else
-			//{
-			//	// (otherwise, no-op: keep the list we already obtained, with the Selected
-			//	// states already chosen by the user)
-			//}
-			return View("Download", viewModel);
-		}
-
-		/// <summary>
-		/// Once the user has chosen the download properties, made the student selections, and clicks
+		/// Once the user has chosen the download properties, made the student selections, and clicked
 		/// the main form submit button, this initiates the actual download
 		/// </summary>
 		/// <param name="downloadSubmissionViewModel">ViewModel for the form</param>

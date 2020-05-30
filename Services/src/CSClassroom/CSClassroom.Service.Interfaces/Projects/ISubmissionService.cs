@@ -62,13 +62,15 @@ namespace CSC.CSClassroom.Service.Projects
 			bool includeEclipseProjects,
 			bool includeFlatFiles);
 
-		Task<IList<User>> GetStudentListFromSectionAsync(string classroomName, string sectionName);
-
+		/// <summary>
+		/// Fetches list of sections and students with commits that the user
+		/// might want to download.  These can be displayed to the user as lists
+		/// with checkboxes to select from.
+		/// </summary>
 		Task<IList<CheckpointDownloadCandidateResult>> GetCheckpointDownloadCandidateListAsync(
 			string classroomName,
 			string projectName,
 			string checkpointName);
-
 
 		/// <summary>
 		/// Returns submissions for grading.
