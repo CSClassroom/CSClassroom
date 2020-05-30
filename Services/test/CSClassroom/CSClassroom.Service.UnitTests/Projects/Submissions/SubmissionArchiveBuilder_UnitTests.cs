@@ -30,7 +30,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 		{
 			var classroom = GetClassroom();
 			var project = GetProject(classroom);
-			var student = GetStudent(classroom, "Student1");
+			var student = GetStudent(classroom, "Student1", "Period1");
 
 			var templateContents = GetArchive
 			(
@@ -60,13 +60,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 			Assert.Equal
 			(
 				"TransformedModifiedByStudent", 
-				archiveContents["EclipseProjects\\Student1\\Public\\PublicFile1.java"]
+				archiveContents["EclipseProjects\\Period1\\Student1\\Public\\PublicFile1.java"]
 			);
 
 			Assert.Equal
 			(
 				"TransformedModifiedByStudent",
-				archiveContents["AllFiles\\Student1-PublicFile1.java"]
+				archiveContents["AllFiles\\PublicFile1\\Period1\\Student1-PublicFile1.java"]
 			);
 		}
 
@@ -79,7 +79,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 		{
 			var classroom = GetClassroom();
 			var project = GetProject(classroom);
-			var student = GetStudent(classroom, "Student1");
+			var student = GetStudent(classroom, "Student1", "Period1");
 
 			var templateContents = GetArchive
 			(
@@ -109,7 +109,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 			Assert.Equal
 			(
 				"TransformedOriginal",
-				archiveContents["EclipseProjects\\Student1\\Immutable\\ImmutableFile1.java"]
+				archiveContents["EclipseProjects\\Period1\\Student1\\Immutable\\ImmutableFile1.java"]
 			);
 		}
 
@@ -122,7 +122,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 		{
 			var classroom = GetClassroom();
 			var project = GetProject(classroom);
-			var student = GetStudent(classroom, "Student1");
+			var student = GetStudent(classroom, "Student1", "Period1");
 
 			var templateContents = GetArchive
 			(
@@ -152,7 +152,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 			Assert.Equal
 			(
 				"TransformedOriginal",
-				archiveContents["EclipseProjects\\Student1\\Private\\PrivateFile1.java"]
+				archiveContents["EclipseProjects\\Period1\\Student1\\Private\\PrivateFile1.java"]
 			);
 		}
 		
@@ -165,7 +165,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 		{
 			var classroom = GetClassroom();
 			var project = GetProject(classroom);
-			var student = GetStudent(classroom, "Student1");
+			var student = GetStudent(classroom, "Student1", "Period1");
 
 			var templateContents = GetArchive
 			(
@@ -201,7 +201,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 			Assert.Equal
 			(
 				"TransformedModifiedByStudent",
-				archiveContents["AllFiles\\Student1-PublicFile1.java"]
+				archiveContents["AllFiles\\PublicFile1\\Period1\\Student1-PublicFile1.java"]
 			);
 		}
 
@@ -241,13 +241,23 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 		/// <summary>
 		/// Returns a user.
 		/// </summary>
-		private ClassroomMembership GetStudent(Classroom classroom, string team)
+		private ClassroomMembership GetStudent(Classroom classroom, string team, string sectionName)
 		{
 			return new ClassroomMembership()
 			{
 				Classroom = classroom,
 				ClassroomId = classroom.Id,
-				GitHubTeam = team
+				GitHubTeam = team,
+				SectionMemberships = Collections.CreateList
+				(
+					new SectionMembership()
+					{
+						Section = new Section()
+						{
+							Name = sectionName
+						}
+					}
+				)
 			};
 		}
 

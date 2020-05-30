@@ -227,13 +227,31 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				submissionArchiveBuilder: submissionArchiveBuilder.Object
 			);
 
-			// TODO: RECOVER TO CHANGES
+			var dlRequests = Collections.CreateList
+			(
+				new SectionSubmissionDownloadRequest
+				(
+					database.Context.Sections.Single
+					(
+						sec => sec.Name == "Period1"
+					).Id,
+					database.Context.Users.Where
+					(
+						user => new string[] { "Student1", "Student2" }.Contains(user.UserName)
+					).Select
+					(
+						user => user.Id
+					).ToList()
+				)
+			);
+
+			// TODO: Improve code coverage
 			var result = await submissionService.DownloadSubmissionsAsync
 			(
 				"Class1",
 				"Project1",
 				"Checkpoint2",
-				null, //new String[] { "Period1" }.ToList(),
+				dlRequests,
 				true,		// includeEclipseProjects
 				true		// includeFlatFiles
 			);
