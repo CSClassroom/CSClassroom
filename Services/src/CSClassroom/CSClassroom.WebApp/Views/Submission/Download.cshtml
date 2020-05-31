@@ -219,6 +219,7 @@
     {
         // The "select students" link should be hidden if the section is unchecked
         $("#" + selectStudentsButtonId).prop("className", checkbox.checked ? "btn btn-link" : "hidden");
+        onIncludeUnsubmittedChanged();
     }
 
     // Called when the user checks or unchecks the "include unsubmitted code" checkbox to dynamically
@@ -228,11 +229,15 @@
         var c_maxStudentsToDisplayInSelectionLink = 3;
         var includeUnsubmittedCheckbox = $("#@Html.IdFor(model => model.IncludeUnsubmitted)");
         var includeUnsubmitted = includeUnsubmittedCheckbox.prop("checked");
+        var numStudentsSelectedAcrossAllSections = 0;
 
         @* For each section, determine the text to show on the "select students" link *@
         @for (int iSect = 0; iSect < Model.SectionsAndStudents.Count; iSect++)
         {
             @:{
+                @:var sectionCheckbox = $("#@Html.IdFor(model => model.SectionsAndStudents[iSect].SectionName.Selected)");
+                @:if (sectionCheckbox.prop("checked"))
+                @:{
                 @:var studentsSubmitButton = $("#@Html.IdFor(model => model.SectionsAndStudents[iSect].SectionsAndStudentsSubmitButton)");
                 @:var studentSummaryDisplay = "Students: ";
                 @:var numStudentsSelected = 0;
@@ -243,17 +248,18 @@
                     For each student in the section, count whether the student is checked, allowable to be checked,
                     and adjust the text of the "select students" link as appropriate
                 *@
-                for (int iStudent = 0; iStudent < Model.SectionsAndStudents[iSect].SelectedStudents.Count; iStudent++)
-                {
+        for (int iStudent = 0; iStudent < Model.SectionsAndStudents[iSect].SelectedStudents.Count; iStudent++)
+        {
                     @:{
                         @:var idStudentSelected = "@Html.IdFor(model => model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Selected)";
                         @:var ctlStudentSelected = $("#" + idStudentSelected);
 
-                        // Is this student "allowable" to be selected, on the basis of whether they clicked "Turn In"?
+            // Is this student "allowable" to be selected, on the basis of whether they clicked "Turn In"?
                         @:if (includeUnsubmitted || @(Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Submitted ? "true" : "false")) {
                         // Is this student actually checked by the user?
                         @:  if (ctlStudentSelected.prop("checked")) {
                         @:      numStudentsSelected++;
+                        @:      numStudentsSelectedAcrossAllSections++;
                         @:      if (numStudentsAppended < c_maxStudentsToDisplayInSelectionLink) {
                         @:          if (numStudentsAppended > 0) {
                         @:              studentSummaryDisplay += "; ";
@@ -269,7 +275,7 @@
                         @:}
                     @:}
                 }
-                // Done iterating through users of this section; construct the final link text
+        // Done iterating through users of this section; construct the final link text
                 @:var remaining = numStudentsSelected - c_maxStudentsToDisplayInSelectionLink;
                 @:if (downloadAllFromSection) {
                 @:      studentSummaryDisplay = "Students: All";
@@ -283,7 +289,12 @@
                 @:}
                 @:studentsSubmitButton.prop("value", studentSummaryDisplay);
             @:}
+            @:}
         }
+
+        // Disable main download form submit button if no students are selected
+        //debugger;
+        $("#@Html.IdFor(model => model.DownloadSubmitButton)").prop("disabled", numStudentsSelectedAcrossAllSections == 0);
     }
 
 </script>
