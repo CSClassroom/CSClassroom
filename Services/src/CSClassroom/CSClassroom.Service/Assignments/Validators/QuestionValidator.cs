@@ -70,7 +70,8 @@ namespace CSC.CSClassroom.Service.Assignments.Validators
 				);
 			}
 
-			if (existingQuestion?.QuestionCategory?.RandomlySelectedQuestionId == null
+			if (existingQuestion != null
+				&& existingQuestion?.QuestionCategory?.RandomlySelectedQuestionId == null
 				&& newQuestionCategory.RandomlySelectedQuestionId != null)
 			{
 				throw new InvalidOperationException
