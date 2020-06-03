@@ -234,61 +234,75 @@
         @* For each section, determine the text to show on the "select students" link *@
         @for (int iSect = 0; iSect < Model.SectionsAndStudents.Count; iSect++)
         {
+            @* Force separate client jscript scope for each server-side iteration *@
             @:{
                 @:var sectionCheckbox = $("#@Html.IdFor(model => model.SectionsAndStudents[iSect].SectionName.Selected)");
                 @:if (sectionCheckbox.prop("checked"))
                 @:{
-                @:var studentsSubmitButton = $("#@Html.IdFor(model => model.SectionsAndStudents[iSect].SectionsAndStudentsSubmitButton)");
-                @:var studentSummaryDisplay = "Students: ";
-                @:var numStudentsSelected = 0;
-                @:var numStudentsAppended = 0;
-                @:var downloadAllFromSection = true;
+                    @:var studentsSubmitButton = $("#@Html.IdFor(model => model.SectionsAndStudents[iSect].SectionsAndStudentsSubmitButton)");
+                    @:var studentSummaryDisplay = "Students: ";
+                    @:var numStudentsSelected = 0;
+                    @:var numStudentsAppended = 0;
+                    @:var downloadAllFromSection = true;
 
-                @* 
-                    For each student in the section, count whether the student is checked, allowable to be checked,
-                    and adjust the text of the "select students" link as appropriate
-                *@
-        for (int iStudent = 0; iStudent < Model.SectionsAndStudents[iSect].SelectedStudents.Count; iStudent++)
-        {
+                    @* 
+                        For each student in the section, count whether the student is checked, allowable to be checked,
+                        and adjust the text of the "select students" link as appropriate
+                    *@
+                    for (int iStudent = 0; iStudent < Model.SectionsAndStudents[iSect].SelectedStudents.Count; iStudent++)
+                    {
                     @:{
                         @:var idStudentSelected = "@Html.IdFor(model => model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Selected)";
                         @:var ctlStudentSelected = $("#" + idStudentSelected);
 
-            // Is this student "allowable" to be selected, on the basis of whether they clicked "Turn In"?
-                        @:if (includeUnsubmitted || @(Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Submitted ? "true" : "false")) {
-                        // Is this student actually checked by the user?
-                        @:  if (ctlStudentSelected.prop("checked")) {
-                        @:      numStudentsSelected++;
-                        @:      numStudentsSelectedAcrossAllSections++;
-                        @:      if (numStudentsAppended < c_maxStudentsToDisplayInSelectionLink) {
-                        @:          if (numStudentsAppended > 0) {
-                        @:              studentSummaryDisplay += "; ";
-                        @:          }
-                        @:          studentSummaryDisplay += "@Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].LastName";
-                        @:          studentSummaryDisplay += ", ";
-                        @:          studentSummaryDisplay += "@Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].FirstName";
-                        @:          numStudentsAppended++;
-                        @:      }
-                        @:  } else { // !ctlStudentSelected.prop("checked")
-                        @:      downloadAllFromSection = false;
-                        @:  }
+                        // Is this student "allowable" to be selected, on the basis of whether they clicked "Turn In"?
+                        @:if (includeUnsubmitted || @(Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Submitted ? "true" : "false"))
+                        @:{
+                            // Is this student actually selected by the user?
+                            @:if (ctlStudentSelected.prop("checked"))
+                            @:{
+                                @:numStudentsSelected++;
+                                @:numStudentsSelectedAcrossAllSections++;
+                                @:if (numStudentsAppended < c_maxStudentsToDisplayInSelectionLink)
+                                @:{
+                                    @:if (numStudentsAppended > 0)
+                                    @:{
+                                        @:studentSummaryDisplay += "; ";
+                                    @:}
+                                    @:studentSummaryDisplay += "@Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].LastName";
+                                    @:studentSummaryDisplay += ", ";
+                                    @:studentSummaryDisplay += "@Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].FirstName";
+                                    @:numStudentsAppended++;
+                                @:}
+                            @:}
+                            @:else    // !ctlStudentSelected.prop("checked")
+                            @:{
+                                @:downloadAllFromSection = false;
+                            @:}
                         @:}
                     @:}
-                }
-        // Done iterating through users of this section; construct the final link text
-                @:var remaining = numStudentsSelected - c_maxStudentsToDisplayInSelectionLink;
-                @:if (downloadAllFromSection) {
-                @:      studentSummaryDisplay = "Students: All";
-                @:      if (!includeUnsubmitted) {
-                @:          studentSummaryDisplay += " (except unsubmitted)";
-                @:      }
-                @:} else if (numStudentsAppended == 0) {
-                @:      studentSummaryDisplay = "Students: None";
-                @:} else if (remaining > 0) {
-                @:  studentSummaryDisplay += "; and " + remaining + " more";
+                    }  // server-side: for (int iStudent = 0...
+
+                    // Done iterating through users of this section; construct the final link text
+                    @:var remaining = numStudentsSelected - c_maxStudentsToDisplayInSelectionLink;
+                    @:if (downloadAllFromSection)
+                    @:{
+                        @:studentSummaryDisplay = "Students: All";
+                        @:if (!includeUnsubmitted)
+                        @:{
+                            @:studentSummaryDisplay += " (except unsubmitted)";
+                        @:}
+                    @:}
+                    @:else if (numStudentsAppended == 0)
+                    @:{
+                        @:studentSummaryDisplay = "Students: None";
+                    @:}
+                    @:else if (remaining > 0)
+                    @:{
+                        @:studentSummaryDisplay += "; and " + remaining + " more";
+                    @:}
+                    @:studentsSubmitButton.prop("value", studentSummaryDisplay);
                 @:}
-                @:studentsSubmitButton.prop("value", studentSummaryDisplay);
-            @:}
             @:}
         }
 
