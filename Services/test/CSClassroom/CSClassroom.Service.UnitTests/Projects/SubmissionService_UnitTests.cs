@@ -227,17 +227,41 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				submissionArchiveBuilder: submissionArchiveBuilder.Object
 			);
 
+			// Downloading these students allows testing the following combinations:
+			//		Period 2: Student3 submission: NO, Student4 submission: YES
+			//				  EXCLUDE this student from downloading: Student5 submission: YES
+			//		Period 3: Student6 submission: NO, Student7 submission: YES
+			//				  EXCLUDE this student from downloading: Student8 submission: NO
+			//
+			string[] studentNamesForDownloadingFromPeriod2 = new string[] { "Student3", "Student4" };
+			string[] studentNamesForDownloadingFromPeriod3 = new string[] { "Student6", "Student7" };
+
+			// TODO: Can I do this cleaner?
 			var dlRequests = Collections.CreateList
 			(
 				new SectionSubmissionDownloadRequest
 				(
 					database.Context.Sections.Single
 					(
-						sec => sec.Name == "Period1"
+						sec => sec.Name == "Period2" && sec.Classroom.Name == "Class1"
 					).Id,
 					database.Context.Users.Where
 					(
-						user => new string[] { "Student1", "Student2" }.Contains(user.UserName)
+						user => studentNamesForDownloadingFromPeriod2.Contains(user.UserName)
+					).Select
+					(
+						user => user.Id
+					).ToList()
+				),
+				new SectionSubmissionDownloadRequest
+				(
+					database.Context.Sections.Single
+					(
+						sec => sec.Name == "Period3" && sec.Classroom.Name == "Class1"
+					).Id,
+					database.Context.Users.Where
+					(
+						user => studentNamesForDownloadingFromPeriod3.Contains(user.UserName)
 					).Select
 					(
 						user => user.Id
@@ -245,7 +269,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				)
 			);
 
-			// TODO: Improve code coverage
 			var result = await submissionService.DownloadSubmissionsAsync
 			(
 				"Class1",
@@ -323,7 +346,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 
 		/// <summary>
 		/// Ensures that GradeSubmissionsAsync returns submissions to grade
-		/// when all students have submitted the checkpoint.
+		/// when not all students have submitted the checkpoint.
 		/// </summary>
 		[Fact]
 		public async Task GradeSubmissionsAsync_NotAllSubmitted_ReturnsSubmissions()
@@ -812,9 +835,17 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				.AddClassroom("Class1")
 				.AddClassroom("Class2")
 				.AddSection("Class1", "Period1")
+				.AddSection("Class1", "Period2")
+				.AddSection("Class1", "Period3")
 				.AddSection("Class2", "Period2")
 				.AddStudent("Student1", "Last1", "First1", "Class1", "Period1", "GitHubUser")
 				.AddStudent("Student2", "Last2", "First2", "Class1", "Period1", "GitHubUser")
+				.AddStudent("Student3", "Last3", "First3", "Class1", "Period2", "GitHubUser")
+				.AddStudent("Student4", "Last4", "First4", "Class1", "Period2", "GitHubUser")
+				.AddStudent("Student5", "Last5", "First5", "Class1", "Period2", "GitHubUser")
+				.AddStudent("Student6", "Last6", "First6", "Class1", "Period3", "GitHubUser")
+				.AddStudent("Student7", "Last7", "First7", "Class1", "Period3", "GitHubUser")
+				.AddStudent("Student8", "Last8", "First8", "Class1", "Period3", "GitHubUser")
 				.AddProject("Class1", "Project1")
 				.AddProject("Class2", "Project2")
 				.AddProjectTestClass("Class1", "Project1", "TestClass1")
@@ -824,6 +855,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				.AddCheckpoint("Class2", "Project2", "Checkpoint1")
 				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint1", "Period1", CommitDates[0])
 				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint2", "Period1", CommitDates[3])
+				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint1", "Period2", CommitDates[0])
+				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint2", "Period2", CommitDates[3])
+				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint1", "Period3", CommitDates[0])
+				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint2", "Period3", CommitDates[3])
 				.AddCheckpointDueDate("Class2", "Project2", "Checkpoint1", "Period2", CommitDates[0])
 				.AddCheckpointTestClass("Class1", "Project1", "Checkpoint1", "TestClass1", required: true)
 				.AddCheckpointTestClass("Class1", "Project1", "Checkpoint1", "TestClass2", required: false)
@@ -837,6 +872,30 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				.AddCommit("Class1", "Project1", "Student2", "Commit2", CommitDates[1], GetFailedBuild())
 				.AddCommit("Class1", "Project1", "Student2", "Commit3", CommitDates[2], GetSuccessfulBuild())
 				.AddCommit("Class1", "Project1", "Student2", "Commit4", CommitDates[3], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student3", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student3", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student3", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student3", "Commit4", CommitDates[3], null /*inProgress*/)
+				.AddCommit("Class1", "Project1", "Student4", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student4", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student4", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student4", "Commit4", CommitDates[3], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student5", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student5", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student5", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student5", "Commit4", CommitDates[3], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student6", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student6", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student6", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student6", "Commit4", CommitDates[3], null /*inProgress*/)
+				.AddCommit("Class1", "Project1", "Student7", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student7", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student7", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student7", "Commit4", CommitDates[3], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student8", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student8", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student8", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student8", "Commit4", CommitDates[3], null /*inProgress*/)
 				.AddCommit("Class2", "Project2", "Student1", "Commit1", CommitDates[0], GetSuccessfulBuild())
 				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student1", "Commit1", SubmissionDates[0],
 					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
@@ -848,6 +907,36 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					2 /*pullRequest*/, "Feedback3", sentFeedback: true, readFeedback: false)
 				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student2", "Commit4", SubmissionDates[3],
 					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student3", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student3", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, "Feedback3", sentFeedback: true, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student4", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student4", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, feedback: null, sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student4", "Commit4", SubmissionDates[3],
+					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student5", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student5", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, "Feedback3", sentFeedback: true, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student5", "Commit4", SubmissionDates[3],
+					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student6", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student6", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, feedback: null, sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student7", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student7", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, "Feedback3", sentFeedback: true, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student7", "Commit4", SubmissionDates[3],
+					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student8", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student8", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, feedback: null, sentFeedback: false, readFeedback: false)
 				.AddSubmission("Class2", "Project2", "Checkpoint1", "Student1", "Commit1", SubmissionDates[0],
 					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: false);
 		}
@@ -913,25 +1002,36 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					)
 				).ReturnsAsync(templateContents);
 
+			// See comment in DownloadSubmissionsAsync_DownloasdSubmissions for summary of
+			// student/period/submission/selection combos being tested
 			submissionDownloader
 				.Setup
 				(
 					sd => sd.DownloadSubmissionsAsync
 					(
 						It.Is<Checkpoint>(c => c.Name == "Checkpoint2"),
-						It.Is<IList<StudentDownloadRequest>>
-						(
-							requests =>
-								   requests.Count == 2
-								&& requests[0].Student.User.UserName == "Student1"
-								&& requests[0].Submitted == false
-								&& requests[1].Student.User.UserName == "Student2"
-								&& requests[1].Submitted == true
-						)
+						It.Is<IList<StudentDownloadRequest>>(req => lam(req))
+
 					)
 				).ReturnsAsync(studentSubmissions);
 
 			return submissionDownloader;
+		}
+
+		private bool lam(IList<StudentDownloadRequest> requests)
+		{
+			return (
+				//requests =>
+									   requests.Count == 4
+									&& requests[0].Student.User.UserName == "Student3"
+									&& requests[0].Submitted == false
+									&& requests[1].Student.User.UserName == "Student4"
+									&& requests[1].Submitted == true
+									&& requests[2].Student.User.UserName == "Student6"
+									&& requests[2].Submitted == false
+									&& requests[3].Student.User.UserName == "Student7"
+									&& requests[3].Submitted == true
+							);
 		}
 
 		/// <summary>

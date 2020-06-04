@@ -242,7 +242,6 @@ namespace CSC.CSClassroom.Service.Projects
 	        bool includeFlatFiles)
 
         {
-            //var sections = await LoadSectionsAsync(classroomName, sectionNames);
 			var checkpoint = await LoadCheckpointAsync
 			(
 				classroomName,
