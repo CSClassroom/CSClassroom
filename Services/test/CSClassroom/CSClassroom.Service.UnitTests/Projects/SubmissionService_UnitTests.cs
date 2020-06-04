@@ -13,6 +13,7 @@ using CSC.CSClassroom.Service.Projects;
 using CSC.CSClassroom.Service.Projects.Submissions;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -236,39 +237,33 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			string[] studentNamesForDownloadingFromPeriod2 = new string[] { "Student3", "Student4" };
 			string[] studentNamesForDownloadingFromPeriod3 = new string[] { "Student6", "Student7" };
 
-			// TODO: Can I do this cleaner?
-			var dlRequests = Collections.CreateList
+			var dlRequests = database.Context.Sections.Where
 			(
-				new SectionSubmissionDownloadRequest
+				sec => sec.Classroom.Name == "Class1" &&
+					   (sec.Name == "Period2" || sec.Name == "Period3")
+			).Select
+			(
+				sec => new SectionSubmissionDownloadRequest
 				(
-					database.Context.Sections.Single
-					(
-						sec => sec.Name == "Period2" && sec.Classroom.Name == "Class1"
-					).Id,
+					sec.Id,
 					database.Context.Users.Where
 					(
-						user => studentNamesForDownloadingFromPeriod2.Contains(user.UserName)
-					).Select
-					(
-						user => user.Id
-					).ToList()
-				),
-				new SectionSubmissionDownloadRequest
-				(
-					database.Context.Sections.Single
-					(
-						sec => sec.Name == "Period3" && sec.Classroom.Name == "Class1"
-					).Id,
-					database.Context.Users.Where
-					(
-						user => studentNamesForDownloadingFromPeriod3.Contains(user.UserName)
+						user =>
+							(
+								   sec.Name == "Period2" 
+								&& studentNamesForDownloadingFromPeriod2.Contains(user.UserName)
+							) 
+						|| (
+								   sec.Name == "Period3"
+								&& studentNamesForDownloadingFromPeriod3.Contains(user.UserName)
+							)
 					).Select
 					(
 						user => user.Id
 					).ToList()
 				)
-			);
-
+			).ToList();
+				
 			var result = await submissionService.DownloadSubmissionsAsync
 			(
 				"Class1",
