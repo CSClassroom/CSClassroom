@@ -345,8 +345,6 @@ namespace CSC.CSClassroom.Service.Projects
 						)
 						.Where
 						(
-							// TODO: Indices on names?  Should I make a separate query to get IDs
-							// to join on them instead?
 							sub => sub.Commit.UserId == sm.ClassroomMembership.User.Id &&
 								   sub.Checkpoint.Project.Name == projectName &&
 								   sub.Checkpoint.Name == checkpointName

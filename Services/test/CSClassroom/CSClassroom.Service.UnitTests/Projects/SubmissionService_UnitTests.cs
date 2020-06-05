@@ -214,20 +214,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				studentSubmissions
 			);
 
-			var submissionArchiveBuilder = GetMockSubmissionArchiveBuilder
-			(
-				templateContents,
-				studentSubmissions,
-				expectedResult
-			);
-
-			var submissionService = GetSubmissionService
-			(
-				database.Context,
-				submissionDownloader: submissionDownloader.Object,
-				submissionArchiveBuilder: submissionArchiveBuilder.Object
-			);
-
 			// Downloading these students allows testing the following combinations:
 			//		Period 2: Student3 submission: NO, Student4 submission: YES
 			//				  EXCLUDE this student from downloading: Student5 submission: YES
@@ -263,18 +249,61 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					).ToList()
 				)
 			).ToList();
-				
-			var result = await submissionService.DownloadSubmissionsAsync
+
+			// Call DownloadSubmissionsAsync with each valid combo of the
+			// include bool params
+			bool[][] includeParamCombos = new bool[][]
+			{
+				new bool[] { true, false },
+				new bool[] { false, true },
+				new bool[] { true, true },
+			};
+
+			foreach (bool[] includeParamCombo in includeParamCombos)
+			{
+				var submissionArchiveBuilder = GetMockSubmissionArchiveBuilder
+				(
+					templateContents,
+					studentSubmissions,
+					expectedResult,
+					includeEclipseProjects: includeParamCombo[0],
+					includeFlatFiles: includeParamCombo[1]
+				);
+
+				var submissionService = GetSubmissionService
+				(
+					database.Context,
+					submissionDownloader: submissionDownloader.Object,
+					submissionArchiveBuilder: submissionArchiveBuilder.Object
+				);
+
+				var result = await submissionService.DownloadSubmissionsAsync
+				(
+					"Class1",
+					"Project1",
+					"Checkpoint2",
+					dlRequests,
+					includeEclipseProjects: includeParamCombo[0],
+					includeFlatFiles: includeParamCombo[1]
+				);
+
+				Assert.Equal(result, expectedResult);
+			}
+		}
+
+		[Fact]
+		public async Task GetCheckpointDownloadCandidateListAsync_ReturnsCandidates()
+		{
+			var database = GetDatabaseBuilder().Build();
+
+			var submissionService = GetSubmissionService(database.Context);
+
+			await submissionService.GetCheckpointDownloadCandidateListAsync
 			(
 				"Class1",
 				"Project1",
-				"Checkpoint2",
-				dlRequests,
-				true,		// includeEclipseProjects
-				true		// includeFlatFiles
+				"Checkpoint2"
 			);
-
-			Assert.Equal(result, expectedResult);
 		}
 
 		/// <summary>
@@ -1005,19 +1034,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					sd => sd.DownloadSubmissionsAsync
 					(
 						It.Is<Checkpoint>(c => c.Name == "Checkpoint2"),
-						It.Is<IList<StudentDownloadRequest>>(req => lam(req))
-
-					)
-				).ReturnsAsync(studentSubmissions);
-
-			return submissionDownloader;
-		}
-
-		private bool lam(IList<StudentDownloadRequest> requests)
-		{
-			return (
-				//requests =>
-									   requests.Count == 4
+						It.Is<IList<StudentDownloadRequest>>
+						(
+							requests => requests.Count == 4
 									&& requests[0].Student.User.UserName == "Student3"
 									&& requests[0].Submitted == false
 									&& requests[1].Student.User.UserName == "Student4"
@@ -1026,7 +1045,11 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 									&& requests[2].Submitted == false
 									&& requests[3].Student.User.UserName == "Student7"
 									&& requests[3].Submitted == true
-							);
+						)
+					)
+				).ReturnsAsync(studentSubmissions);
+
+			return submissionDownloader;
 		}
 
 		/// <summary>
@@ -1035,7 +1058,9 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		private Mock<ISubmissionArchiveBuilder> GetMockSubmissionArchiveBuilder(
 			IArchive templateContents,
 			StudentSubmissions studentSubmissions,
-			Stream expectedArchive)
+			Stream expectedArchive,
+			bool includeEclipseProjects,
+			bool includeFlatFiles)
 		{
 			var archiveBuilder = new Mock<ISubmissionArchiveBuilder>();
 
@@ -1047,8 +1072,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 						It.Is<Project>(p => p.Name == "Project1"),
 						templateContents,
 						studentSubmissions,
-						true,       // includeEclipseProjects
-						true        // includeFlatFiles
+						includeEclipseProjects,
+						includeFlatFiles
 					)
 				).ReturnsAsync(expectedArchive);
 
