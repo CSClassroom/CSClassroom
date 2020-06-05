@@ -25,7 +25,6 @@ namespace CSC.CSClassroom.Model.Projects.ServiceResults
 
     public class UserDownloadCandidateResult
     {
-        // TODO: If I don't end up using user id anywhere, maybe just change this to firstname, lastname
         public User User { get; }
 
         /// <summary>

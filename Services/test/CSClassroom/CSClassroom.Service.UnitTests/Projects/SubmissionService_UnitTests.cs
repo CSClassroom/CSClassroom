@@ -298,12 +298,37 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 
 			var submissionService = GetSubmissionService(database.Context);
 
-			await submissionService.GetCheckpointDownloadCandidateListAsync
+			var candidates = await submissionService.GetCheckpointDownloadCandidateListAsync
 			(
 				"Class1",
 				"Project1",
 				"Checkpoint2"
 			);
+
+			// To insulate this test from data used for other tests, focus on
+			// Period2 and Period3
+			var candidateUsersP2 = candidates.Single
+			(
+				c => c.Section.Name == "Period2"
+			).Users;
+			Assert.Equal(3, candidateUsersP2.Count);
+			Assert.Equal("Student3", candidateUsersP2[0].User.UserName);
+			Assert.False(candidateUsersP2[0].Submitted);
+			Assert.Equal("Student4", candidateUsersP2[1].User.UserName);
+			Assert.True(candidateUsersP2[1].Submitted);
+			Assert.Equal("Student5", candidateUsersP2[2].User.UserName);
+			Assert.True(candidateUsersP2[2].Submitted);
+			var candidateUsersP3 = candidates.Single
+			(
+				c => c.Section.Name == "Period3"
+			).Users;
+			Assert.Equal(3, candidateUsersP3.Count);
+			Assert.Equal("Student6", candidateUsersP3[0].User.UserName);
+			Assert.False(candidateUsersP3[0].Submitted);
+			Assert.Equal("Student7", candidateUsersP3[1].User.UserName);
+			Assert.True(candidateUsersP3[1].Submitted);
+			Assert.Equal("Student8", candidateUsersP3[2].User.UserName);
+			Assert.False(candidateUsersP3[2].Submitted);
 		}
 
 		/// <summary>
