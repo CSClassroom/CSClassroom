@@ -381,10 +381,10 @@ namespace CSC.CSClassroom.WebApp.Controllers
 						).ToList()
 					)
 				).ToList(),
-				new DownloadFormat[] { DownloadFormat.Eclipse, DownloadFormat.All }
-					.Contains(downloadSubmissionViewModel.Format),         // bool includeEclipseProjects
-				new DownloadFormat[] { DownloadFormat.Flat, DownloadFormat.All }
-					.Contains(downloadSubmissionViewModel.Format)          // bool includeFlatFiles
+				includeEclipseProjects: new DownloadFormat[] { DownloadFormat.Eclipse, DownloadFormat.All }
+					.Contains(downloadSubmissionViewModel.Format),
+				includeFlatFiles: new DownloadFormat[] { DownloadFormat.Flat, DownloadFormat.All }
+					.Contains(downloadSubmissionViewModel.Format)
 			);
 
 			var timestamp = TimeZoneProvider.ToUserLocalTime(DateTime.UtcNow)
