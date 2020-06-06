@@ -49,8 +49,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				project,
 				templateContents,
 				GetSubmissions(GetSubmission(student, submissionContents)),
-				true,       // includeEclipseProjects
-				true        // includeFlatFiles
+				includeEclipseProjects: true,
+				includeFlatFiles: true
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -98,8 +98,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				project,
 				templateContents,
 				GetSubmissions(GetSubmission(student, submissionContents)),
-				true,       // includeEclipseProjects
-				true        // includeFlatFiles
+				includeEclipseProjects: true,
+				includeFlatFiles: true
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -141,8 +141,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				project,
 				templateContents,
 				GetSubmissions(GetSubmission(student, submissionContents)),
-				true,       // includeEclipseProjects
-				true        // includeFlatFiles
+				includeEclipseProjects: true,
+				includeFlatFiles: true
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -190,8 +190,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				project,
 				templateContents,
 				GetSubmissions(GetSubmission(student, submissionContents)),
-				true,       // includeEclipseProjects
-				true        // includeFlatFiles
+				includeEclipseProjects: true,
+				includeFlatFiles: true
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -203,6 +203,67 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				"TransformedModifiedByStudent",
 				archiveContents["AllFiles\\PublicFile1\\Period1\\Student1-PublicFile1.java"]
 			);
+		}
+
+		/// <summary>
+		/// Ensures the two include bool parameters which determine whether to include
+		/// EclipseProjects and / or AllFiles are respected
+		/// </summary>
+		/// <returns></returns>
+		[Fact]
+		public async Task BuildSubmissionArchiveAsync_InclusionParameters()
+		{
+			var classroom = GetClassroom();
+			var project = GetProject(classroom);
+			var student = GetStudent(classroom, "Student1", "Period1");
+
+			// Call BuildSubmissionArchiveAsync with each valid combo of the
+			// include bool params
+			bool[][] includeParamCombos = new bool[][]
+			{
+				new bool[] { true, false },
+				new bool[] { false, true },
+				new bool[] { true, true },
+			};
+
+			foreach (bool[] includeParamCombo in includeParamCombos)
+			{
+				var templateContents = GetArchive
+				(
+					new RepositoryFile("Private/PrivateFile1.java", "Original"),
+					new RepositoryFile("Immutable/ImmutableFile1.java", "Original"),
+					new RepositoryFile("Public/PublicFile1.java", "Original"),
+					new RepositoryFile("Public/PublicFile2.txt", "Original")
+				);
+
+				var submissionContents = GetArchive
+				(
+					new RepositoryFile("Private/PrivateFile1.java", "ModifiedByStudent"),
+					new RepositoryFile("Immutable/ImmutableFile1.java", "ModifiedByStudent"),
+					new RepositoryFile("Public/PublicFile1.java", "ModifiedByStudent"),
+					new RepositoryFile("Public/PublicFile2.txt", "ModifiedByStudent")
+				);
+
+				var archiveBuilder = GetSubmissionArchiveBuilder();
+
+				var archive = await archiveBuilder.BuildSubmissionArchiveAsync
+				(
+					project,
+					templateContents,
+					GetSubmissions(GetSubmission(student, submissionContents)),
+					includeEclipseProjects: includeParamCombo[0],
+					includeFlatFiles: includeParamCombo[1]
+				);
+
+				var archiveContents = GetArchiveContents(archive);
+
+				Assert.Equal(
+					includeParamCombo[0] ? 4 : 0,
+					archiveContents.Count(f => f.Key.StartsWith("EclipseProjects")));
+				Assert.Equal(
+					includeParamCombo[1] ? 1 : 0,
+					archiveContents.Count(f => f.Key.StartsWith("AllFiles")));
+			}
 		}
 
 		/// <summary>
