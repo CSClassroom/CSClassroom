@@ -37,7 +37,7 @@
             <label asp-for="Format" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <p asp-description-for="Format" class="form-control-static"></p>
-                <select asp-for="Format" asp-items="Html.GetEnumSelectList<DownloadFormat>()"></select>
+                <select asp-for="Format" asp-items="Model.GetDownloadFormatSelectList()"></select>
                 <span asp-validation-for="Format" class="text-danger"></span>
             </div>
         </div>

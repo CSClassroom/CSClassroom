@@ -6,6 +6,7 @@ using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
+using CSC.Common.Infrastructure.Projects.Submissions;
 
 namespace CSC.CSClassroom.Service.Projects
 {
@@ -59,8 +60,7 @@ namespace CSC.CSClassroom.Service.Projects
 			string projectName,
 			string checkpointName,
 			IList<SectionSubmissionDownloadRequest> selectedDownloadCandidates,
-			bool includeEclipseProjects,
-			bool includeFlatFiles);
+			ProjectSubmissionDownloadFormat downloadFormat);
 
 		/// <summary>
 		/// Fetches list of sections and students with commits that the user

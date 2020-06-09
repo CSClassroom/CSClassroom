@@ -17,6 +17,8 @@ using CSC.CSClassroom.Model.Classrooms;
 using Octokit;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
 using CSC.CSClassroom.Model.Projects;
+using CSC.CSClassroom.WebApp.ViewModels.Shared;
+using CSC.Common.Infrastructure.Projects.Submissions;
 
 namespace CSC.CSClassroom.WebApp.Controllers
 {
@@ -246,14 +248,14 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		{
 			ViewBag.DownloadFormats = new List<SelectListItem>
 			(
-				Enum.GetValues(typeof(DownloadFormat)).Cast<DownloadFormat>()
+				Enum.GetValues(typeof(ProjectSubmissionDownloadFormat)).Cast<ProjectSubmissionDownloadFormat>()
 				.Select
 				(
 					format => new SelectListItem()
 					{
 						Text = format.ToString(),
 						Value = format.ToString(),
-						Selected = (format == DownloadFormat.All)
+						Selected = (format == ProjectSubmissionDownloadFormat.All)
 					}
 				)
 			);
@@ -292,7 +294,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 			DownloadSubmissionViewModel viewModel = new DownloadSubmissionViewModel()
 			{
 				IndexForSectionStudentsView = -1,
-				Format = DownloadFormat.All,
+				Format = ProjectSubmissionDownloadFormat.All,
 				IncludeUnsubmitted = true,
 				SectionsAndStudents = sectionStudents,
 				CurrentSection = new SectionInfo()
@@ -381,10 +383,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 						).ToList()
 					)
 				).ToList(),
-				includeEclipseProjects: new DownloadFormat[] { DownloadFormat.Eclipse, DownloadFormat.All }
-					.Contains(downloadSubmissionViewModel.Format),
-				includeFlatFiles: new DownloadFormat[] { DownloadFormat.Flat, DownloadFormat.All }
-					.Contains(downloadSubmissionViewModel.Format)
+				downloadSubmissionViewModel.Format
 			);
 
 			var timestamp = TimeZoneProvider.ToUserLocalTime(DateTime.UtcNow)

@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.Projects.Submissions;
 using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Projects;
@@ -49,8 +51,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				project,
 				templateContents,
 				GetSubmissions(GetSubmission(student, submissionContents)),
-				includeEclipseProjects: true,
-				includeFlatFiles: true
+				ProjectSubmissionDownloadFormat.All
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -98,8 +99,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				project,
 				templateContents,
 				GetSubmissions(GetSubmission(student, submissionContents)),
-				includeEclipseProjects: true,
-				includeFlatFiles: true
+				ProjectSubmissionDownloadFormat.All
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -141,8 +141,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				project,
 				templateContents,
 				GetSubmissions(GetSubmission(student, submissionContents)),
-				includeEclipseProjects: true,
-				includeFlatFiles: true
+				ProjectSubmissionDownloadFormat.All
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -190,8 +189,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 				project,
 				templateContents,
 				GetSubmissions(GetSubmission(student, submissionContents)),
-				includeEclipseProjects: true,
-				includeFlatFiles: true
+				ProjectSubmissionDownloadFormat.All
 			);
 
 			var archiveContents = GetArchiveContents(archive);
@@ -217,16 +215,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 			var project = GetProject(classroom);
 			var student = GetStudent(classroom, "Student1", "Period1");
 
-			// Call BuildSubmissionArchiveAsync with each valid combo of the
-			// include bool params
-			bool[][] includeParamCombos = new bool[][]
-			{
-				new bool[] { true, false },
-				new bool[] { false, true },
-				new bool[] { true, true },
-			};
-
-			foreach (bool[] includeParamCombo in includeParamCombos)
+			// Call BuildSubmissionArchiveAsync with each valid format
+			foreach (ProjectSubmissionDownloadFormat format in Enum.GetValues(typeof(ProjectSubmissionDownloadFormat)))
 			{
 				var templateContents = GetArchive
 				(
@@ -251,17 +241,22 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 					project,
 					templateContents,
 					GetSubmissions(GetSubmission(student, submissionContents)),
-					includeEclipseProjects: includeParamCombo[0],
-					includeFlatFiles: includeParamCombo[1]
+					format
 				);
 
 				var archiveContents = GetArchiveContents(archive);
 
 				Assert.Equal(
-					includeParamCombo[0] ? 4 : 0,
+					(
+							format == ProjectSubmissionDownloadFormat.All 
+						 || format == ProjectSubmissionDownloadFormat.Eclipse
+					) ? 4 : 0,
 					archiveContents.Count(f => f.Key.StartsWith("EclipseProjects")));
 				Assert.Equal(
-					includeParamCombo[1] ? 1 : 0,
+					(
+							format == ProjectSubmissionDownloadFormat.All
+						 || format == ProjectSubmissionDownloadFormat.Flat
+					) ? 1 : 0,
 					archiveContents.Count(f => f.Key.StartsWith("AllFiles")));
 			}
 		}

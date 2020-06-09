@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Email;
+using CSC.Common.Infrastructure.Projects.Submissions;
 using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Users;
@@ -250,24 +251,15 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				)
 			).ToList();
 
-			// Call DownloadSubmissionsAsync with each valid combo of the
-			// include bool params
-			bool[][] includeParamCombos = new bool[][]
-			{
-				new bool[] { true, false },
-				new bool[] { false, true },
-				new bool[] { true, true },
-			};
-
-			foreach (bool[] includeParamCombo in includeParamCombos)
+			// Call DownloadSubmissionsAsync with each valid format
+			foreach (ProjectSubmissionDownloadFormat format in Enum.GetValues(typeof(ProjectSubmissionDownloadFormat)))
 			{
 				var submissionArchiveBuilder = GetMockSubmissionArchiveBuilder
 				(
 					templateContents,
 					studentSubmissions,
 					expectedResult,
-					includeEclipseProjects: includeParamCombo[0],
-					includeFlatFiles: includeParamCombo[1]
+					format
 				);
 
 				var submissionService = GetSubmissionService
@@ -283,8 +275,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					"Project1",
 					"Checkpoint2",
 					dlRequests,
-					includeEclipseProjects: includeParamCombo[0],
-					includeFlatFiles: includeParamCombo[1]
+					format
 				);
 
 				Assert.Equal(result, expectedResult);
@@ -1084,8 +1075,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			IArchive templateContents,
 			StudentSubmissions studentSubmissions,
 			Stream expectedArchive,
-			bool includeEclipseProjects,
-			bool includeFlatFiles)
+			ProjectSubmissionDownloadFormat format)
 		{
 			var archiveBuilder = new Mock<ISubmissionArchiveBuilder>();
 
@@ -1097,8 +1087,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 						It.Is<Project>(p => p.Name == "Project1"),
 						templateContents,
 						studentSubmissions,
-						includeEclipseProjects,
-						includeFlatFiles
+						format
 					)
 				).ReturnsAsync(expectedArchive);
 

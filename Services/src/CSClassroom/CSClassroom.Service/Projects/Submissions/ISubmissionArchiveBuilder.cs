@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.Projects.Submissions;
 using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Projects;
 
@@ -19,7 +20,6 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 			Project project,
 			IArchive templateContents,
 			IList<StudentSubmission> submissions,
-			bool includeEclipseProjects,
-			bool includeFlatFiles);
+			ProjectSubmissionDownloadFormat format);
 	}
 }

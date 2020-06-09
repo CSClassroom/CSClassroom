@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.Projects.Submissions;
 using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
@@ -46,8 +47,7 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 			Project project,
 			IArchive templateContents,
 			IList<StudentSubmission> submissions,
-			bool includeEclipseProjects,
-			bool includeFlatFiles)
+			ProjectSubmissionDownloadFormat format)
 		{
 			var stream = _fileSystem.CreateNewTempFile();
 
@@ -62,8 +62,7 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 						result.Student,
 						templateContents,
 						result.Contents,
-						includeEclipseProjects,
-						includeFlatFiles
+						format
 					);
 
 					result.Contents.Dispose();
@@ -83,9 +82,19 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 			ClassroomMembership student,
 			IArchive templateContents,
 			IArchive submissionContents,
-			bool includeEclipseProjects,
-			bool includeFlatFiles)
+			ProjectSubmissionDownloadFormat format)
 		{
+			bool includeEclipseProjects =
+			(
+					format == ProjectSubmissionDownloadFormat.Eclipse
+				||  format == ProjectSubmissionDownloadFormat.All
+			);
+			bool includeFlatFiles =
+			(
+					format == ProjectSubmissionDownloadFormat.Flat
+				||  format == ProjectSubmissionDownloadFormat.All
+			);
+
 			// Submissions are grouped by section.  If a student is in multiple
 			// sections, just grab the first one
 			string sectionName = student.SectionMemberships.First().Section.Name;

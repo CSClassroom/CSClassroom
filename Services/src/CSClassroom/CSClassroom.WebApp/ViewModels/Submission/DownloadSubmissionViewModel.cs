@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using CSC.CSClassroom.WebApp.ViewModels.Shared;
+using CSC.Common.Infrastructure.Projects.Submissions;
 
 namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 {
@@ -29,7 +31,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 			Name = "Components to download",
 			Description = "Select which components of the student submissions to include in the download."
 		)]
-		public DownloadFormat Format { get; set; }
+		public ProjectSubmissionDownloadFormat Format { get; set; }
 
 		[Display
 		(
@@ -55,21 +57,16 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		/// The submit button to finally initiate the download
 		/// </summary>
 		public string DownloadSubmitButton { get; set; }
-	}
 
-	/// <summary>
-	/// The category of submission components to download
-	/// </summary>
-	public enum DownloadFormat
-	{
-		[Display(Name = "Flat file list")]
-		Flat,
-
-		[Display(Name = "Eclipse projects")]
-		Eclipse,
-
-		[Display(Name = "All")]
-		All,
+		public IEnumerable<SelectListItem> GetDownloadFormatSelectList()
+		{
+			return new SelectListItem[]
+			{
+				new SelectListItem("Flat file list", ProjectSubmissionDownloadFormat.Flat.ToString(), false),
+				new SelectListItem("Eclipse projects", ProjectSubmissionDownloadFormat.Eclipse.ToString(), false),
+				new SelectListItem("All", ProjectSubmissionDownloadFormat.All.ToString(), true),
+			};
+		}
 	}
 
 	/// <summary>

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Email;
+using CSC.Common.Infrastructure.Projects.Submissions;
 using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Projects;
@@ -238,8 +239,7 @@ namespace CSC.CSClassroom.Service.Projects
 			string projectName,
 			string checkpointName,
 			IList<SectionSubmissionDownloadRequest> selectedDownloadCandidates,
-            bool includeEclipseProjects,
-	        bool includeFlatFiles)
+			ProjectSubmissionDownloadFormat format)
 
         {
 			var checkpoint = await LoadCheckpointAsync
@@ -309,8 +309,7 @@ namespace CSC.CSClassroom.Service.Projects
 				checkpoint.Project,
 				templateContents,
 				submissionContents,
-				includeEclipseProjects,
-				includeFlatFiles
+				format
 			);
 		}
 
