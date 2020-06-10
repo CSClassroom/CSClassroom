@@ -288,7 +288,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 					Name = sectionName,
 					Index = sectionStudents.FindIndex(item => item.SectionName.Value == sectionName)
 				}
-            };
+			};
 
 			return View("Download", viewModel);
 		}
@@ -338,11 +338,11 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// <param name="downloadSubmissionViewModel">ViewModel for the form</param>
 		public async Task<IActionResult> DownloadSubmissionsAsync(DownloadSubmissionViewModel downloadSubmissionViewModel)
 		{
-            var selectedSections = downloadSubmissionViewModel.SectionsAndStudents.Where
-            (
-                ss => ss.SectionName.Selected
+			var selectedSections = downloadSubmissionViewModel.SectionsAndStudents.Where
+			(
+				ss => ss.SectionName.Selected
 			).ToList();
-            
+			
 			if (selectedSections.Count == 0)
 			{
 				return NotFound();
