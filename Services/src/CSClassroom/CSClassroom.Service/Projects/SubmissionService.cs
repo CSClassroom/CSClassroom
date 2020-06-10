@@ -241,7 +241,7 @@ namespace CSC.CSClassroom.Service.Projects
 			IList<SectionSubmissionDownloadRequest> selectedDownloadCandidates,
 			ProjectSubmissionDownloadFormat format)
 
-        {
+		{
 			var checkpoint = await LoadCheckpointAsync
 			(
 				classroomName,
@@ -322,7 +322,7 @@ namespace CSC.CSClassroom.Service.Projects
 			string classroomName,
 			string projectName,
 			string checkpointName)
-        {
+		{
 			return await _dbContext.SectionMemberships
 				.Select
 				(
@@ -410,7 +410,7 @@ namespace CSC.CSClassroom.Service.Projects
 								group => group.Where
 								(
 									s => (s == group.First() && s.Checkpoint != checkpoint)
-									     || (s != group.First() && !string.IsNullOrEmpty(s.Feedback))
+										 || (s != group.First() && !string.IsNullOrEmpty(s.Feedback))
 								)
 							).ToList()
 					)
@@ -472,7 +472,7 @@ namespace CSC.CSClassroom.Service.Projects
 							cm => cm.SectionMemberships.Any
 							(
 								sm => sm.SectionId == section.Id
-								      && sm.Role == SectionRole.Student
+									  && sm.Role == SectionRole.Student
 							)
 						)
 				)
@@ -539,8 +539,8 @@ namespace CSC.CSClassroom.Service.Projects
 				.FirstOrDefaultAsync();
 
 			if (submission == null
-			    || submission.CheckpointId != checkpoint.Id
-			    || !submission.FeedbackSent)
+				|| submission.CheckpointId != checkpoint.Id
+				|| !submission.FeedbackSent)
 			{
 				return null;
 			}
@@ -549,7 +549,7 @@ namespace CSC.CSClassroom.Service.Projects
 				.Where
 				(
 					sm => sm.ClassroomMembership.ClassroomId == checkpoint.Project.ClassroomId
-					      && sm.ClassroomMembership.UserId == submission.Commit.UserId
+						  && sm.ClassroomMembership.UserId == submission.Commit.UserId
 				)
 				.Include(sm => sm.Section)
 				.FirstOrDefaultAsync();
@@ -638,7 +638,7 @@ namespace CSC.CSClassroom.Service.Projects
 						cm => cm.SectionMemberships.Any
 						(
 							sm => sm.SectionId == section.Id
-							      && sm.Role == SectionRole.Student
+								  && sm.Role == SectionRole.Student
 						)
 					)
 				)
@@ -666,7 +666,7 @@ namespace CSC.CSClassroom.Service.Projects
 							cm => cm.SectionMemberships.Any
 							(
 								sm => sm.SectionId == section.Id
-								      && sm.Role == SectionRole.Student
+									  && sm.Role == SectionRole.Student
 							)
 						)
 				)
@@ -758,7 +758,7 @@ namespace CSC.CSClassroom.Service.Projects
 							cm => cm.SectionMemberships.Any
 							(
 								sm => sm.SectionId == section.Id
-								      && sm.Role == SectionRole.Student
+									  && sm.Role == SectionRole.Student
 							)
 						)
 				)

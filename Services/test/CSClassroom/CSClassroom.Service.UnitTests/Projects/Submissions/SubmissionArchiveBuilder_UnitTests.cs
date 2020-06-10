@@ -204,19 +204,19 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 		}
 
 		/// <summary>
-		/// Ensures the two include bool parameters which determine whether to include
-		/// EclipseProjects and / or AllFiles are respected
+		/// Ensures the download format parameter is respected
 		/// </summary>
 		/// <returns></returns>
 		[Fact]
-		public async Task BuildSubmissionArchiveAsync_InclusionParameters()
+		public async Task BuildSubmissionArchiveAsync_DownloadFormat()
 		{
 			var classroom = GetClassroom();
 			var project = GetProject(classroom);
 			var student = GetStudent(classroom, "Student1", "Period1");
 
 			// Call BuildSubmissionArchiveAsync with each valid format
-			foreach (ProjectSubmissionDownloadFormat format in Enum.GetValues(typeof(ProjectSubmissionDownloadFormat)))
+			foreach (ProjectSubmissionDownloadFormat format in 
+					 Enum.GetValues(typeof(ProjectSubmissionDownloadFormat)))
 			{
 				var templateContents = GetArchive
 				(
