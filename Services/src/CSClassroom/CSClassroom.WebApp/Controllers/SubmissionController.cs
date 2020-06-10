@@ -246,20 +246,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> Download(string sectionName)
 		{
-			ViewBag.DownloadFormats = new List<SelectListItem>
-			(
-				Enum.GetValues(typeof(ProjectSubmissionDownloadFormat)).Cast<ProjectSubmissionDownloadFormat>()
-				.Select
-				(
-					format => new SelectListItem()
-					{
-						Text = format.ToString(),
-						Value = format.ToString(),
-						Selected = (format == ProjectSubmissionDownloadFormat.All)
-					}
-				)
-			);
-
 			// Gets list of sections and students from db for user to choose from
 			var downloadCandidates = await SubmissionService.GetCheckpointDownloadCandidateListAsync(
 				ClassroomName,
