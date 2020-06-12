@@ -323,7 +323,9 @@ namespace CSC.CSClassroom.Service.Projects
 			string projectName,
 			string checkpointName)
 		{
-			return await _dbContext.SectionMemberships
+			// Three round trips to db to get section memberships and submissions...
+
+			var sectionMemberships = await _dbContext.SectionMemberships
 				.Select
 				(
 					sm => sm
@@ -333,26 +335,42 @@ namespace CSC.CSClassroom.Service.Projects
 					sm => sm.ClassroomMembership.Classroom.Name == classroomName &&
 						  sm.Role == SectionRole.Student
 				)
+				.Include(sm => sm.Section)
+				.Include(sm => sm.ClassroomMembership)
+					.ThenInclude(cm => cm.User)
+				.ToListAsync();
+
+			var checkpoint = await LoadCheckpointAsync
+			(
+				classroomName,
+				projectName,
+				checkpointName
+			);
+			
+			var submissions = await _dbContext.Submissions
+				.Where
+				(
+					sub => sub.Checkpoint.Id == checkpoint.Id
+				)
+				.ToListAsync();
+
+			// ...and then combine them in memory to produce the CheckpointDownloadCandidateResult list
+			return sectionMemberships
 				.GroupBy
 				(
 					sm => sm.Section,
 					sm => new UserDownloadCandidateResult(
 						sm.ClassroomMembership.User,
-						_dbContext.Submissions.Select
-						(
-							sub => sub
-						)
+						submissions
 						.Where
 						(
-							sub => sub.Commit.UserId == sm.ClassroomMembership.User.Id &&
-								   sub.Checkpoint.Project.Name == projectName &&
-								   sub.Checkpoint.Name == checkpointName
+							sub => sub.Commit.UserId == sm.ClassroomMembership.User.Id
 						).Any()
 					),
 					(section, users) => new CheckpointDownloadCandidateResult(
 						section,
 						users.ToList())
-				).ToListAsync();
+				).ToList();
 		}
 
 		/// <summary>
