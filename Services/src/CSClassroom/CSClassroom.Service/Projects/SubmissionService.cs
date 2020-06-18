@@ -153,6 +153,7 @@ namespace CSC.CSClassroom.Service.Projects
 				checkpointName
 			);
 
+			//var submissions = await GetCheckpointSubmissionsQuery(checkpoint, section);
 			var submissions = await GetCheckpointSubmissionsQuery(checkpoint, section)
 				.ToListAsync();
 
@@ -293,22 +294,19 @@ namespace CSC.CSClassroom.Service.Projects
 			//			.ThenInclude(cm => cm.SectionMemberships)
 			//	.ToListAsync();
 
-			var allCheckpointSubmissions =
-				await GetCheckpointSubmissionsQuery(
-					checkpoint,
-					selectedDownloadCandidates.Select
-					(
-						sdc => sdc.SectionId
-					).ToList()
-				).ToListAsync();
+			var allCheckpointSubmissions = GetCheckpointSubmissionsQuery
+			(
+				checkpoint,
+				section: null       // Include all sections
+			);
 
 			var usersWithSubmissions = new HashSet<User>
 			(
-				allCheckpointSubmissions
+				await allCheckpointSubmissions
 					.Where(submission => selectedUserIds.Contains(submission.Commit.UserId))
 					.GroupBy(submission => submission.Commit.User)
 					.Select(group => group.Key)
-					.ToList()
+					.ToListAsync()
 			);
 
 			var studentDownloadRequests = sectionMemberships
@@ -794,12 +792,34 @@ namespace CSC.CSClassroom.Service.Projects
 
 		/// <summary>
 		/// Returns a query for all submissions in a given checkpoint
-		/// for a single section.
+		/// for a single section, or for all sections if section == null.
 		/// </summary>
+		//private async Task<List<Submission>> GetCheckpointSubmissionsQuery(
 		private IQueryable<Submission> GetCheckpointSubmissionsQuery(
 			Checkpoint checkpoint,
 			Section section)
 		{
+			// Identical queries; just leave off the SectionId filter if section == null
+
+			if (section == null)
+			{
+				return _dbContext.Submissions
+					.Where
+					(
+						submission =>
+							submission.CheckpointId == checkpoint.Id &&
+							submission.Commit.User.ClassroomMemberships.Any
+							(
+								cm => cm.SectionMemberships.Any
+								(
+									sm => sm.Role == SectionRole.Student
+								)
+							)
+					)
+					.Include(submission => submission.Commit.User.ClassroomMemberships)
+					.Include(submission => submission.Commit.Build);
+			}
+
 			return _dbContext.Submissions
 				.Where
 				(
@@ -816,35 +836,129 @@ namespace CSC.CSClassroom.Service.Projects
 				)
 				.Include(submission => submission.Commit.User.ClassroomMemberships)
 				.Include(submission => submission.Commit.Build);
-		}
 
-		/// <summary>
-		/// Returns a query for all submissions in a given checkpoint
-		/// for potentially multiple sections.
-		/// </summary>
-		private IQueryable<Submission> GetCheckpointSubmissionsQuery(
-			Checkpoint checkpoint,
-			List<int> sectionIds)
-		{
-			return _dbContext.Submissions
-				.Where
-				(
-					submission =>
-						submission.CheckpointId == checkpoint.Id &&
-						submission.Commit.User.ClassroomMemberships.Any
-						(
-							cm => cm.SectionMemberships.Any
-							(
-								sm => sectionIds.Any
-								(
-									secId => sm.SectionId == secId
-								)
-								&& sm.Role == SectionRole.Student
-							)
-						)
-				)
-				.Include(submission => submission.Commit.User.ClassroomMemberships)
-				.Include(submission => submission.Commit.Build);
+
+			//// I think I know what I'm doing, let's try iteratively adding queryables
+			//IQueryable<Submission> queryable = _dbContext.Submissions
+			//	.Where
+			//	(
+			//		submission =>
+			//			submission.CheckpointId == checkpoint.Id
+			//	);
+
+			//if (section == null)
+			//{
+			//	var q2 = queryable
+			//		.Where
+			//		(
+			//			submission =>
+			//				submission.Commit.User.ClassroomMemberships.Any
+			//			(
+			//				cm => cm.SectionMemberships.Any
+			//				(
+			//					sm => (sm.Role == SectionRole.Student)
+			//				)
+			//			)
+
+			//		)
+
+			//}
+						
+			//	)
+			//	.Include(submission => submission.Commit.User.ClassroomMemberships)
+			//	.Include(submission => submission.Commit.Build)
+			//	.ToList();
+
+			//// Compare what these do!!!!
+
+			//// 1) Original
+			//_dbContext.Submissions
+			//	.Where
+			//	(
+			//		submission =>
+			//			submission.CheckpointId == checkpoint.Id &&
+			//			submission.Commit.User.ClassroomMemberships.Any
+			//			(
+			//				cm => cm.SectionMemberships.Any
+			//				(
+			//					sm => sm.SectionId == section.Id
+			//						  && sm.Role == SectionRole.Student
+			//				)
+			//			)
+			//	)
+			//	.Include(submission => submission.Commit.User.ClassroomMemberships)
+			//	.Include(submission => submission.Commit.Build)
+			//	.ToList();
+
+			//// 2) func that returns true
+			//Func<SectionMembership, bool> sectionFilter = sm => true;
+			//_dbContext.Submissions
+			//	.Where
+			//	(
+			//		submission =>
+			//			submission.CheckpointId == checkpoint.Id &&
+			//			submission.Commit.User.ClassroomMemberships.Any
+			//		(
+			//			cm => cm.SectionMemberships.Any
+			//			(
+			//				sm => sectionFilter(sm) && (sm.Role == SectionRole.Student)
+			//			)
+			//		)
+			//	)
+			//	.Include(submission => submission.Commit.User.ClassroomMemberships)
+			//	.Include(submission => submission.Commit.Build)
+			//	.ToList();
+
+			//// So everything else compiles...
+			//return _dbContext.Submissions
+			//	.Where
+			//	(
+			//		submission =>
+			//			submission.CheckpointId == checkpoint.Id &&
+			//			submission.Commit.User.ClassroomMemberships.Any
+			//			(
+			//				cm => cm.SectionMemberships.Any
+			//				(
+			//					sm => sm.SectionId == section.Id
+			//						  && sm.Role == SectionRole.Student
+			//				)
+			//			)
+			//	)
+			//	.Include(submission => submission.Commit.User.ClassroomMemberships)
+			//	.Include(submission => submission.Commit.Build);
+
+			//Func<SectionMembership, bool> sectionFilter;
+			//if (section == null)
+			//{
+			//	sectionFilter = sm => true;
+			//}
+			//else
+			//{
+			//	sectionFilter = sm => (sm.SectionId == section.Id);
+			//}
+
+			//List<Submission> submissions = await _dbContext.Submissions
+			//	.Where
+			//	(
+			//		submission =>
+			//			submission.CheckpointId == checkpoint.Id
+			//	)
+			//	.Include(submission => submission.Commit.User.ClassroomMemberships)
+			//	.Include(submission => submission.Commit.Build)
+			//	.ToListAsync();
+
+			//return submissions
+			//	.Where
+			//	(
+			//		submission =>
+			//			submission.Commit.User.ClassroomMemberships.Any
+			//		(
+			//			cm => cm.SectionMemberships.Any
+			//			(
+			//				sm => sectionFilter(sm) && (sm.Role == SectionRole.Student)
+			//			)
+			//		)
+			//	).ToList();
 		}
 
 		/// <summary>
