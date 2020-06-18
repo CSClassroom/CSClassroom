@@ -14,6 +14,7 @@ using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Projects.Submissions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MoreLinq;
 
 namespace CSC.CSClassroom.Service.Projects
 {
@@ -242,6 +243,16 @@ namespace CSC.CSClassroom.Service.Projects
 			ProjectSubmissionDownloadFormat format)
 
 		{
+			// Flat list of all student userIds selected for download
+			var selectedUserIds = new HashSet<int>
+			(
+				selectedDownloadCandidates
+					.SelectMany
+					(
+						sdc => sdc.UserIds
+					).ToList()
+			);
+
 			var checkpoint = await LoadCheckpointAsync
 			(
 				classroomName,
@@ -249,22 +260,38 @@ namespace CSC.CSClassroom.Service.Projects
 				checkpointName
 			);
 
-			// TODO: Study the query this generates.  Will it bring back unnecessary data?
-			var students = await _dbContext.ClassroomMemberships
+			// TODO: Put this in common helper method
+			var sectionMemberships = await _dbContext.SectionMemberships
+				.Select
+				(
+					sm => sm
+				)
 				.Where
 				(
-					cm => selectedDownloadCandidates.Any
-					(
-						sdc => sdc.UserIds.Any
-						(
-							sdcUserId => sdcUserId == cm.User.Id
-						)
-					)
+					sm => sm.ClassroomMembership.Classroom.Name == classroomName &&
+						  sm.Role == SectionRole.Student
 				)
-				.Include(cm => cm.User)
-					.ThenInclude(user => user.ClassroomMemberships)
-						.ThenInclude(cm => cm.SectionMemberships)
+				.Include(sm => sm.Section)
+				.Include(sm => sm.ClassroomMembership)
+					.ThenInclude(cm => cm.User)
 				.ToListAsync();
+
+			// TODO: Study the query this generates.  Will it bring back unnecessary data?
+			//var students = await _dbContext.ClassroomMemberships
+			//	.Where
+			//	(
+			//		cm => selectedDownloadCandidates.Any
+			//		(
+			//			sdc => sdc.UserIds.Any
+			//			(
+			//				sdcUserId => sdcUserId == cm.User.Id
+			//			)
+			//		)
+			//	)
+			//	.Include(cm => cm.User)
+			//		.ThenInclude(user => user.ClassroomMemberships)
+			//			.ThenInclude(cm => cm.SectionMemberships)
+			//	.ToListAsync();
 
 			var allCheckpointSubmissions =
 				await GetCheckpointSubmissionsQuery(
@@ -278,20 +305,26 @@ namespace CSC.CSClassroom.Service.Projects
 			var usersWithSubmissions = new HashSet<User>
 			(
 				allCheckpointSubmissions
+					.Where(submission => selectedUserIds.Contains(submission.Commit.UserId))
 					.GroupBy(submission => submission.Commit.User)
 					.Select(group => group.Key)
 					.ToList()
 			);
 
-			var studentDownloadRequests = students
+			var studentDownloadRequests = sectionMemberships
+				.Where
+				(
+					sm => selectedUserIds.Contains(sm.ClassroomMembership.UserId)
+				)
 				.Select
 				(
-					student => new StudentDownloadRequest
+					sm => new StudentDownloadRequest
 					(
-						student,
-						usersWithSubmissions.Contains(student.User)
+						sm.ClassroomMembership,
+						usersWithSubmissions.Contains(sm.ClassroomMembership.User)
 					)
-				).ToList();
+				)
+				.ToList();
 
 			var templateContents = await _submissionDownloader.DownloadTemplateContentsAsync
 			(
@@ -340,18 +373,19 @@ namespace CSC.CSClassroom.Service.Projects
 					.ThenInclude(cm => cm.User)
 				.ToListAsync();
 
-			var checkpoint = await LoadCheckpointAsync
-			(
-				classroomName,
-				projectName,
-				checkpointName
-			);
-			
+			// Similar to LoadCheckpointAsync, but avoids unnecessary round trips by
+			// not bringing back extra entities.  We only care about the checkpoint id
+			var checkpoint = await _dbContext.Checkpoints
+				.Where(c => c.Project.Classroom.Name == classroomName)
+				.Where(c => c.Project.Name == projectName)
+				.SingleAsync(c => c.Name == checkpointName);
+
 			var submissions = await _dbContext.Submissions
 				.Where
 				(
 					sub => sub.Checkpoint.Id == checkpoint.Id
 				)
+				.Include(sub => sub.Commit)
 				.ToListAsync();
 
 			// ...and then combine them in memory to produce the CheckpointDownloadCandidateResult list
