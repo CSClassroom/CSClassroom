@@ -314,12 +314,12 @@ namespace CSC.CSClassroom.Service.Projects
 					).ToList()
 			);
 
-			var usersWithSubmissions = new HashSet<User>
+			var userIdsWithSubmissions = new HashSet<int>
 			(
 				await allCheckpointSubmissions
 					.Where(submission => selectedUserIds.Contains(submission.Commit.UserId))
 					.GroupBy(submission => submission.Commit.User)
-					.Select(group => group.Key)
+					.Select(group => group.Key.Id)
 					.ToListAsync()
 			);
 
@@ -335,7 +335,7 @@ namespace CSC.CSClassroom.Service.Projects
 					sm => new StudentDownloadRequest
 					(
 						sm.ClassroomMembership,
-						usersWithSubmissions.Contains(sm.ClassroomMembership.User)
+						userIdsWithSubmissions.Contains(sm.ClassroomMembership.User.Id)
 					)
 				)
 				.ToList();
