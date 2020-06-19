@@ -111,6 +111,7 @@
                 <label asp-for="SectionsAndStudents[iSect].SelectedStudents" class="col-md-2 control-label"></label>
                 <div class="col-md-10">
                     <p asp-description-for="SectionsAndStudents[iSect].SelectedStudents" class="form-control-static"></p>
+                    <p><button name="SelectAll" type="button" onclick="onSelectAllOrNone(true)">Select All</button> <button name="SelectNone" type="button" onclick="onSelectAllOrNone(false)">Select None</button></p>
                     <table class="table">
                         <thead>
                             <tr>
@@ -245,7 +246,7 @@
                     @:var numStudentsAppended = 0;
                     @:var downloadAllFromSection = true;
 
-                    @* 
+                    @*
                         For each student in the section, count whether the student is checked, allowable to be checked,
                         and adjust the text of the "select students" link as appropriate
                     *@
@@ -309,6 +310,21 @@
         // Disable main download form submit button if no students are selected
         //debugger;
         $("#@Html.IdFor(model => model.DownloadSubmitButton)").prop("disabled", numStudentsSelectedAcrossAllSections == 0);
+    }
+
+    // Called when user clicks the Select All or Select None button from the Student
+    // Selection Form
+    function onSelectAllOrNone(isSelectAll)
+    {
+        @if (iSectionClicked != -1)
+        {
+            for (int iStudent = 0; iStudent < Model.SectionsAndStudents[iSectionClicked].SelectedStudents.Count; iStudent++)
+            {
+                @:var idStudentSelected = "@Html.IdFor(model => model.SectionsAndStudents[iSectionClicked].SelectedStudents[iStudent].Selected)";
+                @:var ctlStudentSelected = $("#" + idStudentSelected);
+                @:ctlStudentSelected.prop("checked", isSelectAll);
+            }
+        }
     }
 
 </script>
