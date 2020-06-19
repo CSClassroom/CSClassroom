@@ -432,7 +432,11 @@ namespace CSC.CSClassroom.WebApp.Controllers
 					),
 					TimeZoneProvider
 				)
-			).ToList();
+			)
+			.OrderBy(viewModel => viewModel.FeedbackSent)
+			.ThenBy(viewModel => viewModel.LastName)
+			.ThenBy(viewModel => viewModel.FirstName)
+			.ToList();
 
 			return View(viewModels);
 		}
