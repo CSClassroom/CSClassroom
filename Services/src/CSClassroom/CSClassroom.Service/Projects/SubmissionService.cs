@@ -749,7 +749,6 @@ namespace CSC.CSClassroom.Service.Projects
 		/// Returns a query for all submissions in a given checkpoint
 		/// for a single section, or for all sections if section == null.
 		/// </summary>
-		//private async Task<List<Submission>> GetCheckpointSubmissionsQuery(
 		private IQueryable<Submission> GetCheckpointSubmissionsQuery(
 			Checkpoint checkpoint,
 			Section section)
