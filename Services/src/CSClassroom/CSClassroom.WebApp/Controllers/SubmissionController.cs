@@ -338,12 +338,26 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		/// <param name="downloadSubmissionViewModel">ViewModel for the form</param>
 		public async Task<IActionResult> DownloadSubmissionsAsync(DownloadSubmissionViewModel downloadSubmissionViewModel)
 		{
-			var selectedSections = downloadSubmissionViewModel.SectionsAndStudents.Where
-			(
-				ss => ss.SectionName.Selected
-			).ToList();
-			
-			if (selectedSections.Count == 0)
+			var selectedStudents = downloadSubmissionViewModel.SectionsAndStudents
+				.Where
+				(
+					sas => sas.SectionName.Selected
+				)
+				.SelectMany
+				(
+					sas => sas.SelectedStudents
+						.Where
+						(
+							ss => ss.Selected
+									&& (ss.Submitted || downloadSubmissionViewModel.IncludeUnsubmitted)
+						)
+						.Select
+						(
+							ss => ss.Id
+						)
+				).ToList();
+
+			if (selectedStudents.Count == 0)
 			{
 				return NotFound();
 			}
@@ -353,22 +367,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				ClassroomName,
 				ProjectName,
 				CheckpointName,
-				downloadSubmissionViewModel.SectionsAndStudents.Where
-				(
-					sas => sas.SectionName.Selected
-				).Select
-				(
-					sas => new SectionSubmissionDownloadRequest(
-						sas.SectionId,
-						sas.SelectedStudents.Where
-						(
-							ss => ss.Selected
-						).Select
-						(
-							ss => ss.Id
-						).ToList()
-					)
-				).ToList(),
+				selectedStudents,
 				downloadSubmissionViewModel.Format
 			);
 

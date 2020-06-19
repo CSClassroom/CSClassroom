@@ -228,12 +228,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			(
 				sec => sec.Classroom.Name == "Class1" &&
 					   (sec.Name == "Period2" || sec.Name == "Period3")
-			).Select
+			).SelectMany
 			(
-				sec => new SectionSubmissionDownloadRequest
-				(
-					sec.Id,
-					database.Context.Users.Where
+				sec => database.Context.Users
+					.Where
 					(
 						user =>
 							(
@@ -247,8 +245,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					).Select
 					(
 						user => user.Id
-					).ToList()
-				)
+					)
 			).ToList();
 
 			// Call DownloadSubmissionsAsync with each valid format

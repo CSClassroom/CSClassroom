@@ -288,7 +288,7 @@ namespace CSC.CSClassroom.Service.Projects
 			string classroomName,
 			string projectName,
 			string checkpointName,
-			IList<SectionSubmissionDownloadRequest> selectedDownloadCandidates,
+			IList<int> selectedDownloadCandidates,
 			ProjectSubmissionDownloadFormat format)
 		{
 			var checkpoint = await LoadCheckpointAsync
@@ -304,15 +304,7 @@ namespace CSC.CSClassroom.Service.Projects
 				section: null       // Include all sections
 			);
 
-			// Flat list of all student userIds selected for download
-			var selectedUserIds = new HashSet<int>
-			(
-				selectedDownloadCandidates
-					.SelectMany
-					(
-						sdc => sdc.UserIds
-					).ToList()
-			);
+			var selectedUserIds = new HashSet<int>(selectedDownloadCandidates);
 
 			var userIdsWithSubmissions = new HashSet<int>
 			(
