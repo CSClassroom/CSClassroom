@@ -261,6 +261,9 @@ namespace CSC.CSClassroom.WebApp.Controllers
 						{
 							Text = dc.Section.DisplayName,
 							Value = dc.Section.Name,
+
+							// Whichever section the user had clicked on before
+							// choosing to download should be checked by default
 							Selected = (dc.Section.Name == sectionName)
 						},
 						SelectedStudents = dc.Users.Select
@@ -283,11 +286,6 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				Format = ProjectSubmissionDownloadFormat.All,
 				IncludeUnsubmitted = true,
 				SectionsAndStudents = sectionStudents,
-				CurrentSection = new SectionInfo()
-				{
-					Name = sectionName,
-					Index = sectionStudents.FindIndex(item => item.SectionName.Value == sectionName)
-				}
 			};
 
 			return View("Download", viewModel);
@@ -422,7 +420,7 @@ namespace CSC.CSClassroom.WebApp.Controllers
 					(
 						"BuildResult",
 						"Build",
-						new { buildId }
+						new {buildId}
 					),
 					(commit, pullRequestNumber) => Url.GitHub().PullRequest
 					(

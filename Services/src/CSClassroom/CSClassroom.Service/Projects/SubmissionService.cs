@@ -288,7 +288,7 @@ namespace CSC.CSClassroom.Service.Projects
 			string classroomName,
 			string projectName,
 			string checkpointName,
-			IList<int> selectedDownloadCandidates,
+			IList<int> selectedUserIds,
 			ProjectSubmissionDownloadFormat format)
 		{
 			var checkpoint = await LoadCheckpointAsync
@@ -304,12 +304,12 @@ namespace CSC.CSClassroom.Service.Projects
 				section: null       // Include all sections
 			);
 
-			var selectedUserIds = new HashSet<int>(selectedDownloadCandidates);
+			var selectedUserIdsHash = new HashSet<int>(selectedUserIds);
 
 			var userIdsWithSubmissions = new HashSet<int>
 			(
 				await allCheckpointSubmissions
-					.Where(submission => selectedUserIds.Contains(submission.Commit.UserId))
+					.Where(submission => selectedUserIdsHash.Contains(submission.Commit.UserId))
 					.GroupBy(submission => submission.Commit.User)
 					.Select(group => group.Key.Id)
 					.ToListAsync()
@@ -320,7 +320,7 @@ namespace CSC.CSClassroom.Service.Projects
 			var studentDownloadRequests = sectionMemberships
 				.Where
 				(
-					sm => selectedUserIds.Contains(sm.ClassroomMembership.UserId)
+					sm => selectedUserIdsHash.Contains(sm.ClassroomMembership.UserId)
 				)
 				.Select
 				(
@@ -817,7 +817,7 @@ namespace CSC.CSClassroom.Service.Projects
 		}
 
 		/// <summary>
-		/// Loads a single section from the database.
+		/// Loads a section from the database.
 		/// </summary>
 		private async Task<Section> LoadSectionAsync(
 			string classroomName,

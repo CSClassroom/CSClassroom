@@ -197,11 +197,54 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		}
 
 		/// <summary>
+		/// Ensures GetCheckpointDownloadCandidateListAsync returns the correct list of candidates 
+		/// </summary>
+		[Fact]
+		public async Task GetCheckpointDownloadCandidateListAsync_ReturnsCandidates()
+		{
+			var database = GetDatabaseBuilder().Build();
+
+			var submissionService = GetSubmissionService(database.Context);
+
+			var candidates = await submissionService.GetCheckpointDownloadCandidateListAsync
+			(
+				"Class1",
+				"Project1",
+				"Checkpoint2"
+			);
+
+			// To insulate this test from data used for other tests, focus on
+			// Period2 and Period3
+			var candidateUsersP2 = candidates.Single
+			(
+				c => c.Section.Name == "Period2"
+			).Users;
+			Assert.Equal(3, candidateUsersP2.Count);
+			Assert.Equal("Student3", candidateUsersP2[0].User.UserName);
+			Assert.False(candidateUsersP2[0].Submitted);
+			Assert.Equal("Student4", candidateUsersP2[1].User.UserName);
+			Assert.True(candidateUsersP2[1].Submitted);
+			Assert.Equal("Student5", candidateUsersP2[2].User.UserName);
+			Assert.True(candidateUsersP2[2].Submitted);
+			var candidateUsersP3 = candidates.Single
+			(
+				c => c.Section.Name == "Period3"
+			).Users;
+			Assert.Equal(3, candidateUsersP3.Count);
+			Assert.Equal("Student6", candidateUsersP3[0].User.UserName);
+			Assert.False(candidateUsersP3[0].Submitted);
+			Assert.Equal("Student7", candidateUsersP3[1].User.UserName);
+			Assert.True(candidateUsersP3[1].Submitted);
+			Assert.Equal("Student8", candidateUsersP3[2].User.UserName);
+			Assert.False(candidateUsersP3[2].Submitted);
+		}
+
+		/// <summary>
 		/// Ensures that DownloadSubmissionsAsync downloads the submissions
 		/// for a given checkpoint.
 		/// </summary>
 		[Fact]
-		public async Task DownloadSubmissionsAsync_DownloasdSubmissions()
+		public async Task DownloadSubmissionsAsync_DownloadsSubmissions()
 		{
 			var database = GetDatabaseBuilder().Build();
 
@@ -277,46 +320,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 
 				Assert.Equal(result, expectedResult);
 			}
-		}
-
-		[Fact]
-		public async Task GetCheckpointDownloadCandidateListAsync_ReturnsCandidates()
-		{
-			var database = GetDatabaseBuilder().Build();
-
-			var submissionService = GetSubmissionService(database.Context);
-
-			var candidates = await submissionService.GetCheckpointDownloadCandidateListAsync
-			(
-				"Class1",
-				"Project1",
-				"Checkpoint2"
-			);
-
-			// To insulate this test from data used for other tests, focus on
-			// Period2 and Period3
-			var candidateUsersP2 = candidates.Single
-			(
-				c => c.Section.Name == "Period2"
-			).Users;
-			Assert.Equal(3, candidateUsersP2.Count);
-			Assert.Equal("Student3", candidateUsersP2[0].User.UserName);
-			Assert.False(candidateUsersP2[0].Submitted);
-			Assert.Equal("Student4", candidateUsersP2[1].User.UserName);
-			Assert.True(candidateUsersP2[1].Submitted);
-			Assert.Equal("Student5", candidateUsersP2[2].User.UserName);
-			Assert.True(candidateUsersP2[2].Submitted);
-			var candidateUsersP3 = candidates.Single
-			(
-				c => c.Section.Name == "Period3"
-			).Users;
-			Assert.Equal(3, candidateUsersP3.Count);
-			Assert.Equal("Student6", candidateUsersP3[0].User.UserName);
-			Assert.False(candidateUsersP3[0].Submitted);
-			Assert.Equal("Student7", candidateUsersP3[1].User.UserName);
-			Assert.True(candidateUsersP3[1].Submitted);
-			Assert.Equal("Student8", candidateUsersP3[2].User.UserName);
-			Assert.False(candidateUsersP3[2].Submitted);
 		}
 
 		/// <summary>
@@ -1039,7 +1042,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					)
 				).ReturnsAsync(templateContents);
 
-			// See comment in DownloadSubmissionsAsync_DownloasdSubmissions for summary of
+			// See comment in DownloadSubmissionsAsync_DownloadsSubmissions for summary of
 			// student/period/submission/selection combos being tested
 			submissionDownloader
 				.Setup

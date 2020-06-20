@@ -59,7 +59,7 @@ namespace CSC.CSClassroom.Service.Projects
 			string classroomName,
 			string projectName,
 			string checkpointName,
-			IList<int> selectedDownloadCandidates,
+			IList<int> selectedUserIds,
 			ProjectSubmissionDownloadFormat downloadFormat);
 
 		/// <summary>

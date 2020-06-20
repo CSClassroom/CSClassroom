@@ -48,16 +48,13 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		public List<SectionsAndStudents> SectionsAndStudents { get; set; }
 
 		/// <summary>
-		///  The section originally active from the submissions view when the user
-		///  clicked download.  This informs the default options to be selected
-		/// </summary>
-		public SectionInfo CurrentSection { get; set; }
-
-		/// <summary>
 		/// The submit button to finally initiate the download
 		/// </summary>
 		public string DownloadSubmitButton { get; set; }
 
+		/// <summary>
+		/// Returns the array used for populating the download format droplist 
+		/// </summary>
 		public IEnumerable<SelectListItem> GetDownloadFormatSelectList()
 		{
 			return new SelectListItem[]
@@ -70,20 +67,41 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 	}
 
 	/// <summary>
-	/// Info on the "current section", which is what the user had clicked on before
-	/// choosing to Download.  This is used to populate the default section option
-	/// from the Download page.
+	/// Info on each section to download, including the students within
+	/// that section to download.
 	/// </summary>
-	public class SectionInfo
+	public class SectionsAndStudents
 	{
-		public string Name { get; set; }
-		public int Index { get; set; }
+		/// <summary>
+		///  Name of section selected for download
+		/// </summary>
+		public SelectListItem SectionName { get; set; }
+
+		/// <summary>
+		///  Id of section selected for download
+		/// </summary>
+		public int SectionId { get; set; }
+
+		/// <summary>
+		///  Students selected by user to download
+		/// </summary>
+		[Display
+		(
+			Name = "Students",
+			Description = "Select the students to download."
+		)]
+		public List<StudentToDownload> SelectedStudents { get; set; }
+
+		/// <summary>
+		///  The submit button (rendered in link style) to display the form controls to select a student
+		/// </summary>
+		public string SectionsAndStudentsSubmitButton { get; set; }
 	}
 
-    /// <summary>
-    ///  Info for a single student to download
-    /// </summary>
-    public class StudentToDownload
+	/// <summary>
+	///  Info for a single student to download
+	/// </summary>
+	public class StudentToDownload
 	{
 		[Display
 		(
@@ -103,36 +121,10 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		[Display(Name = "First Name")]
 		public string FirstName { get; set; }
 
+		/// <summary>
+		/// Did this user actually turn in a commit for the checkpoint?
+		/// </summary>
 		[Display(Name = "Submitted?")]
 		public Boolean Submitted { get; set; }
-	}
-
-	/// <summary>
-	/// Info on each section to download, including the students within
-	/// that section to download.
-	/// </summary>
-	public class SectionsAndStudents
-	{
-		/// <summary>
-		///  Name of section selected for download
-		/// </summary>
-		public SelectListItem SectionName { get; set; }
-
-		public int SectionId { get; set; }
-
-        /// <summary>
-        ///  Students selected by user to download
-        /// </summary>
-        [Display
-		(
-			Name = "Students",
-			Description = "Select the students to download."
-		)]
-		public List<StudentToDownload> SelectedStudents { get; set; }
-
-		/// <summary>
-		///  The submit button (rendered in link style) to display the form controls to select a student
-		/// </summary>
-		public string SectionsAndStudentsSubmitButton { get; set; }
 	}
 }

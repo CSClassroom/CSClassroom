@@ -206,7 +206,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 		/// <summary>
 		/// Ensures the download format parameter is respected
 		/// </summary>
-		/// <returns></returns>
 		[Fact]
 		public async Task BuildSubmissionArchiveAsync_DownloadFormat()
 		{
