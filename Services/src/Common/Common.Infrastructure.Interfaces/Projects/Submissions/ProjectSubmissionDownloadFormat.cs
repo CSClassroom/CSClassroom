@@ -1,7 +1,8 @@
 ﻿namespace CSC.Common.Infrastructure.Projects.Submissions
 {
 	/// <summary>
-	/// The category of submission components to download
+	/// The category of submission components to download.  This enum is used by
+	/// the view model, submission service, and the submission archive builder
 	/// </summary>
 	public enum ProjectSubmissionDownloadFormat
 	{

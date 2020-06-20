@@ -16,7 +16,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 	/// Initially, the "main download form" controls are visible, which give the top-level
 	/// options.  When the user clicks one of the "select students" link, the form is redrawn
 	/// with the main download options hidden, and a checklist of students from the specified
-	/// section shown.
+	/// section shown.  This gives the appearance of a second form: the "select students" form.
 	/// </summary>
 	public class DownloadSubmissionViewModel
 	{
@@ -93,7 +93,7 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		public List<StudentToDownload> SelectedStudents { get; set; }
 
 		/// <summary>
-		///  The submit button (rendered in link style) to display the form controls to select a student
+		///  The submit button (rendered in link style) to display the form controls to select students
 		/// </summary>
 		public string SectionsAndStudentsSubmitButton { get; set; }
 	}

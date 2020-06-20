@@ -25,7 +25,7 @@
 <form asp-action="DownloadSubmissions">
 
     @*
-         ----------------------------------------------------------
+        ----------------------------------------------------------
           Form Option #1: The Main download submissions form
         ----------------------------------------------------------
     *@
@@ -91,7 +91,7 @@
     </div>
 
     @*
-         ----------------------------------------------------------
+        ----------------------------------------------------------
           Form Option #2: The select-students-from-section form
         ----------------------------------------------------------
     *@
@@ -171,7 +171,7 @@
 
     function onDocumentReady()
     {
-        // Primary download form: Hide / unhide entire form
+        @* Primary download form: Hide / unhide entire form *@
         var mainDownloadSubmissionsForm = $("#mainDownloadSubmissionsForm");
         if (@iSectionClicked == -1)
         {
@@ -182,8 +182,8 @@
             mainDownloadSubmissionsForm.hide();
         }
 
-        // Primary download form: hide / unhide the student selection links based on the
-        // section checkbox state
+        @* Primary download form: hide / unhide the student selection links based on the
+           section checkbox state *@
         @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
         {
             @:onSectionSelectionChanged(
@@ -191,8 +191,8 @@
             @:  "@Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton)");
         }
 
-        // Student selection forms: Hide / unhide each section's student selection form,
-        // depending on which student selection link brought us here, if any
+        @* Student selection forms: Hide / unhide each section's student selection form,
+           depending on which student selection link brought us here, if any *@
         @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
         {
             @:var studentSelectionForm = $("#studentSelectionForm_@(i)");
@@ -208,23 +208,23 @@
         }
         onIncludeUnsubmittedChanged();
 
-        // Student selection forms: Disable students who didn't submit if user
-        // unchecked "include unsubmitted"
+        @* Student selection forms: Disable students who didn't submit if user
+           unchecked "include unsubmitted" *@
         $('input[class="disabled"]').prop("disabled", true).css("color", "graytext");
         $('td[class="disabled"]').prop("disabled", true).css("color", "graytext");
     }
 
-    // Called when user checks or unchecks an entire section from the
-    // main download submissions form
+    @* Called when user checks or unchecks an entire section from the
+       main download submissions form *@
     function onSectionSelectionChanged(checkbox, selectStudentsButtonId)
     {
-        // The "select students" link should be hidden if the section is unchecked
+        @* The "select students" link should be hidden if the section is unchecked *@
         $("#" + selectStudentsButtonId).prop("className", checkbox.checked ? "btn btn-link" : "hidden");
         onIncludeUnsubmittedChanged();
     }
 
-    // Called when the user checks or unchecks the "include unsubmitted code" checkbox to dynamically
-    // update the student list based on which students clicked "Turn In" for the checkpoint.
+    @* Called when the user checks or unchecks the "include unsubmitted code" checkbox to dynamically
+       update the student list based on which students clicked "Turn In" for the checkpoint. *@
     function onIncludeUnsubmittedChanged()
     {
         var c_maxStudentsToDisplayInSelectionLink = 3;
@@ -276,7 +276,7 @@
                                     @:numStudentsAppended++;
                                 @:}
                             @:}
-                            @:else    // !ctlStudentSelected.prop("checked")
+                            @:else    @* !ctlStudentSelected.prop("checked") *@
                             @:{
                                 @:downloadAllFromSection = false;
                             @:}
@@ -307,13 +307,12 @@
             @:}
         }
 
-        // Disable main download form submit button if no students are selected
-        //debugger;
+        @* Disable main download form submit button if no students are selected *@
         $("#@Html.IdFor(model => model.DownloadSubmitButton)").prop("disabled", numStudentsSelectedAcrossAllSections == 0);
     }
 
-    // Called when user clicks the Select All or Select None button from the Student
-    // Selection Form
+    @* Called when user clicks the Select All or Select None button from the Student
+       Selection Form *@
     function onSelectAllOrNone(isSelectAll)
     {
         @if (iSectionClicked != -1)
