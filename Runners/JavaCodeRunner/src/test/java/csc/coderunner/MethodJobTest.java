@@ -25,7 +25,7 @@ public class MethodJobTest
 		
 		MethodJobResult result = job.runJob();
 		
-		assertCompilationFailed(result.getClassCompilationResult(), new int[] { 1, 1, 3, 3, 3 });
+		assertCompilationFailed(result.getClassCompilationResult(), new int[] { 1, 3, 3, 3 });
 		assertNull(result.getMethodDefinition());
 		assertNull(result.getTestsCompilationResult());
 		assertNull(result.getTestResults());
@@ -126,7 +126,7 @@ public class MethodJobTest
 			false /*expectSuccess*/,
 			new String[]
 			{ 
-				  "java.lang.ArrayIndexOutOfBoundsException: 4\n"
+				  "java.lang.ArrayIndexOutOfBoundsException: Index 4 out of bounds for length 3\n"
 				+ "\tat java.util.Arrays$ArrayList.get\n"
 				+ "\tat getFourthElement (Line 3)" 
 			}, 
