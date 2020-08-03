@@ -41,7 +41,7 @@
     "nvd3": "1.8.5",
     "pagedown": "^1.1.0",
     "sanitize-html": "^1.13.0",
-    "tinymce": "4.6.6"
+    "tinymce": "4.9.10"
   },
   "scripts": {
     "gulp-clean": "gulp clean",
