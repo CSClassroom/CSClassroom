@@ -21,9 +21,11 @@ namespace CSC.CSClassroom.Repository.Configuration
 			// Add the database.
 			services.AddDbContext<DatabaseContext>
 			(
-				dbCtxOptions => dbCtxOptions.UseNpgsql(
+				dbCtxOptions => dbCtxOptions.UseNpgsql
+				(
 					new Npgsql.NpgsqlConnection(connectionString),
-					npgsqlOptions => npgsqlOptions.SetPostgresVersion(new Version(9, 5)))
+					npgsqlOptions => npgsqlOptions.SetPostgresVersion(new Version(9, 5))
+				)
 			);
 		}
 	}

@@ -36,7 +36,8 @@ namespace CSC.CSClassroom.WebApp.ViewModels.Submission
 		[Display
 		(
 			Name = "Include unsubmitted code",
-			Description = "Check this to include the latest commit from students who did not turn in their code.  Uncheck this to skip downloading those students' code."
+			Description = "Check this to include the latest commit from students who did not turn " +
+				"in their code.  Uncheck this to skip downloading those students' code."
 		)]
 		public bool IncludeUnsubmitted { get; set; }
 

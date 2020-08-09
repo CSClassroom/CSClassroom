@@ -266,17 +266,20 @@ namespace CSC.CSClassroom.Service.Projects
 				.GroupBy
 				(
 					sm => sm.Section,
-					sm => new UserDownloadCandidateResult(
+					sm => new UserDownloadCandidateResult
+					(
 						sm.ClassroomMembership.User,
 						submissions
-						.Where
-						(
-							sub => sub.Commit.UserId == sm.ClassroomMembership.User.Id
-						).Any()
+							.Where
+							(
+								sub => sub.Commit.UserId == sm.ClassroomMembership.User.Id
+							).Any()
 					),
-					(section, users) => new CheckpointDownloadCandidateResult(
+					(section, users) => new CheckpointDownloadCandidateResult
+					(
 						section,
-						users.ToList())
+						users.ToList()
+					)
 				).ToList();
 		}
 
