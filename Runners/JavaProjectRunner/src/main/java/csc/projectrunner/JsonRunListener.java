@@ -20,7 +20,7 @@ public class JsonRunListener extends RunListener
 	private PrintStream oldSystemOut;
 	private PrintStream oldSystemErr;
 	private NoInterruptionOutputStream utos;
-	private final int c_maxOutputLength = 50000;
+	private final int c_maxOutputLength = 200000;
 	
 	public JsonRunListener(OutputStream stream) throws IOException
 	{

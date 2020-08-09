@@ -1,4 +1,4 @@
 pushd Playbooks
 export TERRAFORM_STATE_ROOT=../../Provision
-ansible-playbook -i terraform.py -s update-buildservice-runners.yml
+ansible-playbook -u root -i terraform.py update-buildservice-runners.yml
 popd
