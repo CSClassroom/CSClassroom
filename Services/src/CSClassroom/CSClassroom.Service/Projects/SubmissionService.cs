@@ -748,27 +748,6 @@ namespace CSC.CSClassroom.Service.Projects
 			Checkpoint checkpoint,
 			Section section)
 		{
-			// Identical queries, except leave off the SectionId filter if section == null
-
-			if (section == null)
-			{
-				return _dbContext.Submissions
-					.Where
-					(
-						submission =>
-							submission.CheckpointId == checkpoint.Id &&
-							submission.Commit.User.ClassroomMemberships.Any
-							(
-								cm => cm.SectionMemberships.Any
-								(
-									sm => sm.Role == SectionRole.Student
-								)
-							)
-					)
-					.Include(submission => submission.Commit.User.ClassroomMemberships)
-					.Include(submission => submission.Commit.Build);
-			}
-
 			return _dbContext.Submissions
 				.Where
 				(
@@ -778,7 +757,7 @@ namespace CSC.CSClassroom.Service.Projects
 						(
 							cm => cm.SectionMemberships.Any
 							(
-								sm => sm.SectionId == section.Id
+								sm => (section == null || sm.SectionId == section.Id)
 									  && sm.Role == SectionRole.Student
 							)
 						)
