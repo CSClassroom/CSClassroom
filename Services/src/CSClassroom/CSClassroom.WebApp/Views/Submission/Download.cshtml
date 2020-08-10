@@ -29,7 +29,7 @@
           Form Option #1: The Main download submissions form
         ----------------------------------------------------------
     *@
-    <div id="mainDownloadSubmissionsForm" class="form-horizontal">
+    <div id="mainDownloadSubmissionsForm" class="form-horizontal" hidden="hidden">
         <hr />
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -103,7 +103,7 @@
             continue;
         }
 
-        <div id="studentSelectionForm_@(iSect)" class="form-horizontal">
+        <div id="studentSelectionForm_@(iSect)" class="form-horizontal" hidden="hidden">
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
