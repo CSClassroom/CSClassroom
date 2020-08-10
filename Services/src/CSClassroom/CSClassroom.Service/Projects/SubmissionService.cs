@@ -252,13 +252,14 @@ namespace CSC.CSClassroom.Service.Projects
 				.Where(c => c.Project.Name == projectName)
 				.SingleAsync(c => c.Name == checkpointName);
 
+			// Map user ID to submissions made by that student for this checkpoint
 			var submissions = await _dbContext.Submissions
 				.Where
 				(
 					sub => sub.Checkpoint.Id == checkpoint.Id
 				)
 				.Include(sub => sub.Commit)
-				.ToListAsync();
+				.ToDictionaryAsync(sub => sub.Commit.UserId, sub => sub);
 
 			// ...and then combine them in memory to produce the CheckpointDownloadCandidateResult list
 
@@ -269,11 +270,7 @@ namespace CSC.CSClassroom.Service.Projects
 					sm => new UserDownloadCandidateResult
 					(
 						sm.ClassroomMembership.User,
-						submissions
-							.Where
-							(
-								sub => sub.Commit.UserId == sm.ClassroomMembership.User.Id
-							).Any()
+						submissions.ContainsKey(sm.ClassroomMembership.User.Id)
 					),
 					(section, users) => new CheckpointDownloadCandidateResult
 					(
