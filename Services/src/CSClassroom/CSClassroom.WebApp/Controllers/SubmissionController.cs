@@ -276,9 +276,14 @@ namespace CSC.CSClassroom.WebApp.Controllers
 								Id = user.User.Id,
 								Submitted = user.Submitted
 							}
-						).ToList()
+						)
+						.OrderBy(ss => ss.LastName)
+						.ThenBy(ss => ss.FirstName)
+						.ToList()
 					}
-				).ToList();
+				)
+				.OrderBy(sas => sas.SectionName.Text)
+				.ToList();
 
 			DownloadSubmissionViewModel viewModel = new DownloadSubmissionViewModel()
 			{
