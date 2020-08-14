@@ -981,6 +981,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
 				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student7", "Commit3", SubmissionDates[2],
 					2 /*pullRequest*/, "Feedback3", sentFeedback: true, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student7", "Commit3", SubmissionDates[3],
+					3 /*pullRequest*/, "Feedback3", sentFeedback: false, readFeedback: false)
 				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student7", "Commit4", SubmissionDates[3],
 					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false)
 				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student8", "Commit1", SubmissionDates[0],

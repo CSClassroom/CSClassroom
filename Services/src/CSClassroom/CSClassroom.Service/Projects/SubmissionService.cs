@@ -259,7 +259,8 @@ namespace CSC.CSClassroom.Service.Projects
 					sub => sub.Checkpoint.Id == checkpoint.Id
 				)
 				.Include(sub => sub.Commit)
-				.ToDictionaryAsync(sub => sub.Commit.UserId, sub => sub);
+				.GroupBy(sub => sub.Commit.UserId)
+				.ToDictionaryAsync(group => group.Key, group => group);
 
 			// ...and then combine them in memory to produce the CheckpointDownloadCandidateResult list
 
