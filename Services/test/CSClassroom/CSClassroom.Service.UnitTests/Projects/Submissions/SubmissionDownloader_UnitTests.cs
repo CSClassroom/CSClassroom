@@ -85,6 +85,58 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 		}
 
 		/// <summary>
+		/// Ensures that we do not download a student's submission if there is
+		/// no repo for that student.
+		/// </summary>
+		[Fact]
+		public async Task DownloadSubmissionsAsync_NoRepo_SubmissionNotDownloaded()
+		{
+			var classroom = GetClassroom();
+			var project = GetProject(classroom);
+			var checkpoint = GetCheckpoint(project);
+			var student1 = GetStudent(classroom, "Student1");
+			var student2 = GetStudent(classroom, "Student2");
+
+			var studentRepo1 = new RepositoryContents
+			(
+				"Project1_Student1",
+				"Checkpoint1",
+				ArchiveStore.FileSystem,
+				contents: true
+			);
+
+			var studentRepo2 = new RepositoryContents
+			(
+				"Project1_Student2",
+				"Checkpoint1",
+				ArchiveStore.FileSystem,
+				contents: false
+			);
+
+			var repoClient = GetMockGitHubRepositoryClient(studentRepo1, studentRepo2);
+			var repoMetadataRetriever = GetMockRepositoryMetadataRetriever();
+			var downloader = GetSubmissionDownloader
+			(
+				repoClient,
+				repoMetadataRetriever
+			);
+
+			var result = await downloader.DownloadSubmissionsAsync
+			(
+				checkpoint,
+				Collections.CreateList
+				(
+					new StudentDownloadRequest(student1, submitted: true),
+					new StudentDownloadRequest(student2, submitted: false)
+				)
+			);
+
+			Assert.Single(result);
+			Assert.Equal(student1, result[0].Student);
+			Assert.Equal(studentRepo1.Contents, result[0].Contents);
+		}
+
+		/// <summary>
 		/// Ensures that a student's latest commit is correctly downloaded when
 		/// the student did not make a submission for a checkpoint.
 		/// </summary>
@@ -216,32 +268,6 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 					(project, student) => $"{project.Name}_{student.GitHubTeam}"
 				);
 
-			repoMetadataRetriever
-				.Setup
-				(
-					rmr => rmr.GetStudentRepositoriesAsync
-					(
-						It.IsAny<Project>(), 
-						It.IsAny<IList<ClassroomMembership>>()
-					)
-				)
-				.Returns<Project, IList<ClassroomMembership>>
-				(
-					(project, students) => Task.FromResult<IDictionary<ClassroomMembership, GitHubRepository>>
-					(
-						students.ToDictionary
-						(
-							student => student,
-							student => new GitHubRepository
-							(
-								id: 0,
-								owner: "GitHubOrg",
-								name: $"{project.Name}_{student.GitHubTeam}"
-							)
-						)
-					)
-				);
-
 			return repoMetadataRetriever.Object;
 		}
 
@@ -256,17 +282,42 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 
 			foreach (var repository in repositories)
 			{
-				repoClient
-					.Setup
-					(
-						rc => rc.GetRepositoryContentsAsync
+				if (repository.Contents != null)
+				{
+					repoClient
+						.Setup
 						(
-							"GitHubOrg",
-							repository.RepoName,
-							repository.BranchName,
-							repository.BackingStore
+							rc => rc.GetRepositoryContentsAsync
+							(
+								"GitHubOrg",
+								repository.RepoName,
+								repository.BranchName,
+								repository.BackingStore
+							)
+						).ReturnsAsync(repository.Contents);
+				}
+				else
+                {
+					repoClient
+						.Setup
+						(
+							rc => rc.GetRepositoryContentsAsync
+							(
+								"GitHubOrg",
+								repository.RepoName,
+								repository.BranchName,
+								repository.BackingStore
+							)
 						)
-					).ReturnsAsync(repository.Contents);
+						.ThrowsAsync
+						(
+							new Octokit.NotFoundException
+							(
+								"Not found",
+								System.Net.HttpStatusCode.NotFound
+							)
+						);
+				}
 			}
 
 			return repoClient.Object;
@@ -318,15 +369,19 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Submissions
 			public RepositoryContents(
 				string repoName,
 				string branchName,
-				ArchiveStore backingStore)
+				ArchiveStore backingStore,
+				bool contents = true)
 			{
 				RepoName = repoName;
 				BranchName = branchName;
 				BackingStore = backingStore;
-				Contents = new UncompressedMemoryArchive
-				(
-					new Dictionary<string, byte[]>()
-				);
+				if (contents)
+				{
+					Contents = new UncompressedMemoryArchive
+					(
+						new Dictionary<string, byte[]>()
+					);
+				}
 			}
 		}
 	}

@@ -78,19 +78,13 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 					.Select(request => request.Student)
 			);
 
-			var studentRepos = await _repoMetadataRetriever.GetStudentRepositoriesAsync
-			(
-				checkpoint.Project,
-				students
-			);
-
 			var submissions = await _operationRunner.RunOperationsAsync
 			(
-				studentRepos.Keys,
+				students,
 				async student => new StudentSubmission
 				(
 					student,
-					await _repoClient.GetRepositoryContentsAsync
+					await GetRepositoryContentsAsync
 					(
 						orgName,
 						_repoMetadataRetriever.GetRepoName(checkpoint.Project, student),
@@ -102,7 +96,38 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 				)
 			);
 
-			return new StudentSubmissions(submissions);
+			return new StudentSubmissions
+			(
+				submissions.Where
+				(
+					submission => submission.Contents != null
+				).ToList()
+			);
+		}
+
+		/// <summary>
+		/// Downloads submissions for a set of students.
+		/// </summary>
+		public async Task<IArchive> GetRepositoryContentsAsync(
+			string organizationName,
+			string repositoryName,
+			string branchName,
+			ArchiveStore backingStore)
+		{
+			try
+            {
+				return await _repoClient.GetRepositoryContentsAsync
+				(
+					organizationName,
+					repositoryName,
+					branchName,
+					backingStore
+				);
+            }
+			catch (Octokit.NotFoundException)
+            {
+				return null;
+            }
 		}
 	}
 }
