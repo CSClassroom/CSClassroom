@@ -34,6 +34,8 @@
     <PackageReference Include="Hangfire.AspNetCore" Version="1.6.21" />
     <PackageReference Include="Microsoft.AspNetCore.All" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.4" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Utils" Version="2.2.4" />
     <PackageReference Include="morelinq" Version="3.1.0" />
     <PackageReference Include="Sendgrid" Version="9.10.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />

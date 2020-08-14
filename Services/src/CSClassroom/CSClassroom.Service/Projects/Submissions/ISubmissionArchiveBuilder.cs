@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.Projects.Submissions;
 using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Projects;
 
@@ -18,6 +19,7 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 		Task<Stream> BuildSubmissionArchiveAsync(
 			Project project,
 			IArchive templateContents,
-			IList<StudentSubmission> submissions);
+			IList<StudentSubmission> submissions,
+			ProjectSubmissionDownloadFormat format);
 	}
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Email;
+using CSC.Common.Infrastructure.Projects.Submissions;
 using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Users;
@@ -13,6 +14,7 @@ using CSC.CSClassroom.Service.Projects;
 using CSC.CSClassroom.Service.Projects.Submissions;
 using CSC.CSClassroom.Service.UnitTests.TestDoubles;
 using CSC.CSClassroom.Service.UnitTests.Utilities;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -195,11 +197,54 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		}
 
 		/// <summary>
+		/// Ensures GetCheckpointDownloadCandidateListAsync returns the correct list of candidates 
+		/// </summary>
+		[Fact]
+		public async Task GetCheckpointDownloadCandidateListAsync_ReturnsCandidates()
+		{
+			var database = GetDatabaseBuilder().Build();
+
+			var submissionService = GetSubmissionService(database.Context);
+
+			var candidates = await submissionService.GetCheckpointDownloadCandidateListAsync
+			(
+				"Class1",
+				"Project1",
+				"Checkpoint2"
+			);
+
+			// To insulate this test from data used for other tests, focus on
+			// Period2 and Period3
+			var candidateUsersP2 = candidates.Single
+			(
+				c => c.Section.Name == "Period2"
+			).Users;
+			Assert.Equal(3, candidateUsersP2.Count);
+			Assert.Equal("Student3", candidateUsersP2[0].User.UserName);
+			Assert.False(candidateUsersP2[0].Submitted);
+			Assert.Equal("Student4", candidateUsersP2[1].User.UserName);
+			Assert.True(candidateUsersP2[1].Submitted);
+			Assert.Equal("Student5", candidateUsersP2[2].User.UserName);
+			Assert.True(candidateUsersP2[2].Submitted);
+			var candidateUsersP3 = candidates.Single
+			(
+				c => c.Section.Name == "Period3"
+			).Users;
+			Assert.Equal(3, candidateUsersP3.Count);
+			Assert.Equal("Student6", candidateUsersP3[0].User.UserName);
+			Assert.False(candidateUsersP3[0].Submitted);
+			Assert.Equal("Student7", candidateUsersP3[1].User.UserName);
+			Assert.True(candidateUsersP3[1].Submitted);
+			Assert.Equal("Student8", candidateUsersP3[2].User.UserName);
+			Assert.False(candidateUsersP3[2].Submitted);
+		}
+
+		/// <summary>
 		/// Ensures that DownloadSubmissionsAsync downloads the submissions
 		/// for a given checkpoint.
 		/// </summary>
 		[Fact]
-		public async Task DownloadSubmissionsAsync_DownloasdSubmissions()
+		public async Task DownloadSubmissionsAsync_DownloadsSubmissions()
 		{
 			var database = GetDatabaseBuilder().Build();
 
@@ -213,29 +258,68 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				studentSubmissions
 			);
 
-			var submissionArchiveBuilder = GetMockSubmissionArchiveBuilder
-			(
-				templateContents,
-				studentSubmissions,
-				expectedResult
-			);
+			// Downloading these students allows testing the following combinations:
+			//		Period 2: Student3 submission: NO, Student4 submission: YES
+			//				  EXCLUDE this student from downloading: Student5 submission: YES
+			//		Period 3: Student6 submission: NO, Student7 submission: YES
+			//				  EXCLUDE this student from downloading: Student8 submission: NO
+			//
+			string[] studentNamesForDownloadingFromPeriod2 = new string[] { "Student3", "Student4" };
+			string[] studentNamesForDownloadingFromPeriod3 = new string[] { "Student6", "Student7" };
 
-			var submissionService = GetSubmissionService
+			var dlRequests = database.Context.Sections.Where
 			(
-				database.Context,
-				submissionDownloader: submissionDownloader.Object,
-				submissionArchiveBuilder: submissionArchiveBuilder.Object
-			);
-
-			var result = await submissionService.DownloadSubmissionsAsync
+				sec => sec.Classroom.Name == "Class1" &&
+					   (sec.Name == "Period2" || sec.Name == "Period3")
+			).SelectMany
 			(
-				"Class1",
-				"Project1",
-				"Checkpoint2",
-				"Period1"
-			);
+				sec => database.Context.Users
+					.Where
+					(
+						user =>
+							(
+								   sec.Name == "Period2" 
+								&& studentNamesForDownloadingFromPeriod2.Contains(user.UserName)
+							) 
+						|| (
+								   sec.Name == "Period3"
+								&& studentNamesForDownloadingFromPeriod3.Contains(user.UserName)
+							)
+					).Select
+					(
+						user => user.Id
+					)
+			).ToList();
 
-			Assert.Equal(result, expectedResult);
+			// Call DownloadSubmissionsAsync with each valid format
+			foreach (ProjectSubmissionDownloadFormat format in Enum.GetValues(typeof(ProjectSubmissionDownloadFormat)))
+			{
+				var submissionArchiveBuilder = GetMockSubmissionArchiveBuilder
+				(
+					templateContents,
+					studentSubmissions,
+					expectedResult,
+					format
+				);
+
+				var submissionService = GetSubmissionService
+				(
+					database.Context,
+					submissionDownloader: submissionDownloader.Object,
+					submissionArchiveBuilder: submissionArchiveBuilder.Object
+				);
+
+				var result = await submissionService.DownloadSubmissionsAsync
+				(
+					"Class1",
+					"Project1",
+					"Checkpoint2",
+					dlRequests,
+					format
+				);
+
+				Assert.Equal(result, expectedResult);
+			}
 		}
 
 		/// <summary>
@@ -302,7 +386,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 
 		/// <summary>
 		/// Ensures that GradeSubmissionsAsync returns submissions to grade
-		/// when all students have submitted the checkpoint.
+		/// when not all students have submitted the checkpoint.
 		/// </summary>
 		[Fact]
 		public async Task GradeSubmissionsAsync_NotAllSubmitted_ReturnsSubmissions()
@@ -788,6 +872,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		private TestDatabaseBuilder GetDatabaseBuilder()
 		{
 			return new TestDatabaseBuilder()
+				// Test data shared by many tests.  Includes Class1 Period1, and Class2 Period2
 				.AddClassroom("Class1")
 				.AddClassroom("Class2")
 				.AddSection("Class1", "Period1")
@@ -828,7 +913,80 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student2", "Commit4", SubmissionDates[3],
 					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false)
 				.AddSubmission("Class2", "Project2", "Checkpoint1", "Student1", "Commit1", SubmissionDates[0],
-					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: false);
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: false)
+
+				// For the submission download tests, some additional periods, students, checkpoints,
+				// commits, and submissions
+
+				// Submission download tests: Class1 Period2, Student3-5
+				.AddSection("Class1", "Period2")
+				.AddStudent("Student3", "Last3", "First3", "Class1", "Period2", "GitHubUser")
+				.AddStudent("Student4", "Last4", "First4", "Class1", "Period2", "GitHubUser")
+				.AddStudent("Student5", "Last5", "First5", "Class1", "Period2", "GitHubUser")
+				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint1", "Period2", CommitDates[0])
+				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint2", "Period2", CommitDates[3])
+				.AddCommit("Class1", "Project1", "Student3", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student3", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student3", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student3", "Commit4", CommitDates[3], null /*inProgress*/)
+				.AddCommit("Class1", "Project1", "Student4", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student4", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student4", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student4", "Commit4", CommitDates[3], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student5", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student5", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student5", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student5", "Commit4", CommitDates[3], GetSuccessfulBuild())
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student3", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student3", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, "Feedback3", sentFeedback: true, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student4", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student4", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, feedback: null, sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student4", "Commit4", SubmissionDates[3],
+					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student5", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student5", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, "Feedback3", sentFeedback: true, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student5", "Commit4", SubmissionDates[3],
+					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false)
+
+				// Submission download tests: Class1 Period3, Student6-8
+				.AddSection("Class1", "Period3")
+				.AddStudent("Student6", "Last6", "First6", "Class1", "Period3", "GitHubUser")
+				.AddStudent("Student7", "Last7", "First7", "Class1", "Period3", "GitHubUser")
+				.AddStudent("Student8", "Last8", "First8", "Class1", "Period3", "GitHubUser")
+				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint1", "Period3", CommitDates[0])
+				.AddCheckpointDueDate("Class1", "Project1", "Checkpoint2", "Period3", CommitDates[3])
+				.AddCommit("Class1", "Project1", "Student6", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student6", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student6", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student6", "Commit4", CommitDates[3], null /*inProgress*/)
+				.AddCommit("Class1", "Project1", "Student7", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student7", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student7", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student7", "Commit4", CommitDates[3], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student8", "Commit1", CommitDates[0], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student8", "Commit2", CommitDates[1], GetFailedBuild())
+				.AddCommit("Class1", "Project1", "Student8", "Commit3", CommitDates[2], GetSuccessfulBuild())
+				.AddCommit("Class1", "Project1", "Student8", "Commit4", CommitDates[3], null /*inProgress*/)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student6", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student6", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, feedback: null, sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student7", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student7", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, "Feedback3", sentFeedback: true, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint2", "Student7", "Commit4", SubmissionDates[3],
+					3 /*pullRequest*/, "Feedback4", sentFeedback: false, readFeedback: false)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student8", "Commit1", SubmissionDates[0],
+					1 /*pullRequest*/, "Feedback1", sentFeedback: true, readFeedback: true)
+				.AddSubmission("Class1", "Project1", "Checkpoint1", "Student8", "Commit3", SubmissionDates[2],
+					2 /*pullRequest*/, feedback: null, sentFeedback: false, readFeedback: false);
 		}
 
 		/// <summary>
@@ -892,6 +1050,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					)
 				).ReturnsAsync(templateContents);
 
+			// See comment in DownloadSubmissionsAsync_DownloadsSubmissions for summary of
+			// student/period/submission/selection combos being tested
 			submissionDownloader
 				.Setup
 				(
@@ -900,12 +1060,15 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 						It.Is<Checkpoint>(c => c.Name == "Checkpoint2"),
 						It.Is<IList<StudentDownloadRequest>>
 						(
-							requests =>
-								   requests.Count == 2
-								&& requests[0].Student.User.UserName == "Student1"
-								&& requests[0].Submitted == false
-								&& requests[1].Student.User.UserName == "Student2"
-								&& requests[1].Submitted == true
+							requests => requests.Count == 4
+									&& requests[0].Student.User.UserName == "Student3"
+									&& requests[0].Submitted == false
+									&& requests[1].Student.User.UserName == "Student4"
+									&& requests[1].Submitted == true
+									&& requests[2].Student.User.UserName == "Student6"
+									&& requests[2].Submitted == false
+									&& requests[3].Student.User.UserName == "Student7"
+									&& requests[3].Submitted == true
 						)
 					)
 				).ReturnsAsync(studentSubmissions);
@@ -919,7 +1082,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		private Mock<ISubmissionArchiveBuilder> GetMockSubmissionArchiveBuilder(
 			IArchive templateContents,
 			StudentSubmissions studentSubmissions,
-			Stream expectedArchive)
+			Stream expectedArchive,
+			ProjectSubmissionDownloadFormat format)
 		{
 			var archiveBuilder = new Mock<ISubmissionArchiveBuilder>();
 
@@ -930,7 +1094,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					(
 						It.Is<Project>(p => p.Name == "Project1"),
 						templateContents,
-						studentSubmissions
+						studentSubmissions,
+						format
 					)
 				).ReturnsAsync(expectedArchive);
 

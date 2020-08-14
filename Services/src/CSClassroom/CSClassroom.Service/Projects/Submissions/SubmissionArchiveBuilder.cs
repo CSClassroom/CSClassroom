@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using CSC.Common.Infrastructure.Projects.Submissions;
 using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
@@ -44,7 +46,8 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 		public async Task<Stream> BuildSubmissionArchiveAsync(
 			Project project,
 			IArchive templateContents,
-			IList<StudentSubmission> submissions)
+			IList<StudentSubmission> submissions,
+			ProjectSubmissionDownloadFormat format)
 		{
 			var stream = _fileSystem.CreateNewTempFile();
 
@@ -58,7 +61,8 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 						project,
 						result.Student,
 						templateContents,
-						result.Contents
+						result.Contents,
+						format
 					);
 
 					result.Contents.Dispose();
@@ -77,9 +81,25 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 			Project project,
 			ClassroomMembership student,
 			IArchive templateContents,
-			IArchive submissionContents)
+			IArchive submissionContents,
+			ProjectSubmissionDownloadFormat format)
 		{
-			var studentFolder = $"EclipseProjects\\{student.GitHubTeam}";
+			bool includeEclipseProjects =
+			(
+					format == ProjectSubmissionDownloadFormat.Eclipse
+				||  format == ProjectSubmissionDownloadFormat.All
+			);
+			bool includeFlatFiles =
+			(
+					format == ProjectSubmissionDownloadFormat.Flat
+				||  format == ProjectSubmissionDownloadFormat.All
+			);
+
+			// Submissions are grouped by section.  If a student is in multiple
+			// sections, just grab the first one
+			string sectionName = student.SectionMemberships.First().Section.Name;
+
+			var studentFolder = $"EclipseProjects\\{sectionName}\\{student.GitHubTeam}";
 
 			// The project will contain all non-immutable submission files, 
 			// plus all immutable and private files from the template project.
@@ -104,27 +124,32 @@ namespace CSC.CSClassroom.Service.Projects.Submissions
 					continue;
 
 				var contents = _transformer.GetFileContents(project, student, entry);
-
 				var archiveFilePath = entry.FullPath;
-				var archiveFileFolder = archiveFilePath.Contains("/")
-					? archiveFilePath.Substring(0, archiveFilePath.LastIndexOf("/"))
-					: archiveFilePath;
-
-				var localFileFolder = $"{studentFolder}\\{archiveFileFolder}";
 				var fileName = archiveFilePath.Substring(archiveFilePath.LastIndexOf("/") + 1);
-				var localFilePath = $"{localFileFolder}\\{fileName}";
 
-				// Add the file to the student project folder.
-				var projectFolderEntry = archive.CreateEntry(localFilePath);
-				using (Stream stream = projectFolderEntry.Open())
+				if (includeEclipseProjects)
 				{
-					await stream.WriteAsync(contents, offset: 0, count: contents.Length);
+					var archiveFileFolder = archiveFilePath.Contains("/")
+						? archiveFilePath.Substring(0, archiveFilePath.LastIndexOf("/"))
+						: archiveFilePath;
+
+					var localFileFolder = $"{studentFolder}\\{archiveFileFolder}";
+					var localFilePath = $"{localFileFolder}\\{fileName}";
+
+					// Add the file to the student project folder.
+					var projectFolderEntry = archive.CreateEntry(localFilePath);
+					using (Stream stream = projectFolderEntry.Open())
+					{
+						await stream.WriteAsync(contents, offset: 0, count: contents.Length);
+					}
 				}
 
 				// Add the file to the folder containing all files, if applicable.
-				if (fileName.EndsWith(".java") && project.GetFileType(entry) == FileType.Public)
+				if (includeFlatFiles && fileName.EndsWith(".java") && project.GetFileType(entry) == FileType.Public)
 				{
-					var allFilesEntry = archive.CreateEntry($"AllFiles\\{student.GitHubTeam}-{fileName}");
+					// Files are grouped by base name, and then by section
+					var baseFileName = fileName.Substring(0, fileName.LastIndexOf("."));
+					var allFilesEntry = archive.CreateEntry($"AllFiles\\{baseFileName}\\{sectionName}\\{student.GitHubTeam}-{fileName}");
 					using (Stream stream = allFilesEntry.Open())
 					{
 						await stream.WriteAsync(contents, offset: 0, count: contents.Length);

@@ -27,6 +27,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       
   postgres:
+    # Warning!  If you change the postgres version, be sure to update the version reported
+    # to EF in CSClassroom.Repository/Configuration/ServiceCollectionExtensions.cs
+    # in ServiceCollectionExtensions.AddCSClassroomDatabase
     image: postgres:9.5.4
     ports:
       - "5432:5432"

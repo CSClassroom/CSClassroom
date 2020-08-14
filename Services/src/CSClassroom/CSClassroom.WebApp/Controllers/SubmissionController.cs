@@ -13,6 +13,12 @@ using CSC.CSClassroom.WebApp.ViewModels.Build;
 using CSC.CSClassroom.WebApp.ViewModels.Submission;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using CSC.CSClassroom.Model.Classrooms;
+using Octokit;
+using CSC.CSClassroom.Model.Projects.ServiceResults;
+using CSC.CSClassroom.Model.Projects;
+using CSC.CSClassroom.WebApp.ViewModels.Shared;
+using CSC.Common.Infrastructure.Projects.Submissions;
 
 namespace CSC.CSClassroom.WebApp.Controllers
 {
@@ -232,16 +238,129 @@ namespace CSC.CSClassroom.WebApp.Controllers
 		}
 
 		/// <summary>
-		/// Downloads all submissions for the given section.
+		/// Renders initial entry to the Download Submissions form.  Asks the user to select
+		/// the download format--the components to include in the archive--along with which
+		/// sections and students to download them for.
 		/// </summary>
 		[Route("Submissions/{sectionName}/Download")]
 		[ClassroomAuthorization(ClassroomRole.Admin)]
 		public async Task<IActionResult> Download(string sectionName)
 		{
-			var section = Classroom.Sections
-				.SingleOrDefault(s => s.Name == sectionName);
+			// Gets list of sections and students from db for user to choose from
+			var downloadCandidates = await SubmissionService.GetCheckpointDownloadCandidateListAsync(
+				ClassroomName,
+				ProjectName,
+				CheckpointName);
 
-			if (section == null)
+			List<SectionsAndStudents> sectionStudents = downloadCandidates.Select
+				(
+					dc => new SectionsAndStudents()
+					{
+						SectionId = dc.Section.Id,
+						SectionName = new SelectListItem()
+						{
+							Text = dc.Section.DisplayName,
+							Value = dc.Section.Name,
+
+							// Whichever section the user had clicked on before
+							// choosing to download should be checked by default
+							Selected = (dc.Section.Name == sectionName)
+						},
+						SelectedStudents = dc.Users.Select
+						(
+							user => new StudentToDownload()
+							{
+								Selected = true,
+								FirstName = user.User.FirstName,
+								LastName = user.User.LastName,
+								Id = user.User.Id,
+								Submitted = user.Submitted
+							}
+						)
+						.OrderBy(ss => ss.LastName)
+						.ThenBy(ss => ss.FirstName)
+						.ToList()
+					}
+				)
+				.OrderBy(sas => sas.SectionName.Text)
+				.ToList();
+
+			DownloadSubmissionViewModel viewModel = new DownloadSubmissionViewModel()
+			{
+				IndexForSectionStudentsView = -1,
+				Format = ProjectSubmissionDownloadFormat.All,
+				IncludeUnsubmitted = true,
+				SectionsAndStudents = sectionStudents,
+			};
+
+			return View("Download", viewModel);
+		}
+
+		/// <summary>
+		/// Upon clicking any of the download submission form submit buttons (or links),
+		/// this decides what to do next
+		/// </summary>
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		[Route("Submissions/{sectionName}/Download")]
+		[ClassroomAuthorization(ClassroomRole.Admin)]
+		public async Task<IActionResult> Download(DownloadSubmissionViewModel downloadSubmissionViewModel)
+		{
+			// Will be > -1 if we got here because user clicked one of the student selection links
+			// next to one of the section names
+			int iSectionStudents = downloadSubmissionViewModel.SectionsAndStudents.FindIndex
+			(
+				ss => ss.SectionsAndStudentsSubmitButton != null
+			);
+
+			downloadSubmissionViewModel.IndexForSectionStudentsView = iSectionStudents;
+
+			if (iSectionStudents != -1)
+			{
+				// Display the "select students" form controls
+				return View("Download", downloadSubmissionViewModel);
+			}
+
+			// Either we posted here from the select-a-student form, or from the primary
+			// download submissions form
+			if (downloadSubmissionViewModel.DownloadSubmitButton == null)
+			{
+				// We posted here from the select-a-student form, so render the
+				// main download form controls (with the updated student selections)
+				return View("Download", downloadSubmissionViewModel);
+			}
+
+			// The download submission button was clicked, so we're finally ready to initiate the download
+			return await DownloadSubmissionsAsync(downloadSubmissionViewModel);
+		}
+
+		/// <summary>
+		/// Once the user has chosen the download properties, made the student selections, and clicked
+		/// the main form submit button, this initiates the actual download
+		/// </summary>
+		/// <param name="downloadSubmissionViewModel">ViewModel for the form</param>
+		public async Task<IActionResult> DownloadSubmissionsAsync(DownloadSubmissionViewModel downloadSubmissionViewModel)
+		{
+			var selectedStudents = downloadSubmissionViewModel.SectionsAndStudents
+				.Where
+				(
+					sas => sas.SectionName.Selected
+				)
+				.SelectMany
+				(
+					sas => sas.SelectedStudents
+						.Where
+						(
+							ss => ss.Selected
+									&& (ss.Submitted || downloadSubmissionViewModel.IncludeUnsubmitted)
+						)
+						.Select
+						(
+							ss => ss.Id
+						)
+				).ToList();
+
+			if (selectedStudents.Count == 0)
 			{
 				return NotFound();
 			}
@@ -251,7 +370,8 @@ namespace CSC.CSClassroom.WebApp.Controllers
 				ClassroomName,
 				ProjectName,
 				CheckpointName,
-				sectionName
+				selectedStudents,
+				downloadSubmissionViewModel.Format
 			);
 
 			var timestamp = TimeZoneProvider.ToUserLocalTime(DateTime.UtcNow)
@@ -315,7 +435,11 @@ namespace CSC.CSClassroom.WebApp.Controllers
 					),
 					TimeZoneProvider
 				)
-			).ToList();
+			)
+			.OrderBy(viewModel => viewModel.FeedbackSent)
+			.ThenBy(viewModel => viewModel.LastName)
+			.ThenBy(viewModel => viewModel.FirstName)
+			.ToList();
 
 			return View(viewModels);
 		}

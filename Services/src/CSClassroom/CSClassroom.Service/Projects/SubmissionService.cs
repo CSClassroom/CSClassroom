@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CSC.Common.Infrastructure.Email;
+using CSC.Common.Infrastructure.Projects.Submissions;
 using CSC.Common.Infrastructure.System;
 using CSC.CSClassroom.Model.Classrooms;
 using CSC.CSClassroom.Model.Projects;
@@ -13,6 +14,7 @@ using CSC.CSClassroom.Repository;
 using CSC.CSClassroom.Service.Projects.Submissions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MoreLinq;
 
 namespace CSC.CSClassroom.Service.Projects
 {
@@ -230,17 +232,65 @@ namespace CSC.CSClassroom.Service.Projects
 		}
 
 		/// <summary>
-		/// Downloads all submissions for a given checkpoint in a section,
-		/// in the form of a zip archive. The archive will also include
-		/// the latest state of repositories for which there is no submission. 
+		/// Fetches list of sections and students with commits that the user
+		/// might want to download.  These can be displayed to the user as lists
+		/// with checkboxes to select from.
+		/// </summary>
+		public async Task<IList<CheckpointDownloadCandidateResult>> GetCheckpointDownloadCandidateListAsync(
+			string classroomName,
+			string projectName,
+			string checkpointName)
+		{
+			// A few round trips to db to get section memberships and submissions...
+
+			var sectionMemberships = await LoadSectionMembershipsAsync(classroomName);
+
+			// Similar to LoadCheckpointAsync, but avoids unnecessary round trips by
+			// not bringing back extra entities.  We only care about the checkpoint id
+			var checkpoint = await _dbContext.Checkpoints
+				.Where(c => c.Project.Classroom.Name == classroomName)
+				.Where(c => c.Project.Name == projectName)
+				.SingleAsync(c => c.Name == checkpointName);
+
+			// Map user ID to submissions made by that student for this checkpoint
+			var submissions = await _dbContext.Submissions
+				.Where
+				(
+					sub => sub.Checkpoint.Id == checkpoint.Id
+				)
+				.Include(sub => sub.Commit)
+				.ToDictionaryAsync(sub => sub.Commit.UserId, sub => sub);
+
+			// ...and then combine them in memory to produce the CheckpointDownloadCandidateResult list
+
+			return sectionMemberships
+				.GroupBy
+				(
+					sm => sm.Section,
+					sm => new UserDownloadCandidateResult
+					(
+						sm.ClassroomMembership.User,
+						submissions.ContainsKey(sm.ClassroomMembership.User.Id)
+					),
+					(section, users) => new CheckpointDownloadCandidateResult
+					(
+						section,
+						users.ToList()
+					)
+				).ToList();
+		}
+
+		/// <summary>
+		/// Downloads the submissions for a given checkpoint, according to the
+		/// options specified by the user, in the form of a zip archive. 
 		/// </summary>
 		public async Task<Stream> DownloadSubmissionsAsync(
 			string classroomName,
 			string projectName,
 			string checkpointName,
-			string sectionName)
+			IList<int> selectedUserIds,
+			ProjectSubmissionDownloadFormat format)
 		{
-			var section = await LoadSectionAsync(classroomName, sectionName);
 			var checkpoint = await LoadCheckpointAsync
 			(
 				classroomName,
@@ -248,39 +298,39 @@ namespace CSC.CSClassroom.Service.Projects
 				checkpointName
 			);
 
-			var students = await _dbContext.ClassroomMemberships
-				.Where
-				(
-					cm => cm.SectionMemberships.Any
-					(
-						sm => sm.SectionId == section.Id
-						      && sm.Role == SectionRole.Student
-					)
-				)
-				.Include(cm => cm.User)
-				.ToListAsync();
-
-			var allCheckpointSubmissions =
-				await GetCheckpointSubmissionsQuery(checkpoint, section)
-					.ToListAsync();
-
-			var usersWithSubmissions = new HashSet<User>
+			var allCheckpointSubmissions = GetCheckpointSubmissionsQuery
 			(
-				allCheckpointSubmissions
-					.GroupBy(submission => submission.Commit.User)
-					.Select(group => group.Key)
-					.ToList()
+				checkpoint,
+				section: null       // Include all sections
 			);
 
-			var studentDownloadRequests = students
+			var selectedUserIdsHash = new HashSet<int>(selectedUserIds);
+
+			var userIdsWithSubmissions = new HashSet<int>
+			(
+				await allCheckpointSubmissions
+					.Where(submission => selectedUserIdsHash.Contains(submission.Commit.UserId))
+					.GroupBy(submission => submission.Commit.User)
+					.Select(group => group.Key.Id)
+					.ToListAsync()
+			);
+
+			var sectionMemberships = await LoadSectionMembershipsAsync(classroomName);
+
+			var studentDownloadRequests = sectionMemberships
+				.Where
+				(
+					sm => selectedUserIdsHash.Contains(sm.ClassroomMembership.UserId)
+				)
 				.Select
 				(
-					student => new StudentDownloadRequest
+					sm => new StudentDownloadRequest
 					(
-						student,
-						usersWithSubmissions.Contains(student.User)
+						sm.ClassroomMembership,
+						userIdsWithSubmissions.Contains(sm.ClassroomMembership.User.Id)
 					)
-				).ToList();
+				)
+				.ToList();
 
 			var templateContents = await _submissionDownloader.DownloadTemplateContentsAsync
 			(
@@ -297,7 +347,8 @@ namespace CSC.CSClassroom.Service.Projects
 			(
 				checkpoint.Project,
 				templateContents,
-				submissionContents
+				submissionContents,
+				format
 			);
 		}
 
@@ -356,7 +407,7 @@ namespace CSC.CSClassroom.Service.Projects
 								group => group.Where
 								(
 									s => (s == group.First() && s.Checkpoint != checkpoint)
-									     || (s != group.First() && !string.IsNullOrEmpty(s.Feedback))
+										 || (s != group.First() && !string.IsNullOrEmpty(s.Feedback))
 								)
 							).ToList()
 					)
@@ -418,7 +469,7 @@ namespace CSC.CSClassroom.Service.Projects
 							cm => cm.SectionMemberships.Any
 							(
 								sm => sm.SectionId == section.Id
-								      && sm.Role == SectionRole.Student
+									  && sm.Role == SectionRole.Student
 							)
 						)
 				)
@@ -485,8 +536,8 @@ namespace CSC.CSClassroom.Service.Projects
 				.FirstOrDefaultAsync();
 
 			if (submission == null
-			    || submission.CheckpointId != checkpoint.Id
-			    || !submission.FeedbackSent)
+				|| submission.CheckpointId != checkpoint.Id
+				|| !submission.FeedbackSent)
 			{
 				return null;
 			}
@@ -495,7 +546,7 @@ namespace CSC.CSClassroom.Service.Projects
 				.Where
 				(
 					sm => sm.ClassroomMembership.ClassroomId == checkpoint.Project.ClassroomId
-					      && sm.ClassroomMembership.UserId == submission.Commit.UserId
+						  && sm.ClassroomMembership.UserId == submission.Commit.UserId
 				)
 				.Include(sm => sm.Section)
 				.FirstOrDefaultAsync();
@@ -584,7 +635,7 @@ namespace CSC.CSClassroom.Service.Projects
 						cm => cm.SectionMemberships.Any
 						(
 							sm => sm.SectionId == section.Id
-							      && sm.Role == SectionRole.Student
+								  && sm.Role == SectionRole.Student
 						)
 					)
 				)
@@ -612,7 +663,7 @@ namespace CSC.CSClassroom.Service.Projects
 							cm => cm.SectionMemberships.Any
 							(
 								sm => sm.SectionId == section.Id
-								      && sm.Role == SectionRole.Student
+									  && sm.Role == SectionRole.Student
 							)
 						)
 				)
@@ -687,7 +738,8 @@ namespace CSC.CSClassroom.Service.Projects
 		}
 
 		/// <summary>
-		/// Returns a query for all submissions in a given checkpoint.
+		/// Returns a query for all submissions in a given checkpoint
+		/// for a single section, or for all sections if section == null.
 		/// </summary>
 		private IQueryable<Submission> GetCheckpointSubmissionsQuery(
 			Checkpoint checkpoint,
@@ -702,8 +754,8 @@ namespace CSC.CSClassroom.Service.Projects
 						(
 							cm => cm.SectionMemberships.Any
 							(
-								sm => sm.SectionId == section.Id
-								      && sm.Role == SectionRole.Student
+								sm => (section == null || sm.SectionId == section.Id)
+									  && sm.Role == SectionRole.Student
 							)
 						)
 				)
@@ -754,6 +806,29 @@ namespace CSC.CSClassroom.Service.Projects
 				.Where(s => s.Classroom.Name == classroomName)
 				.Include(s => s.Classroom)
 				.SingleAsync(s => s.Name == sectionName);
+		}
+
+		/// <summary>
+		/// Loads section memberships for all sections of a given classroom
+		/// from the database
+		/// </summary>
+		private async Task<List<SectionMembership>> LoadSectionMembershipsAsync(
+			string classroomName)
+		{
+			return await _dbContext.SectionMemberships
+				.Select
+				(
+					sm => sm
+				)
+				.Where
+				(
+					sm => sm.ClassroomMembership.Classroom.Name == classroomName &&
+							sm.Role == SectionRole.Student
+				)
+				.Include(sm => sm.Section)
+				.Include(sm => sm.ClassroomMembership)
+					.ThenInclude(cm => cm.User)
+				.ToListAsync();
 		}
 	}
 }

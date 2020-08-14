@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using CSC.CSClassroom.Model.Classrooms;
+using CSC.CSClassroom.Model.Users;
 using CSC.CSClassroom.Model.Projects;
 using CSC.CSClassroom.Model.Projects.ServiceResults;
+using CSC.Common.Infrastructure.Projects.Submissions;
 
 namespace CSC.CSClassroom.Service.Projects
 {
@@ -57,7 +59,18 @@ namespace CSC.CSClassroom.Service.Projects
 			string classroomName,
 			string projectName,
 			string checkpointName,
-			string sectionName);
+			IList<int> selectedUserIds,
+			ProjectSubmissionDownloadFormat downloadFormat);
+
+		/// <summary>
+		/// Fetches list of sections and students with commits that the user
+		/// might want to download.  These can be displayed to the user as lists
+		/// with checkboxes to select from.
+		/// </summary>
+		Task<IList<CheckpointDownloadCandidateResult>> GetCheckpointDownloadCandidateListAsync(
+			string classroomName,
+			string projectName,
+			string checkpointName);
 
 		/// <summary>
 		/// Returns submissions for grading.

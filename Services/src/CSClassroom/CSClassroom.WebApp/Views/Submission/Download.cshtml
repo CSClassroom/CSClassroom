@@ -1,0 +1,329 @@
+﻿@{
+    ViewData["Title"] = "Download Project Checkpoint Submissions";
+}
+
+@*
+    This page dynamically decides which controls to show, and which to hide, giving the appearance
+    of multiple forms.  See the comments in DownloadSubmissionViewModel.cs for more info.
+*@
+@model CSC.CSClassroom.WebApp.ViewModels.Submission.DownloadSubmissionViewModel
+
+@{
+    int iSectionClicked = Model.IndexForSectionStudentsView;
+    if (iSectionClicked == -1)
+    {
+        // Form Option #1: The Main download submissions form
+        <h2>Download @Project.Name @Checkpoint.DisplayName Submissions</h2>
+    }
+    else
+    {
+        // Form Option #2: The select-students-from-section form
+        <h2>Select Students To Download From @Model.SectionsAndStudents[iSectionClicked].SectionName.Text</h2>
+    }
+}
+
+<form asp-action="DownloadSubmissions">
+
+    @*
+        ----------------------------------------------------------
+          Form Option #1: The Main download submissions form
+        ----------------------------------------------------------
+    *@
+    <div id="mainDownloadSubmissionsForm" class="form-horizontal" hidden="hidden">
+        <hr />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group">
+            <label asp-for="Format" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="Format" class="form-control-static"></p>
+                <select asp-for="Format" asp-items="Model.GetDownloadFormatSelectList()"></select>
+                <span asp-validation-for="Format" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="IncludeUnsubmitted" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="IncludeUnsubmitted" class="form-control-static"></p>
+                <input type="checkbox" asp-for="IncludeUnsubmitted" onchange="onIncludeUnsubmittedChanged()" />
+                <span asp-validation-for="IncludeUnsubmitted" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="SectionsAndStudents" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <p asp-description-for="SectionsAndStudents" class="form-control-static"></p>
+                <table class="table-condensed">
+                    @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                <input type="checkbox" asp-for="@Model.SectionsAndStudents[i].SectionName.Selected" onchange="onSectionSelectionChanged(this, '@Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton)' )" />
+                                <input type="hidden" asp-for="@Model.SectionsAndStudents[i].SectionId" />
+                            </td>
+                            <td>
+                                @Model.SectionsAndStudents[i].SectionName.Text
+                                <input type="hidden" asp-for="@Model.SectionsAndStudents[i].SectionName.Text" />
+                                <input type="hidden" asp-for="@Model.SectionsAndStudents[i].SectionName.Value" />
+                            </td>
+                            <td>
+                                @*
+                                    Although this is a form submit button, it appears like (and is referred to as) a link.
+                                    Its text shows the students currently selected.  Clicking it hides the main download
+                                    form and unhides the "select students" form for the corresponding section
+                                *@
+                                <input asp-for="@Model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton" type="submit"
+                                       style="max-width: 100%" value="..." class="btn btn-link" />
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input asp-for="@Model.DownloadSubmitButton" type="submit" value="Download" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+
+    @*
+        ----------------------------------------------------------
+          Form Option #2: The select-students-from-section form
+        ----------------------------------------------------------
+    *@
+
+    @for (int iSect = 0; iSect < Model.SectionsAndStudents.Count; iSect++)
+    {
+        if (Model.SectionsAndStudents[iSect] == null || Model.SectionsAndStudents[iSect].SelectedStudents == null)
+        {
+            continue;
+        }
+
+        <div id="studentSelectionForm_@(iSect)" class="form-horizontal" hidden="hidden">
+            <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="SectionsAndStudents[iSect].SelectedStudents" class="col-md-2 control-label"></label>
+                <div class="col-md-10">
+                    <p asp-description-for="SectionsAndStudents[iSect].SelectedStudents" class="form-control-static"></p>
+                    <p><button name="SelectAll" type="button" onclick="onSelectAllOrNone(true)">Select All</button> <button name="SelectNone" type="button" onclick="onSelectAllOrNone(false)">Select None</button></p>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Download?
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].LastName)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].FirstName)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.SectionsAndStudents[iSect].SelectedStudents[0].Submitted)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.SectionsAndStudents[iSect].SelectedStudents.Count; i++)
+                            {
+                                bool disabled = !Model.IncludeUnsubmitted && !Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted;
+                                <tr>
+                                    <td>
+                                        <input class="@(disabled ? "disabled" : "")" type="checkbox" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Selected" />
+                                        <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].LastName" />
+                                        <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName" />
+                                        <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Id" />
+                                    </td>
+                                    <td class="@(disabled ? "disabled" : "")">
+                                        @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].LastName)
+                                    </td>
+                                    <td class="@(disabled ? "disabled" : "")">
+                                        @Html.DisplayFor(model => model.SectionsAndStudents[iSect].SelectedStudents[i].FirstName)
+                                    </td>
+                                    <td>
+                                        <input type="hidden" asp-for="@Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted" />
+                                        @(Model.SectionsAndStudents[iSect].SelectedStudents[i].Submitted ? "yes" : "no")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Continue" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    }
+</form>
+
+<script type="text/javascript">
+    $(document).ready(() => { onDocumentReady(); });
+
+    function onDocumentReady()
+    {
+        @* Primary download form: Hide / unhide entire form *@
+        var mainDownloadSubmissionsForm = $("#mainDownloadSubmissionsForm");
+        if (@iSectionClicked == -1)
+        {
+            mainDownloadSubmissionsForm.show();
+        }
+        else
+        {
+            mainDownloadSubmissionsForm.hide();
+        }
+
+        @* Primary download form: hide / unhide the student selection links based on the
+           section checkbox state *@
+        @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
+        {
+            @:onSectionSelectionChanged(
+            @:  $("#@Html.IdFor(model => model.SectionsAndStudents[i].SectionName.Selected)")[0],
+            @:  "@Html.IdFor(model => model.SectionsAndStudents[i].SectionsAndStudentsSubmitButton)");
+        }
+
+        @* Student selection forms: Hide / unhide each section's student selection form,
+           depending on which student selection link brought us here, if any *@
+        @for (int i = 0; i < Model.SectionsAndStudents.Count; i++)
+        {
+            @:var studentSelectionForm = $("#studentSelectionForm_@(i)");
+            @:if (studentSelectionForm.length)
+            if (i == iSectionClicked)
+            {
+                @:studentSelectionForm.show();
+            }
+            else
+            {
+                @:studentSelectionForm.hide();
+            }
+        }
+        onIncludeUnsubmittedChanged();
+
+        @* Student selection forms: Disable students who didn't submit if user
+           unchecked "include unsubmitted" *@
+        $('input[class="disabled"]').prop("disabled", true).css("color", "graytext");
+        $('td[class="disabled"]').prop("disabled", true).css("color", "graytext");
+    }
+
+    @* Called when user checks or unchecks an entire section from the
+       main download submissions form *@
+    function onSectionSelectionChanged(checkbox, selectStudentsButtonId)
+    {
+        @* The "select students" link should be hidden if the section is unchecked *@
+        $("#" + selectStudentsButtonId).prop("className", checkbox.checked ? "btn btn-link" : "hidden");
+        onIncludeUnsubmittedChanged();
+    }
+
+    @* Called when the user checks or unchecks the "include unsubmitted code" checkbox to dynamically
+       update the student list based on which students clicked "Turn In" for the checkpoint. *@
+    function onIncludeUnsubmittedChanged()
+    {
+        var c_maxStudentsToDisplayInSelectionLink = 3;
+        var includeUnsubmittedCheckbox = $("#@Html.IdFor(model => model.IncludeUnsubmitted)");
+        var includeUnsubmitted = includeUnsubmittedCheckbox.prop("checked");
+        var numStudentsSelectedAcrossAllSections = 0;
+
+        @* For each section, determine the text to show on the "select students" link *@
+        @for (int iSect = 0; iSect < Model.SectionsAndStudents.Count; iSect++)
+        {
+            @* Force separate client jscript scope for each server-side iteration *@
+            @:{
+                @:var sectionCheckbox = $("#@Html.IdFor(model => model.SectionsAndStudents[iSect].SectionName.Selected)");
+                @:if (sectionCheckbox.prop("checked"))
+                @:{
+                    @:var studentsSubmitButton = $("#@Html.IdFor(model => model.SectionsAndStudents[iSect].SectionsAndStudentsSubmitButton)");
+                    @:var studentSummaryDisplay = "Students: ";
+                    @:var numStudentsSelected = 0;
+                    @:var numStudentsAppended = 0;
+                    @:var downloadAllFromSection = true;
+
+                    @*
+                        For each student in the section, count whether the student is checked, allowable to be checked,
+                        and adjust the text of the "select students" link as appropriate
+                    *@
+                    for (int iStudent = 0; iStudent < Model.SectionsAndStudents[iSect].SelectedStudents.Count; iStudent++)
+                    {
+                    @:{
+                        @:var idStudentSelected = "@Html.IdFor(model => model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Selected)";
+                        @:var ctlStudentSelected = $("#" + idStudentSelected);
+
+                        // Is this student "allowable" to be selected, on the basis of whether they clicked "Turn In"?
+                        @:if (includeUnsubmitted || @(Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].Submitted ? "true" : "false"))
+                        @:{
+                            // Is this student actually selected by the user?
+                            @:if (ctlStudentSelected.prop("checked"))
+                            @:{
+                                @:numStudentsSelected++;
+                                @:numStudentsSelectedAcrossAllSections++;
+                                @:if (numStudentsAppended < c_maxStudentsToDisplayInSelectionLink)
+                                @:{
+                                    @:if (numStudentsAppended > 0)
+                                    @:{
+                                        @:studentSummaryDisplay += "; ";
+                                    @:}
+                                    @:studentSummaryDisplay += "@Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].LastName";
+                                    @:studentSummaryDisplay += ", ";
+                                    @:studentSummaryDisplay += "@Model.SectionsAndStudents[iSect].SelectedStudents[iStudent].FirstName";
+                                    @:numStudentsAppended++;
+                                @:}
+                            @:}
+                            @:else    @* !ctlStudentSelected.prop("checked") *@
+                            @:{
+                                @:downloadAllFromSection = false;
+                            @:}
+                        @:}
+                    @:}
+                    }  // server-side: for (int iStudent = 0...
+
+                    // Done iterating through users of this section; construct the final link text
+                    @:var remaining = numStudentsSelected - c_maxStudentsToDisplayInSelectionLink;
+                    @:if (downloadAllFromSection)
+                    @:{
+                        @:studentSummaryDisplay = "Students: All";
+                        @:if (!includeUnsubmitted)
+                        @:{
+                            @:studentSummaryDisplay += " (except unsubmitted)";
+                        @:}
+                    @:}
+                    @:else if (numStudentsAppended == 0)
+                    @:{
+                        @:studentSummaryDisplay = "Students: None";
+                    @:}
+                    @:else if (remaining > 0)
+                    @:{
+                        @:studentSummaryDisplay += "; and " + remaining + " more";
+                    @:}
+                    @:studentsSubmitButton.prop("value", studentSummaryDisplay);
+                @:}
+            @:}
+        }
+
+        @* Disable main download form submit button if no students are selected *@
+        $("#@Html.IdFor(model => model.DownloadSubmitButton)").prop("disabled", numStudentsSelectedAcrossAllSections == 0);
+    }
+
+    @* Called when user clicks the Select All or Select None button from the Student
+       Selection Form *@
+    function onSelectAllOrNone(isSelectAll)
+    {
+        @if (iSectionClicked != -1)
+        {
+            for (int iStudent = 0; iStudent < Model.SectionsAndStudents[iSectionClicked].SelectedStudents.Count; iStudent++)
+            {
+                @:var idStudentSelected = "@Html.IdFor(model => model.SectionsAndStudents[iSectionClicked].SelectedStudents[iStudent].Selected)";
+                @:var ctlStudentSelected = $("#" + idStudentSelected);
+                @:ctlStudentSelected.prop("checked", isSelectAll);
+            }
+        }
+    }
+
+</script>
