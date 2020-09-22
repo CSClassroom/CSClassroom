@@ -66,7 +66,7 @@ namespace CSC.Common.Infrastructure.Configuration
 		}
 
 		/// <summary>
-		/// Registers dependencies for interacting with GitHub.
+		/// Registers dependencies for interacting with SendGrid.
 		/// </summary>
 		public static void RegisterSendGridMailProvider(
 			this ContainerBuilder builder, 
@@ -77,6 +77,19 @@ namespace CSC.Common.Infrastructure.Configuration
 			(
 				CreateSendGridMailProvider(sendGridSettings, csClassroomSettings)
 			).As<IEmailProvider>();
+		}
+
+		/// <summary>
+		/// Registers dependencies for interacting with Postmark.
+		/// </summary>
+		public static void RegisterPostmarkMailProvider(
+			this ContainerBuilder builder,
+			IConfigurationSection postmarkSettings,
+			IConfigurationSection csClassroomSettings)
+		{
+			builder.RegisterInstance(GetPostmarkApiKey(postmarkSettings)).As<PostmarkApiKey>();
+			builder.RegisterInstance(GetDefaultFromAddress(csClassroomSettings)).As<DefaultFromAddress>();
+			builder.RegisterType<PostmarkEmailProvider>().As<IEmailProvider>();
 		}
 
 		/// <summary>
@@ -95,6 +108,24 @@ namespace CSC.Common.Infrastructure.Configuration
 			IConfigurationSection csClassroomSettings)
 		{
 			return new SendGridEmailProvider(sendGridSettings?["ApiKey"], csClassroomSettings["EmailAddress"]);
+		}
+
+		/// <summary>
+		/// Returns the API key for the Postmark service.
+		/// </summary>
+		private static PostmarkApiKey GetPostmarkApiKey(
+			IConfigurationSection postmarkSettings)
+		{
+			return new PostmarkApiKey(postmarkSettings?["ApiKey"]);
+		}
+
+		/// <summary>
+		/// Returns the default e-mail address that e-mails will be sent from.
+		/// </summary>
+		private static DefaultFromAddress GetDefaultFromAddress(
+			IConfigurationSection csClassroomSettings)
+		{
+			return new DefaultFromAddress(csClassroomSettings["EmailAddress"]);
 		}
 
 		/// <summary>

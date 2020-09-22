@@ -12,6 +12,18 @@
     <ApplicationIcon />
     <Win32Resource />
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Kestrel' ">
+    <StartAction>Project</StartAction>
+    <ExternalConsole>true</ExternalConsole>
+    <EnvironmentVariables>
+      <Variable name="ASPNETCORE_URLS" value="http://0.0.0.0:10000" />
+      <Variable name="RollingLogPath" value="c:\windows\temp\csclassroom-log.txt" />
+      <Variable name="ASPNETCORE_ENVIRONMENT" value="Development" />
+    </EnvironmentVariables>
+    <LaunchBrowser></LaunchBrowser>
+    <LaunchUrl>http://localhost:10000</LaunchUrl>
+    <ApplicationURL>http://localhost:10000</ApplicationURL>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="node_modules\**\*;wwwroot\**\*" />
     <None Update="wwwroot\**;Views\**\*;Areas\**\Views;docker-compose.yml;docker-compose.dev.debug.yml;docker-compose.dev.release.yml;Dockerfile;.dockerignore;entrypoint-dev.sh">
@@ -32,7 +44,10 @@
     <PackageReference Include="AsyncFriendlyStackTrace" Version="1.6.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.3.1" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.6.21" />
-    <PackageReference Include="Microsoft.AspNetCore.All" />
+    <PackageReference Include="Microsoft.AspNetCore.All">
+      <PrivateAssets Condition="'%(PackageReference.Version)' == ''">all</PrivateAssets>
+      <Publish Condition="'%(PackageReference.Version)' == ''">true</Publish>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.4" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Utils" Version="2.2.4" />

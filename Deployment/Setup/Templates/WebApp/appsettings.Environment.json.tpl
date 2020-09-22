@@ -15,8 +15,8 @@
     "OAuthToken": "{{ github_oauth_token }}",
     "WebhookSecret": "{{ github_webhook_secret }}"
   },
-  "SendGrid": {
-    "ApiKey": "{{ sendgrid_apikey }}"
+  "Postmark": {
+    "ApiKey": "{{ postmark_apikey }}"
   },
   "ConnectionStrings": {
     "PostgresDefaultConnection": "User ID=postgres;Password={{ postgres_password }};Host=postgres;Port=5432;Database=csclassroom;Pooling=true;"

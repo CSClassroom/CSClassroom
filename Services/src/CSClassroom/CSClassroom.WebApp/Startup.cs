@@ -83,7 +83,7 @@ namespace CSC.CSClassroom.WebApp
 			builder.RegisterCSClassroomService(GetSection("CSClassroom"));
 			builder.RegisterGitHubClients(GetSection("GitHub"));
 			builder.RegisterRemoteBuildService(GetSection("BuildService"));
-			builder.RegisterSendGridMailProvider(GetSection("SendGrid"), GetSection("CSClassroom"));
+			builder.RegisterPostmarkMailProvider(GetSection("Postmark"), GetSection("CSClassroom"));
 			builder.RegisterJobQueueClient();
 			builder.RegisterSecurity();
 			builder.RegisterSystem();
