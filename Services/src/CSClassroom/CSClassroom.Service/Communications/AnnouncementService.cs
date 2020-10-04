@@ -313,7 +313,8 @@ namespace CSC.CSClassroom.Service.Communications
 				(
 					recipients,
 					$"{classroom.DisplayName}: {announcement.Title}",
-					announcement.Contents + GetEmailFooter(announcement, formatDateTime)
+					announcement.Contents + GetEmailFooter(announcement, formatDateTime),
+					broadcast: true
 				);
 			}
 		}

@@ -431,6 +431,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 					),
 					It.IsAny<string>(),
 					It.IsAny<string>(),
+					false /* broadcast */,
 					null /* customSender */,
 					null /* threadInfo */
 				),
@@ -487,6 +488,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 					),
 					It.IsAny<string>(),
 					It.IsAny<string>(),
+					false /* broadcast */,
 					null /* customSender */,
 					null /* threadInfo */
 				),
@@ -1214,6 +1216,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 					),
 					It.IsAny<string>(),
 					It.IsAny<string>(),
+					false /* broadcast */,
 					null /* customSender */,
 					null /* threadInfo */
 				),
@@ -1572,6 +1575,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 					),
 					It.IsAny<string>(),
 					It.IsAny<string>(),
+					false /* broadcast */,
 					null /* customSender */,
 					null /* threadInfo */
 				),
@@ -2140,6 +2144,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Identity
 						),
 						It.IsAny<string>(),
 						It.IsAny<string>(),
+						false /* broadcast */,
 						null /* customSender */,
 						null /* threadInfo */
 					)

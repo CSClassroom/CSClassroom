@@ -973,6 +973,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 						),
 						subject,
 						message,
+						false /* broadcast */,
 						It.Is<EmailSender>(si => SenderMatches(si, senderName)),
 						It.Is<ThreadInfo>
 						(

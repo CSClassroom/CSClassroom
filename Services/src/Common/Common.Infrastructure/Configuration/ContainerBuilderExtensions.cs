@@ -66,30 +66,33 @@ namespace CSC.Common.Infrastructure.Configuration
 		}
 
 		/// <summary>
-		/// Registers dependencies for interacting with SendGrid.
+		/// Registers an e-mail provider.
 		/// </summary>
-		public static void RegisterSendGridMailProvider(
-			this ContainerBuilder builder, 
+		public static void RegisterEmailProvider(
+			this ContainerBuilder builder,
+			IConfigurationSection postmarkSettings,
 			IConfigurationSection sendGridSettings,
 			IConfigurationSection csClassroomSettings)
 		{
-			builder.RegisterInstance
-			(
-				CreateSendGridMailProvider(sendGridSettings, csClassroomSettings)
-			).As<IEmailProvider>();
-		}
-
-		/// <summary>
-		/// Registers dependencies for interacting with Postmark.
-		/// </summary>
-		public static void RegisterPostmarkMailProvider(
-			this ContainerBuilder builder,
-			IConfigurationSection postmarkSettings,
-			IConfigurationSection csClassroomSettings)
-		{
-			builder.RegisterInstance(GetPostmarkApiKey(postmarkSettings)).As<PostmarkApiKey>();
-			builder.RegisterInstance(GetDefaultFromAddress(csClassroomSettings)).As<DefaultFromAddress>();
-			builder.RegisterType<PostmarkEmailProvider>().As<IEmailProvider>();
+			if (postmarkSettings.Exists())
+            {
+				builder.RegisterInstance
+				(
+					GetPostmarkConfig(postmarkSettings, csClassroomSettings)
+				).As<PostmarkEmailProviderConfig>();
+				builder.RegisterType<PostmarkEmailProvider>().As<IEmailProvider>();
+			}
+			else if (sendGridSettings.Exists())
+            {
+				builder.RegisterInstance
+				(
+					CreateSendGridMailProvider(sendGridSettings, csClassroomSettings)
+				).As<IEmailProvider>();
+			}
+			else
+            {
+				builder.RegisterType<DisabledEmailProvider>().As<IEmailProvider>();
+			}
 		}
 
 		/// <summary>
@@ -107,25 +110,24 @@ namespace CSC.Common.Infrastructure.Configuration
 			IConfigurationSection sendGridSettings,
 			IConfigurationSection csClassroomSettings)
 		{
-			return new SendGridEmailProvider(sendGridSettings?["ApiKey"], csClassroomSettings["EmailAddress"]);
+			return new SendGridEmailProvider(sendGridSettings["ApiKey"], csClassroomSettings["EmailAddress"]);
 		}
 
 		/// <summary>
-		/// Returns the API key for the Postmark service.
+		/// Returns the configuration for the Postmark service.
 		/// </summary>
-		private static PostmarkApiKey GetPostmarkApiKey(
-			IConfigurationSection postmarkSettings)
-		{
-			return new PostmarkApiKey(postmarkSettings?["ApiKey"]);
-		}
-
-		/// <summary>
-		/// Returns the default e-mail address that e-mails will be sent from.
-		/// </summary>
-		private static DefaultFromAddress GetDefaultFromAddress(
+		private static PostmarkEmailProviderConfig GetPostmarkConfig(
+			IConfigurationSection postmarkSettings,
 			IConfigurationSection csClassroomSettings)
 		{
-			return new DefaultFromAddress(csClassroomSettings["EmailAddress"]);
+			return new PostmarkEmailProviderConfig
+			(
+				apiKey: postmarkSettings["ApiKey"],
+				defaultFromEmail: csClassroomSettings["EmailAddress"],
+				transactionalMessageStream: postmarkSettings["TransactionalMessageStream"],
+				broadcastMessageStream: postmarkSettings["BroadcastMessageStream"]
+			);
+
 		}
 
 		/// <summary>

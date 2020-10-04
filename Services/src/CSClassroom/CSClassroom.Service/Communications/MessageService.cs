@@ -613,6 +613,7 @@ namespace CSC.CSClassroom.Service.Communications
 				await GetEmailRecipientsAsync(message),
 				GetEmailSubject(message),
 				GetEmailContents(message, conversationUrl, getAttachmentUrl, formatDateTime),
+				broadcast: false,
 				GetEmailSender(message),
 				GetEmailThreadInfo(message)
 			);

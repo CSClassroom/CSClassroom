@@ -719,7 +719,8 @@ namespace CSC.CSClassroom.Service.Projects
 				(
 					new List<EmailRecipient>() {new EmailRecipient($"{user.FirstName} {user.LastName}", user.EmailAddress)},
 					$"{submission.Checkpoint.Project.Name} {submission.Checkpoint.DisplayName} Feedback",
-					$"{submission.Feedback.Replace("\n", "<br>")}<br><br><a href=\"{markReadUrlBuilder(submission)}\">Click here</a> to mark this feedback as read."
+					$"{submission.Feedback.Replace("\n", "<br>")}<br><br><a href=\"{markReadUrlBuilder(submission)}\">Click here</a> to mark this feedback as read.",
+					broadcast: false
 				);
 
 				return new Tuple<Submission, bool>(submission, true);

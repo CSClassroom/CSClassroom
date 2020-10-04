@@ -1153,6 +1153,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 							body.Contains("Feedback4")
 							&& body.Contains("UrlMarkAsRead")
 					),
+					false /* broadcast */,
 					null /* customSender */,
 					null /* threadInfo */
 				);
@@ -1164,6 +1165,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 					It.IsAny<IList<EmailRecipient>>(),
 					It.IsAny<string>(),
 					It.IsAny<string>(),
+					false /* broadcast */,
 					null /* customSender */,
 					null /* threadInfo */
 				);

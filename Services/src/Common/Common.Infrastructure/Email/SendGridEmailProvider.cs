@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SendGrid;
@@ -26,8 +27,10 @@ namespace CSC.Common.Infrastructure.Email
 		/// </summary>
 		public SendGridEmailProvider(string apiKey, string defaultFromAddress)
 		{
-			_apiKey = apiKey;
-			DefaultFromAddress = defaultFromAddress;
+            _apiKey = apiKey
+				?? throw new ArgumentNullException("apiKey");
+			DefaultFromAddress = defaultFromAddress
+				?? throw new ArgumentNullException("defaultFromAddress");
 		}
 
 		/// <summary>
@@ -37,15 +40,10 @@ namespace CSC.Common.Infrastructure.Email
 			IList<EmailRecipient> recipients,
 			string subject, 
 			string body,
+			bool broadcast,
 			EmailSender customSender = null,
 			ThreadInfo threadInfo = null)
 		{
-			if (_apiKey == null)
-			{
-				// E-mail is disabled.
-				return;
-			}
-
 			var from = customSender != null
 				? new EmailAddress(customSender.FromAddress, customSender.Name)
 				: new EmailAddress(DefaultFromAddress, "CS Classroom");

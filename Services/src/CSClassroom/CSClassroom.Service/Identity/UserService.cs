@@ -632,7 +632,8 @@ namespace CSC.CSClassroom.Service.Identity
 					)
 				},
 				"Confirm your e-mail address with CS Classroom",
-				$"Hi {user.FirstName},<br><br>Thank you for registering for CS Classroom. Please <a href=\"{confirmUrl}\">click here</a> to confirm your e-mail address."
+				$"Hi {user.FirstName},<br><br>Thank you for registering for CS Classroom. Please <a href=\"{confirmUrl}\">click here</a> to confirm your e-mail address.",
+				broadcast: false
 			);
 		}
 

@@ -15,9 +15,17 @@
     "OAuthToken": "{{ github_oauth_token }}",
     "WebhookSecret": "{{ github_webhook_secret }}"
   },
+{% if postmark_apikey is defined %}  
   "Postmark": {
-    "ApiKey": "{{ postmark_apikey }}"
+    "ApiKey": "{{ postmark_apikey }}",
+    "TransactionalMessageStream" : "{{ postmark_transactional_message_stream }}",
+    "BroadcastMessageStream" : "{{ postmark_broadcast_message_stream }}"
   },
+{% elif sendgrid_apikey is defined %}
+  "SendGrid": {
+    "ApiKey" : "{{ sendgrid_apikey }}"
+  },
+{% endif %}
   "ConnectionStrings": {
     "PostgresDefaultConnection": "User ID=postgres;Password={{ postgres_password }};Host=postgres;Port=5432;Database=csclassroom;Pooling=true;"
   },

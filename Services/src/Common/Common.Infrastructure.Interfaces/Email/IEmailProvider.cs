@@ -101,6 +101,7 @@ namespace CSC.Common.Infrastructure.Email
 			IList<EmailRecipient> recipients,
 			string subject,
 			string body,
+			bool broadcast,
 			EmailSender customSender = null,
 			ThreadInfo threadInfo = null);
 	}

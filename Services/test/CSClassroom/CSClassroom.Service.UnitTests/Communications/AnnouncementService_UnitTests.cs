@@ -497,6 +497,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Communications
 						),
 						subject,
 						message,
+						true /* broadcast */,
 						null /* customSender */,
 						null /* threadInfo */
 					)

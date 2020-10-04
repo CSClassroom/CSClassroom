@@ -19,6 +19,7 @@
       <Variable name="ASPNETCORE_URLS" value="http://0.0.0.0:10000" />
       <Variable name="RollingLogPath" value="c:\windows\temp\csclassroom-log.txt" />
       <Variable name="ASPNETCORE_ENVIRONMENT" value="Development" />
+      <Variable name="applicationUrl" value="http://localhost:10000" />
     </EnvironmentVariables>
     <LaunchBrowser></LaunchBrowser>
     <LaunchUrl>http://localhost:10000</LaunchUrl>
