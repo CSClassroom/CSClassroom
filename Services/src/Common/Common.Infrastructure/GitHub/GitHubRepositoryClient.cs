@@ -150,7 +150,13 @@ namespace CSC.Common.Infrastructure.GitHub
 		/// </summary>
 		private GitHubRepository ToModelRepository(Repository repo)
 		{
-			return new GitHubRepository(repo.Id, repo.Owner.Login, repo.Name);
+			return new GitHubRepository
+			(
+				repo.Id,
+				repo.Owner.Login,
+				repo.Name,
+				repo.DefaultBranch
+			);
 		}
 
 		/// <summary>
@@ -247,7 +253,7 @@ namespace CSC.Common.Infrastructure.GitHub
 				(
 					repository.Owner,
 					repository.Name,
-					"heads/master",
+					$"heads/{repository.DefaultBranch}",
 					new ReferenceUpdate(starterCommit.Sha, force: true)
 				)
 			);

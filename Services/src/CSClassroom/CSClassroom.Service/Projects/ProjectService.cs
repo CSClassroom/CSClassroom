@@ -360,7 +360,13 @@ namespace CSC.CSClassroom.Service.Projects
 
 			pushEvent.CreatedAt = _timeProvider.UtcNow;
 
-			if (pushEvent.Ref != "refs/heads/master")
+			bool defaultBranchPush = string.Equals
+			(
+				pushEvent.Ref,
+				$"refs/heads/{pushEvent.Repository.Default_Branch}"
+			);
+
+			if (!defaultBranchPush)
 			{
 				return;
 			}

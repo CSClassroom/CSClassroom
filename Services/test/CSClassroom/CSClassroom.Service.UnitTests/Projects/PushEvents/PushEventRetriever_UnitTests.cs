@@ -34,7 +34,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.PushEvents
 				(
 					new Dictionary<ClassroomMembership, GitHubRepository>()
 					{
-						[students[0]] = new GitHubRepository(1, "GitHubOrg", "GitHubRepoName")
+						[students[0]] = new GitHubRepository
+						(
+							1,
+							"GitHubOrg",
+							"GitHubRepoName",
+							"main"
+						)
 					}
 				);
 

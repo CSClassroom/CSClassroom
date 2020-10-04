@@ -52,10 +52,10 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Repositories
 
 			var reposInOrganization = Collections.CreateList
 			(
-				new GitHubRepository(0, "GitHubOrg", "Project1_Last1First1"),
-				new GitHubRepository(1, "GitHubOrg", "Project1_Last2First2"),
-				new GitHubRepository(2, "GitHubOrg", "SomeOtherProject_Last1First1"),
-				new GitHubRepository(3, "GitHubOrg", "SomeOtherProject_Last3First3")
+				new GitHubRepository(0, "GitHubOrg", "Project1_Last1First1", "main"),
+				new GitHubRepository(1, "GitHubOrg", "Project1_Last2First2", "main"),
+				new GitHubRepository(2, "GitHubOrg", "SomeOtherProject_Last1First1", "main"),
+				new GitHubRepository(3, "GitHubOrg", "SomeOtherProject_Last3First3", "main")
 			);
 
 			var repoClient = new Mock<IGitHubRepositoryClient>();

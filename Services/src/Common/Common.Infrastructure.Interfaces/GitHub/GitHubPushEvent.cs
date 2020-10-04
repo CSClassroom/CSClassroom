@@ -48,6 +48,11 @@ namespace CSC.Common.Infrastructure.GitHub
 		/// The owner of the repository.
 		/// </summary>
 		public PushEventRepositoryOwner Owner { get; set; }
+
+		/// <summary>
+		/// The default branch of the repository.
+		/// </summary>
+		public string Default_Branch { get; set; }
 	}
 
 	/// <summary>

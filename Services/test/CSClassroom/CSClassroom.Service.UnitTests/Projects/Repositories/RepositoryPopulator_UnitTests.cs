@@ -292,7 +292,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Repositories
 						(
 							id: 0, 
 							owner: "Class1GitHubOrg", 
-							name: $"{project.Name}_{student.GitHubTeam}"
+							name: $"{project.Name}_{student.GitHubTeam}",
+							defaultBranch: "main"
 						)
 					)
 				);
@@ -405,7 +406,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Repositories
 			Mock<IGitHubRepositoryClient> repoClient,
 			bool existingStudentRepo)
 		{
-			var repo = new GitHubRepository(1, "GitHubUser", "Project1_LastNameFirstName");
+			var repo = new GitHubRepository
+			(
+				1,
+				"GitHubUser",
+				"Project1_LastNameFirstName",
+				"main"
+			);
 
 			repoClient
 				.Setup(rc => rc.GetAllRepositoriesAsync("Class1GitHubOrg"))
@@ -458,7 +465,13 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.Repositories
 		private static void SetupCreateRepositoryAsync(
 			Mock<IGitHubRepositoryClient> repoClient)
 		{
-			var repo = new GitHubRepository(1, "GitHubUser", "Project1_LastNameFirstName");
+			var repo = new GitHubRepository
+			(
+				1,
+				"GitHubUser",
+				"Project1_LastNameFirstName",
+				"main"
+			);
 
 			repoClient
 				.Setup(GetCreateRepositoryExpression())

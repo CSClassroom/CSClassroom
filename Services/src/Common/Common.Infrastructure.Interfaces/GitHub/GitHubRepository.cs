@@ -21,13 +21,19 @@
 		public string Name { get; }
 
 		/// <summary>
+		/// The default branch for the repository.
+		/// </summary>
+		public string DefaultBranch { get; }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public GitHubRepository(long id, string owner, string name)
+		public GitHubRepository(long id, string owner, string name, string defaultBranch)
 		{
 			Id = id;
 			Owner = owner;
 			Name = name;
+			DefaultBranch = defaultBranch;
 		}
 	}
 }

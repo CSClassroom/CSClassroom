@@ -315,7 +315,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			var database = GetDatabaseBuilderWithProjectAndStudent(buildableProject)
 				.Build();
 
-			var pushEvent = GetPushEvent("refs/heads/master");
+			var pushEvent = GetPushEvent("refs/heads/main");
 			var pushEventProcessor = GetMockPushEventProcessor(pushEvent);
 			var jsonSerializer = GetMockJsonSerializer(pushEvent);
 			var timeProvider = GetMockTimeProvider(new DateTime(2016, 1, 1));
@@ -354,7 +354,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			var database = GetDatabaseBuilderWithProjectAndStudent(true /*buildableProject*/)
 				.Build();
 
-			var pushEvent = GetPushEvent("refs/heads/master");
+			var pushEvent = GetPushEvent("refs/heads/main");
 			var pushEventProcessor = GetMockPushEventProcessor(pushEvent);
 			var jsonSerializer = GetMockJsonSerializer(pushEvent);
 			var timeProvider = GetMockTimeProvider(new DateTime(2016, 1, 1));
@@ -387,7 +387,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			var database = GetDatabaseBuilderWithProjectAndStudent(false /*buildableProject*/)
 				.Build();
 
-			var pushEvent = GetPushEvent("refs/heads/master");
+			var pushEvent = GetPushEvent("refs/heads/main");
 			var pushEventProcessor = GetMockPushEventProcessor(pushEvent);
 			var jsonSerializer = GetMockJsonSerializer(pushEvent);
 			var timeProvider = GetMockTimeProvider(new DateTime(2016, 1, 1));
@@ -460,7 +460,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		{
 			var database = GetDatabaseBuilderWithProjectAndStudent().Build();
 
-			var pushEvent = GetPushEvent("refs/heads/master");
+			var pushEvent = GetPushEvent("refs/heads/main");
 			var pushEventRetriever = GetMockPushEventRetriever(pushEvent);
 			var pushEventProcessor = GetMockPushEventProcessor(pushEvent);
 
@@ -495,7 +495,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		{
 			var database = GetDatabaseBuilderWithProjectAndStudent().Build();
 
-			var pushEvent = GetPushEvent("refs/heads/master");
+			var pushEvent = GetPushEvent("refs/heads/main");
 			var pushEventRetriever = GetMockPushEventRetriever(pushEvent);
 			var pushEventProcessor = GetMockPushEventProcessor(pushEvent);
 
@@ -528,7 +528,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			var userId = database.Context.Users.First().Id;
 			database.Reload();
 
-			var pushEvent = GetPushEvent("refs/heads/master");
+			var pushEvent = GetPushEvent("refs/heads/main");
 			var pushEventRetriever = GetMockPushEventRetriever(pushEvent);
 			var pushEventProcessor = GetMockPushEventProcessor(pushEvent);
 
@@ -567,7 +567,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 			var userId = database.Context.Users.First().Id;
 			database.Reload();
 
-			var pushEvent = GetPushEvent("refs/heads/master");
+			var pushEvent = GetPushEvent("refs/heads/main");
 			var pushEventRetriever = GetMockPushEventRetriever(pushEvent);
 			var pushEventProcessor = GetMockPushEventProcessor(pushEvent);
 
@@ -822,6 +822,7 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 		private Mock<IPushEventProcessor> GetMockPushEventProcessor(GitHubPushEvent pushEvent)
 		{
 			var pushEventProcessor = new Mock<IPushEventProcessor>();
+
 			pushEventProcessor
 				.Setup
 				(
@@ -967,7 +968,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects
 				Ref = refPath,
 				Repository = new PushEventRepository()
 				{
-					Name = "Project1_LastNameFirstName"
+					Name = "Project1_LastNameFirstName",
+					Default_Branch = "main"
 				}
 			};
 		}
