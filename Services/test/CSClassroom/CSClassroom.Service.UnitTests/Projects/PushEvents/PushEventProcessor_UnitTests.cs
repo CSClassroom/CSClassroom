@@ -169,8 +169,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.PushEvents
 						(
 							Collections.CreateList
 							(
-								"TestClass1",
-								"TestClass2"	
+								"TestClass2",
+								"TestClass1"	
 							)
 						)
 				),
@@ -212,8 +212,8 @@ namespace CSC.CSClassroom.Service.UnitTests.Projects.PushEvents
 				ExplicitSubmissionRequired = true,
 				TestClasses = Collections.CreateList
 				(
-					new TestClass() { ClassName = "TestClass1" },
-					new TestClass() { ClassName = "TestClass2" }	
+					new TestClass() { ClassName = "TestClass1", Order = 1},
+					new TestClass() { ClassName = "TestClass2", Order = 0}
 				),
 				ImmutableFilePaths = Collections.CreateList
 				(

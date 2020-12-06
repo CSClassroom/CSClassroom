@@ -159,6 +159,7 @@ namespace CSC.CSClassroom.Service.Projects.PushEvents
 					.Concat(project.ImmutableFilePaths.Select(p => p.Path))
 					.ToList(),
 				project.TestClasses
+					.OrderBy(tc => tc.Order)
 					.Select(tc => tc.ClassName)
 					.ToList(),
 				buildResultCallbackUrl
