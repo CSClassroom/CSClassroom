@@ -109,5 +109,36 @@ namespace CSC.CSClassroom.Service.UnitTests.Assignments.QuestionGraders
 			Assert.Equal(new[] { true, false }, ((ShortAnswerQuestionResult)result.Result).Correct);
 			Assert.Equal(0.5, result.Score);
 		}
+
+		/// <summary>
+		/// Non-ajax submissions will submit carriage returns instead of newlines. This test
+		/// ensures that we correctly handle submissions with blank names containing carriage
+		/// returns.
+		/// </summary>
+		[Fact]
+		public async Task GradeSubmissionAsync_BlankNamesContainCarriageReturns_ParsedCorrectly()
+		{
+			var question = new ShortAnswerQuestion()
+			{
+				Blanks = Collections.CreateList
+				(
+					new ShortAnswerQuestionBlank() { Name = "A\n", Answer = "One" }
+				)
+			};
+
+			var submission = new ShortAnswerQuestionSubmission()
+			{
+				Blanks = Collections.CreateList
+				(
+					new SubmissionBlank() { Name = "A\r\n", Answer = "One" }
+				)
+			};
+
+			var grader = new ShortAnswerQuestionGrader(question);
+			var result = await grader.GradeSubmissionAsync(submission);
+
+			Assert.Equal(new[] { true }, ((ShortAnswerQuestionResult)result.Result).Correct);
+			Assert.Equal(1.0, result.Score);
+		}
 	}
 }

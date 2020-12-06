@@ -44,7 +44,7 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 
 			foreach (var submissionBlank in shortSubmission.Blanks)
 			{
-				var foundBlank = blanks.Single(blank => blank.Name == submissionBlank.Name);
+				var foundBlank = blanks.Single(blank => BlankMatches(submissionBlank.Name, blank));
 
 				results.Add
 				(
@@ -67,6 +67,14 @@ namespace CSC.CSClassroom.Service.Assignments.QuestionGraders
 					? (results.Count(c => c)*1.0)/results.Count
 					: results.All(c => c) ? 1.0 : 0.0
 			);
+		}
+
+		/// <summary>
+		/// Returns whether or not the submitted blank matches the expected blank.
+		/// </summary>
+		private bool BlankMatches(string submittedBlankName, ShortAnswerQuestionBlank blank)
+		{
+			return blank.Name == submittedBlankName.Replace("\r\n", "\n");
 		}
 
 		/// <summary>
