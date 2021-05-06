@@ -40,7 +40,7 @@
     "marked": "^0.3.6",
     "nvd3": "1.8.5",
     "pagedown": "^1.1.0",
-    "sanitize-html": "^1.13.0",
+    "sanitize-html": "^2.3.2",
     "tinymce": "4.6.6"
   },
   "scripts": {
