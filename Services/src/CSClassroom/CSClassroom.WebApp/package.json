@@ -35,7 +35,7 @@
     "jquery-multifile": "^2.2.2",
     "jquery-ui-dist": "1.12.1",
     "jquery-ui-themes": "1.12.0",
-    "jquery-validation": "1.14.0",
+    "jquery-validation": "1.19.4",
     "jquery-validation-unobtrusive": "3.2.6",
     "marked": "^0.3.6",
     "nvd3": "1.8.5",
