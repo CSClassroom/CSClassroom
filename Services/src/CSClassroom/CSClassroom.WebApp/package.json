@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "ace-builds": "1.2.5",
-    "bootstrap": "3.3.6",
+    "bootstrap": "3.4.1",
     "bootstrap-toggle": "^2.2.2",
     "cheerio": "^0.22.0",
     "cookie": "^0.3.1",
